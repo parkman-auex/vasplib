@@ -1,0 +1,1 @@
+../../bin/+spglib_matlab/PointGroupMap.m

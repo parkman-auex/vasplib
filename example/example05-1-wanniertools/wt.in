@@ -1,0 +1,94 @@
+&TB_FILE
+!Hrfile = 'wannier90_hr.dat'  
+!Hrfile = 'wannier90_hr.dat.PT'
+Hrfile = 'wannier90_hr.dat.full_group'  
+!Hrfile = 'wannier90_hr.dat.tr'  
+!Hrfile = 'wannier90_hr.dat.revise'
+Package = 'VASP'             ! obtained from VASP, it could be 'VASP', 'QE', 'Wien2k', 'OpenMx'
+/
+LATTICE
+Angstrom
+        4.2986288071         0.0000000000         0.0000000000
+       -2.1493144035         3.7227217484         0.0000000000
+        2.1493146629         1.2409073992         7.1570665352
+ATOM_POSITIONS
+4
+Direct
+Cu    0.754030056         0.877015014         0.368954968
+Cu     0.245970031         0.122985000         0.631044972
+I     0.000000000         0.000000000         0.000000000
+
+
+PROJECTORS 
+1 1 2 0
+Cu s d d d d d 
+Cu s d d d d d
+I pz px py 
+ 
+
+SURFACE            ! Specify surface with two vectors, see doc 
+1  0  0		! edge state : hkl (100) new a1= 100 a2 =001
+0  0  1
+0  -1  0
+
+
+!> bulk band structure calculation flag
+&CONTROL
+!BulkBand_calc            = T
+!BulkBand_points_calc     = T
+!DOS_calc                 = T
+BulkFS_calc              = F
+BulkGap_cube_calc        = F
+BulkGap_plane_calc       = F
+!SlabBand_calc            = T
+!SlabBandWaveFunc_calc    = T
+!SlabBand_plane_calc      = T
+!WireBand_calc            = T
+SlabSS_calc              = T
+SlabArc_calc             = T
+!SlabQPI_calc             = T
+!ArcQPI_calc              = T
+!Z2_3D_calc               = T
+!SlabSpintexture_calc     = T
+!Wanniercenter_calc       = T
+/
+
+&SYSTEM
+NSLAB = 10              ! for thin film system
+NSLAB1= 4               ! nanowire system 
+NSLAB2= 4               ! nanowire system 
+NumOccupied = 4        ! NumOccupied    value-band
+SOC = 1                 ! soc
+E_FERMI =  0.03396967             ! e-fermi = 0 always
+surf_onsite= 0.0        ! surf_onsite
+/
+
+&PARAMETERS
+Eta_Arc = 0.0001     ! infinite small value, like brodening 
+E_arc = 0.0         ! energy for calculate Fermi Arc
+OmegaNum = 1000      ! omega number       
+OmegaMin = -0.2    ! energy interval
+OmegaMax =  0.2    ! energy interval
+Nk1 = 301           ! number k points  odd number would be better
+Nk2 = 301            ! number k points  odd number would be better
+Nk3 = 301            ! number k points  odd number would be better
+NP = 3              ! number of principle layers
+Gap_threshold = 0.01 ! threshold for FindNodes_calc output
+/
+
+KPATH_BULK            ! k point path 
+4
+G         0         0         0 Z       0.       0.       0.5 
+Z       0.      0.       0.5 F       0.5         0       0.5 
+F       0.5         0       0.5 G         0         0         0 
+G         0         0         0 L       0.5         0       0.0
+
+KPATH_SLAB  ! minus dimension
+2        ! numker of k line for 2D case
+Z -0.0 -0.5 G 0.0 0.0
+G 0.0 0.0 Z 0.0 0.5
+
+KPLANE_SLAB
+-0.1    -0.5      ! Original point for 2D k plane
+0.2  0.0      ! The first vector to define 2D k plane
+0.0  1.0      ! The second vector to define 2D k plane  for arc plots

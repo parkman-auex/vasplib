@@ -1,0 +1,329 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>example01 bandplot</title><meta name="generator" content="MATLAB 9.3"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2020-12-05"><meta name="DC.source" content="Run_example_bandplot_spinless.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>example01 bandplot</h1><!--introduction--><p>**************************************             # vasp_nospin **************************************</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Label:</a></li><li><a href="#2">Description of the Script:</a></li><li><a href="#3">Usage:</a></li><li><a href="#4">Input:</a></li><li><a href="#5">Output:</a></li><li><a href="#6">Note:</a></li><li><a href="#7">Change log</a></li><li><a href="#8">Copyright</a></li><li><a href="#9">make sure you have copy the POSCAR KPOINTS EIGENVAL DOSCAR in this directory</a></li><li><a href="#10">for a default print,just type</a></li><li><a href="#11">for a user-defined bandplot</a></li><li><a href="#12">bandplot parm</a></li><li><a href="#13">save plot data</a></li></ul></div><h2 id="1">Label:</h2><div><ul><li>vasp</li><li>band</li><li>spinless</li></ul></div><h2 id="2">Description of the Script:</h2><p>plot a band stucture of standard vasp output</p><h2 id="3">Usage:</h2><div><ul><li>Modify or Understand this code</li></ul></div><h2 id="4">Input:</h2><div><ol><li>Files: POSCAR KPOINTS          EIGENVAL/BAND.dat          DOSCAR/Efermi</li></ol></div><h2 id="5">Output:</h2><div><ol><li>band-structure with good output</li></ol></div><h2 id="6">Note:</h2><pre>Take advantage of the scope of application of the function.</pre><h2 id="7">Change log</h2><div><ul><li>Document Date: 2020/12/05</li><li>Creation Date: 2020/12/05</li><li>Last updated : 2020/12/05</li></ul></div><h2 id="8">Copyright</h2><div><ul><li>parkman</li><li><a href="parkman@buaa.edu.cn">parkman@buaa.edu.cn</a></li></ul></div><p>Let's begin</p><h2 id="9">make sure you have copy the POSCAR KPOINTS EIGENVAL DOSCAR in this directory</h2><pre class="codeinput">ls
+</pre><pre class="codeoutput">BAND.dat			KPOINTS
+BandStuctureCuIwSOC.eps		POSCAR
+DOSCAR				Run_example_bandplot_spinless.m
+EIGENVAL			vasp_m_nospin.eps
+
+</pre><h2 id="10">for a default print,just type</h2><pre class="language-matlab">bandplot
+or
+bandplot()
+</pre><pre class="codeinput">bandplot;
+</pre><img vspace="5" hspace="5" src="Run_example_bandplot_spinless_01.png" alt=""> <h2 id="11">for a user-defined bandplot</h2><p>we shoulf first load the EIGENCAR,   EIGENCAR = EIGENVAL_read(); which is a highly useful matric stucture with the format</p><p>
+<style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0;}
+.tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+  overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+  font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg .tg-baqh{text-align:center;vertical-align:top}
+</style>
+<table class="tg" style="undefined;table-layout: fixed; width: 324px">
+<colgroup>
+<col style="width: 64px">
+<col style="width: 61px">
+<col style="width: 57px">
+<col style="width: 65px">
+<col style="width: 77px">
+</colgroup>
+<thead>
+  <tr>
+    <th class="tg-baqh"></th>
+    <th class="tg-baqh">kpoint 1</th>
+    <th class="tg-baqh">kpoint2</th>
+    <th class="tg-baqh">...</th>
+    <th class="tg-baqh">kpoint nk</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td class="tg-baqh">band 1</td>
+    <td class="tg-baqh">.</td>
+    <td class="tg-baqh">.</td>
+    <td class="tg-baqh"></td>
+    <td class="tg-baqh">.</td>
+  </tr>
+  <tr>
+    <td class="tg-baqh">band 2</td>
+    <td class="tg-baqh">.</td>
+    <td class="tg-baqh">.</td>
+    <td class="tg-baqh"></td>
+    <td class="tg-baqh">.</td>
+  </tr>
+  <tr>
+    <td class="tg-baqh">...</td>
+    <td class="tg-baqh"></td>
+    <td class="tg-baqh"></td>
+    <td class="tg-baqh"></td>
+    <td class="tg-baqh"></td>
+  </tr>
+  <tr>
+    <td class="tg-baqh">band nE</td>
+    <td class="tg-baqh">.</td>
+    <td class="tg-baqh">.</td>
+    <td class="tg-baqh"></td>
+    <td class="tg-baqh">.</td>
+  </tr>
+</tbody>
+</table>
+</p><p><a href="latex">latex</a> \begin{table}[] \begin{tabular}{ccccc}         &amp; kpoint 1 &amp; kpoint2 &amp; ... &amp; kpoint nk \\ band 1  &amp; .        &amp; .       &amp;     &amp; .         \\ band 2  &amp; .        &amp; .       &amp;     &amp; .         \\ ...     &amp;          &amp;         &amp;     &amp;           \\ band nE &amp; .        &amp; .       &amp;     &amp; . \end{tabular} \end{table} <a href="/latex">/latex</a>%</p><pre class="codeinput">EIGENCAR = EIGENVAL_read();
+</pre><h2 id="12">bandplot parm</h2><p>The whole parm of bandplot is   [fig,ax]=bandplot(EIGENCAR,Ecut,titlestring,color,klist_l,kpoints_l,...   kpoints_name,fontname,fig,ax) Here, we'd like check Ecut = [-6,6], with a title 'Band Stucture CuI w SOC' blue color, we just run and abtain a (title).eps file. You can open it with AI for publication</p><pre class="codeinput">bandplot(EIGENCAR,[-6,6],<span class="string">'Band Stucture CuI w SOC'</span>,<span class="string">'b'</span>);
+</pre><img vspace="5" hspace="5" src="Run_example_bandplot_spinless_02.png" alt=""> <h2 id="13">save plot data</h2><p>we can get handle and the plot data of a bandplot</p><pre class="codeinput">[fig,ax,data_plot] = bandplot()
+</pre><pre class="codeoutput">
+fig = 
+
+  Figure (3) - &#23646;&#24615;:
+
+      Number: 3
+        Name: ''
+       Color: [1 1 1]
+    Position: [1000 918 560 420]
+       Units: 'pixels'
+
+  &#20351;&#29992; GET &#26174;&#31034;&#25152;&#26377;&#23646;&#24615;
+
+
+ax = 
+
+  Axes (vasp-nospin) - &#23646;&#24615;:
+
+             XLim: [0 3.0451]
+             YLim: [-3 3]
+           XScale: 'linear'
+           YScale: 'linear'
+    GridLineStyle: '-'
+         Position: [0.1300 0.1100 0.7750 0.7969]
+            Units: 'normalized'
+
+  &#20351;&#29992; GET &#26174;&#31034;&#25152;&#26377;&#23646;&#24615;
+
+
+data_plot = 
+
+  &#21253;&#21547;&#20197;&#19979;&#23383;&#27573;&#30340; struct:
+
+        EIGENCAR: [48&times;240 double]
+            Ecut: [-3 3]
+     titlestring: 'vasp-nospin'
+           color: [0.3500 0.1966 0.2511]
+         klist_l: [1&times;240 double]
+       kpoints_l: [5&times;1 double]
+    kpoints_name: ["G"    "Z"    "F"    "G"    "L"]
+        fontname: "Helvetica"
+
+</pre><img vspace="5" hspace="5" src="Run_example_bandplot_spinless_03.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2017b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% example01 bandplot
+% ****************************************
+%             # vasp_nospin
+% ****************************************
+%
+%% Label:
+% * vasp
+% * band
+% * spinless
+%
+%% Description of the Script:
+%
+% plot a band stucture of standard vasp output
+%
+%% Usage: 
+%
+% * Modify or Understand this code
+%
+%% Input:
+%  
+% # Files: POSCAR KPOINTS 
+%          EIGENVAL/BAND.dat
+%          DOSCAR/Efermi
+%
+%% Output:
+%
+% # band-structure with good output
+%
+%% Note: 
+%
+%  Take advantage of the scope of application of the function.
+%
+%% Change log
+%
+% * Document Date: 2020/12/05
+% * Creation Date: 2020/12/05
+% * Last updated : 2020/12/05
+%
+%% Copyright
+%
+% * parkman
+% * <parkman@buaa.edu.cn>
+%
+% Let's begin
+%
+%% make sure you have copy the POSCAR KPOINTS EIGENVAL DOSCAR in this directory
+ls
+
+%% for a default print,just type 
+%   bandplot
+% or 
+%   bandplot()
+bandplot;
+
+%% for a user-defined bandplot
+%
+% we shoulf first load the EIGENCAR, 
+%   EIGENCAR = EIGENVAL_read();
+% which is a highly useful matric stucture
+% with the format
+%
+% <html>
+% <style type="text/css">
+% .tg  {border-collapse:collapse;border-spacing:0;}
+% .tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+%   overflow:hidden;padding:10px 5px;word-break:normal;}
+% .tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+%   font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
+% .tg .tg-baqh{text-align:center;vertical-align:top}
+% </style>
+% <table class="tg" style="undefined;table-layout: fixed; width: 324px">
+% <colgroup>
+% <col style="width: 64px">
+% <col style="width: 61px">
+% <col style="width: 57px">
+% <col style="width: 65px">
+% <col style="width: 77px">
+% </colgroup>
+% <thead>
+%   <tr>
+%     <th class="tg-baqh"></th>
+%     <th class="tg-baqh">kpoint 1</th>
+%     <th class="tg-baqh">kpoint2</th>
+%     <th class="tg-baqh">...</th>
+%     <th class="tg-baqh">kpoint nk</th>
+%   </tr>
+% </thead>
+% <tbody>
+%   <tr>
+%     <td class="tg-baqh">band 1</td>
+%     <td class="tg-baqh">.</td>
+%     <td class="tg-baqh">.</td>
+%     <td class="tg-baqh"></td>
+%     <td class="tg-baqh">.</td>
+%   </tr>
+%   <tr>
+%     <td class="tg-baqh">band 2</td>
+%     <td class="tg-baqh">.</td>
+%     <td class="tg-baqh">.</td>
+%     <td class="tg-baqh"></td>
+%     <td class="tg-baqh">.</td>
+%   </tr>
+%   <tr>
+%     <td class="tg-baqh">...</td>
+%     <td class="tg-baqh"></td>
+%     <td class="tg-baqh"></td>
+%     <td class="tg-baqh"></td>
+%     <td class="tg-baqh"></td>
+%   </tr>
+%   <tr>
+%     <td class="tg-baqh">band nE</td>
+%     <td class="tg-baqh">.</td>
+%     <td class="tg-baqh">.</td>
+%     <td class="tg-baqh"></td>
+%     <td class="tg-baqh">.</td>
+%   </tr>
+% </tbody>
+% </table>
+% </html>
+%
+% <latex>
+% \begin{table}[]
+% \begin{tabular}{ccccc}
+%         & kpoint 1 & kpoint2 & ... & kpoint nk \\
+% band 1  & .        & .       &     & .         \\
+% band 2  & .        & .       &     & .         \\
+% ...     &          &         &     &           \\
+% band nE & .        & .       &     & .        
+% \end{tabular}
+% \end{table}
+% </latex>%
+EIGENCAR = EIGENVAL_read();
+
+%% bandplot parm
+% The whole parm of bandplot is 
+%   [fig,ax]=bandplot(EIGENCAR,Ecut,titlestring,color,klist_l,kpoints_l,...
+%   kpoints_name,fontname,fig,ax)
+% Here, we'd like check Ecut = [-6,6], with a title 'Band Stucture CuI w SOC'
+% blue color, we just run and abtain a (title).eps file. You can open it with
+% AI for publication
+bandplot(EIGENCAR,[-6,6],'Band Stucture CuI w SOC','b');
+
+%% save plot data
+% we can get handle and the plot data of a bandplot
+[fig,ax,data_plot] = bandplot()
+##### SOURCE END #####
+--></body></html>

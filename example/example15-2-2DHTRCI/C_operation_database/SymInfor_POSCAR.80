@@ -1,0 +1,135 @@
+phonopy_version: '2.4.2'
+space_group_type: 'P-6m2'
+space_group_number: 187
+point_group_type: '-6m2'
+space_group_operations:
+- rotation: # 1
+  - [ 1,  0 , 0]
+  - [ 0,  1 , 0]
+  - [ 0,  0 , 1]
+  translation: [ 0.00000,  0.00000,  0.00000 ]
+- rotation: # 2
+  - [-1,  1 , 0]
+  - [-1,  0 , 0]
+  - [ 0,  0 ,-1]
+  translation: [ 0.00000,  0.00000,  0.00000 ]
+- rotation: # 3
+  - [ 0, -1 , 0]
+  - [ 1, -1 , 0]
+  - [ 0,  0 , 1]
+  translation: [ 0.00000,  0.00000,  0.00000 ]
+- rotation: # 4
+  - [ 1,  0 , 0]
+  - [ 0,  1 , 0]
+  - [ 0,  0 ,-1]
+  translation: [ 0.00000,  0.00000,  0.00000 ]
+- rotation: # 5
+  - [-1,  1 , 0]
+  - [-1,  0 , 0]
+  - [ 0,  0 , 1]
+  translation: [ 0.00000,  0.00000,  0.00000 ]
+- rotation: # 6
+  - [ 0, -1 , 0]
+  - [ 1, -1 , 0]
+  - [ 0,  0 ,-1]
+  translation: [ 0.00000,  0.00000,  0.00000 ]
+- rotation: # 7
+  - [ 0, -1 , 0]
+  - [-1,  0 , 0]
+  - [ 0,  0 ,-1]
+  translation: [ 0.00000,  0.00000,  0.00000 ]
+- rotation: # 8
+  - [ 1,  0 , 0]
+  - [ 1, -1 , 0]
+  - [ 0,  0 , 1]
+  translation: [ 0.00000,  0.00000,  0.00000 ]
+- rotation: # 9
+  - [-1,  1 , 0]
+  - [ 0,  1 , 0]
+  - [ 0,  0 ,-1]
+  translation: [ 0.00000,  0.00000,  0.00000 ]
+- rotation: # 10
+  - [ 0, -1 , 0]
+  - [-1,  0 , 0]
+  - [ 0,  0 , 1]
+  translation: [ 0.00000,  0.00000,  0.00000 ]
+- rotation: # 11
+  - [ 1,  0 , 0]
+  - [ 1, -1 , 0]
+  - [ 0,  0 ,-1]
+  translation: [ 0.00000,  0.00000,  0.00000 ]
+- rotation: # 12
+  - [-1,  1 , 0]
+  - [ 0,  1 , 0]
+  - [ 0,  0 , 1]
+  translation: [ 0.00000,  0.00000,  0.00000 ]
+atom_mapping:
+  1: 1
+  2: 2
+  3: 2
+  4: 1
+  5: 1
+  6: 2
+  7: 2
+  8: 1
+  9: 1
+  10: 2
+  11: 2
+  12: 1
+  13: 13
+  14: 13
+  15: 13
+  16: 13
+  17: 13
+  18: 13
+site_symmetries:
+- atom: 1
+  Wyckoff: 'l'
+  site_point_group: 'm'
+  orientation:
+  - [ 0,  0,  1]
+  - [ 1,  0,  0]
+  - [ 0,  1,  0]
+  rotations:
+  - # 1
+    - [ 1,  0,  0]
+    - [ 0,  1,  0]
+    - [ 0,  0,  1]
+  - # 2
+    - [ 1,  0,  0]
+    - [ 0,  1,  0]
+    - [ 0,  0, -1]
+- atom: 2
+  Wyckoff: 'l'
+  site_point_group: 'm'
+  orientation:
+  - [ 0,  0,  1]
+  - [ 1,  0,  0]
+  - [ 0,  1,  0]
+  rotations:
+  - # 1
+    - [ 1,  0,  0]
+    - [ 0,  1,  0]
+    - [ 0,  0,  1]
+  - # 2
+    - [ 1,  0,  0]
+    - [ 0,  1,  0]
+    - [ 0,  0, -1]
+- atom: 13
+  Wyckoff: 'l'
+  site_point_group: 'm'
+  orientation:
+  - [ 0,  0,  1]
+  - [ 1,  0,  0]
+  - [ 0,  1,  0]
+  rotations:
+  - # 1
+    - [ 1,  0,  0]
+    - [ 0,  1,  0]
+    - [ 0,  0,  1]
+  - # 2
+    - [ 1,  0,  0]
+    - [ 0,  1,  0]
+    - [ 0,  0, -1]
+# Primitive cell was found. It is written into PPOSCAR.
+# Bravais lattice is written into BPOSCAR.

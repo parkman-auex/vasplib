@@ -1,0 +1,422 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>pbandplot</title><meta name="generator" content="MATLAB 9.3"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2020-12-05"><meta name="DC.source" content="pbandplot.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>pbandplot</h1><!--introduction--><p>plotpband</p><div><ul><li>Label: plot</li></ul></div><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Description of the Function:</a></li><li><a href="#3">Usage:</a></li><li><a href="#4">Input:</a></li><li><a href="#5">Output:</a></li><li><a href="#6">example:</a></li><li><a href="#7">Note:</a></li><li><a href="#8">Change log</a></li><li><a href="#9">Copyright</a></li><li><a href="#10">Source code :</a></li></ul></div><h2 id="1">Description of the Function:</h2><h2 id="3">Usage:</h2><div><ul><li>[fig,ax]=pbandplot(WEIGHTCAR_struct,EIGENCAR,Ecut,titlestring,cmap,klist_l,kpoints_l,kpoints_name,fontname,fig,ax)</li><li>[fig,ax]=pbandplot(WEIGHTCAR_struct,EIGENCAR,Ecut,titlestring,cmap,klist_l,kpoints_l,kpoints_name,fontname)</li><li>[fig,ax]=pbandplot(WEIGHTCAR_struct,EIGENCAR,Ecut,titlestring,cmap,klist_l,kpoints_l,kpoints_name)</li><li>[fig,ax]=pbandplot(WEIGHTCAR_struct,EIGENCAR,Ecut,titlestring,cmap)</li><li>[fig,ax]=pbandplot(WEIGHTCAR_struct,EIGENCAR,Ecut,titlestring)</li><li>[fig,ax]=pbandplot(WEIGHTCAR_struct,EIGENCAR,Ecut)</li><li>[fig,ax]=pbandplot(WEIGHTCAR_struct,EIGENCAR)</li><li>[fig,ax]=pbandplot(WEIGHTCAR_struct,EIGENCAR)</li><li>[fig,ax]=pbandplot(WEIGHTCAR_struct,EIGENCAR)</li><li>[fig,ax]=pbandplot(WEIGHTCAR_struct)</li><li>[fig,ax]=pbandplot()</li></ul></div><h2 id="4">Input:</h2><div><ol><li>input1:</li><li>input2:</li><li>input3:</li></ol></div><h2 id="5">Output:</h2><div><ol><li>fig:</li><li>ax:</li></ol></div><h2 id="6">example:</h2><p>for vasp   bandplot(); for a eigencar   bandplot(EIGENCAR) use Ecut   bandplot(EIGENCAR,Ecut)</p><h2 id="7">Note:</h2><pre>Take advantage of the scope of application of the function.</pre><h2 id="8">Change log</h2><div><ul><li>Document Date: 2020/12/04</li><li>Creation Date: 2020/12/04</li><li>Last updated : 2020/12/04</li></ul></div><h2 id="9">Copyright</h2><div><ul><li>parkman</li><li><a href="parkman@buaa.edu.cn">parkman@buaa.edu.cn</a></li></ul></div><h2 id="10">Source code :</h2><pre class="codeinput"><span class="keyword">function</span> [fig,ax]=pbandplot(WEIGHTCAR_struct,EIGENCAR,Ecut,titlestring,cmap,klist_l,kpoints_l,kpoints_name,fontname,fig,ax)
+<span class="comment">%--------  init  --------</span>
+    import <span class="string">vasplib_tool.*</span>
+<span class="comment">%--------  narg  --------</span>
+    <span class="keyword">if</span> nargin &lt; 10 &amp; nargin &gt; 0
+       [fig,ax] = creat_figure();
+    <span class="keyword">end</span>
+    <span class="keyword">if</span> nargin &lt; 9
+        fontname=<span class="string">"Helvetica"</span>;
+    <span class="keyword">end</span>
+    <span class="keyword">if</span> nargin &lt; 8
+    <span class="keyword">end</span>
+    <span class="keyword">if</span> nargin &lt; 7
+    <span class="keyword">end</span>
+    <span class="keyword">if</span> nargin &lt; 6
+        [~,klist_l,~,kpoints_l,kpoints_name]=kpathgen3D();
+    <span class="keyword">end</span>
+    <span class="keyword">if</span> nargin &lt; 5
+        cmap = jet;
+        ncmap = length(cmap);
+    <span class="keyword">end</span>
+    <span class="keyword">if</span> nargin &lt; 4
+        dirname = pwd;
+        dirname = strsplit(dirname,<span class="string">'/'</span>);
+        titlestring = dirname(length(dirname));
+        titlestring = strrep(titlestring,<span class="string">'_'</span>,<span class="string">'-'</span>);
+    <span class="keyword">end</span>
+    <span class="keyword">if</span> nargin &lt; 3
+        Ecut=[-3,3];
+    <span class="keyword">end</span>
+    <span class="keyword">if</span> nargin &lt; 2
+        EIGENCAR=EIGENVAL_read();
+    <span class="keyword">end</span>
+    <span class="keyword">if</span> nargin &lt; 1
+        <span class="comment">% WEIGHTCAR_in_a_file;</span>
+        [WEIGHTCAR_struct_cell,Name_list,~] = WEIGHTCAR_gen_dir(<span class="string">'PBAND'</span>);
+        [~,nWEIGHTCAR_struct_cell] = size(WEIGHTCAR_struct_cell);
+        <span class="keyword">for</span> i = 1:nWEIGHTCAR_struct_cell
+            titlestring_new = titlestring+<span class="string">"-"</span>+Name_list(i,:);
+            disp(titlestring_new );
+            WEIGHTCAR_struct = WEIGHTCAR_struct_cell{i};
+            <span class="comment">% rm the last</span>
+            WEIGHTCAR_struct(end) = [];
+            [fig_temp,ax_temp]=pbandplot(WEIGHTCAR_struct,EIGENCAR,Ecut,titlestring_new ,cmap,klist_l,kpoints_l,kpoints_name,fontname);
+            <span class="comment">%--------  fbug  --------</span>
+            fig(i) = fig_temp;ax(i) = ax_temp;
+        <span class="keyword">end</span>
+        <span class="comment">%--------  fbug  --------</span>
+        <span class="keyword">return</span>;
+        <span class="comment">% diedai ?</span>
+    <span class="keyword">end</span>
+<span class="comment">%--------  juge  --------</span>
+
+    <span class="keyword">if</span> nargin &gt;4
+        disp(<span class="string">'cmap need to be improved'</span>);
+        <span class="keyword">if</span> ~isa(cmap,<span class="string">'double'</span>)
+            color = str2rgb(color);
+        <span class="keyword">end</span>
+        ncmap = length(cmap);
+    <span class="keyword">end</span>
+<span class="comment">%-------- distri --------</span>
+    <span class="keyword">if</span> isa(WEIGHTCAR_struct,<span class="string">'double'</span>)
+         pbandmode = <span class="string">'patch'</span>         ;
+         WEIGHTCAR = WEIGHTCAR_struct;
+    <span class="keyword">elseif</span> isa(WEIGHTCAR_struct,<span class="string">'cell'</span>)
+         pbandmode = <span class="string">'bubble_rough'</span> ;
+         WEIGHTCAR_cell = WEIGHTCAR_struct;
+         nWEIGHTCAR = length(WEIGHTCAR_cell);
+         Name_list(nWEIGHTCAR ,:) = <span class="string">""</span>;
+         <span class="comment">%--------  bug  --------</span>
+         <span class="keyword">if</span> nWEIGHTCAR &gt; ncmap
+             cmap = repmat(cmap,[(round(nWEIGHTCAR/ncmap)+1),1]);
+         <span class="keyword">elseif</span> nWEIGHTCAR &lt; ncmap
+             Dcmap = round(ncmap/nWEIGHTCAR);
+             <span class="keyword">for</span> i = 1:nWEIGHTCAR
+                 cmap_new(i,:) =cmap((Dcmap-1)*i+i,:);
+             <span class="keyword">end</span>
+             cmap = cmap_new;
+         <span class="keyword">end</span>
+         <span class="keyword">for</span> i = 1:nWEIGHTCAR
+             Name_list(i,:) = strcat(<span class="string">'A'</span>,string(i));
+         <span class="keyword">end</span>
+    <span class="keyword">elseif</span> isa(WEIGHTCAR_struct,<span class="string">'struct'</span>)
+         <span class="comment">% it means we can rebuild code for highly user-like plot</span>
+         pbandmode = <span class="string">'bubble_refine'</span>;
+         nWEIGHTCAR = length(WEIGHTCAR_struct);
+         Name_list(nWEIGHTCAR ,:) = <span class="string">""</span>;
+         WEIGHTCAR_cell{nWEIGHTCAR} = WEIGHTCAR_struct(nWEIGHTCAR).WEIGHTCAR;
+         <span class="keyword">for</span> i = 1 : nWEIGHTCAR
+             WEIGHTCAR_cell{i} =  WEIGHTCAR_struct(i).WEIGHTCAR;
+             Name_list(i ,:) = WEIGHTCAR_struct(i).displayname;
+             <span class="comment">% if color</span>
+             <span class="comment">% if alpha</span>
+         <span class="keyword">end</span>
+         <span class="comment">%--------  bug  --------</span>
+         <span class="keyword">if</span> nWEIGHTCAR &gt; ncmap
+             cmap = repmat(cmap,[(round(nWEIGHTCAR/ncmap)+1),1]);
+         <span class="keyword">elseif</span> nWEIGHTCAR &lt; ncmap
+             Dcmap = round(ncmap/nWEIGHTCAR);
+             <span class="keyword">for</span> i = 1:nWEIGHTCAR
+                cmap_new(i,:) =cmap((Dcmap-1)*i+i,:);
+             <span class="keyword">end</span>
+             cmap = cmap_new;
+         <span class="keyword">end</span>
+    <span class="keyword">end</span>
+<span class="comment">%--------  init  --------</span>
+    Nbands=size(EIGENCAR,1);
+    klist=klist_l;
+    xmin=klist_l(1);
+    xmax=klist_l(length(klist_l));
+    Xcut = [xmin,xmax];
+<span class="comment">%--------plotwhole--------_</span>
+     <span class="keyword">for</span> Ei=1:Nbands
+        plot(ax,klist,EIGENCAR(Ei,:),<span class="string">'LineWidth'</span>,1.0,<span class="string">'Color'</span>,[0.1 0.1 0.1],<span class="string">'DisplayName'</span>,num2str(Ei));
+        <span class="comment">%hold on;</span>
+    <span class="keyword">end</span>
+<span class="comment">%--------plotweight--------</span>
+    <span class="keyword">switch</span> pbandmode
+        <span class="keyword">case</span> <span class="string">'patch'</span>
+            [fig,ax] = pband_plot_one_patch(klist,EIGENCAR,WEIGHTCAR,cmap,fig,ax);
+        <span class="keyword">case</span> <span class="string">'bubble_rough'</span>
+            [fig,ax] = pband_plot_set(klist,EIGENCAR,WEIGHTCAR_cell,Name_list,cmap,fig,ax);
+        <span class="keyword">case</span> <span class="string">'bubble_refine'</span>
+            [fig,ax] = pband_plot_set(klist,EIGENCAR,WEIGHTCAR_cell,Name_list,cmap,fig,ax);<span class="comment">% waiting</span>
+    <span class="keyword">end</span>
+<span class="comment">%--------reference -------</span>
+    [fig,ax] = set_reference(fig,ax,<span class="string">'band'</span>,Xcut,Ecut,kpoints_l,kpoints_name,fontname);
+<span class="comment">%--------  fbug  --------</span>
+    titlestring = cell2mat(titlestring);
+<span class="comment">%--------  title  -------</span>
+    title(ax,titlestring);
+<span class="comment">%--------  save  --------</span>
+    <span class="comment">%disp(class(titlestring));</span>
+
+    [fig,ax] = save_figure(fig,titlestring+<span class="string">".eps"</span>,ax);
+<span class="comment">%-------- return --------</span>
+<span class="keyword">end</span>
+
+
+<span class="comment">% cmap = [0,0,1;0,0.0769230797886848,1;0,0.153846159577370,1;0,0.230769231915474,1;0,0.307692319154739,1;0,0.384615391492844,1;0,0.461538463830948,1;0,0.538461565971375,1;0,0.615384638309479,1;0,0.692307710647583,1;0,0.769230782985687,1;0,0.846153855323792,1;0,0.923076927661896,1;0,1,1;0.0334640555083752,0.966797411441803,0.966797411441803;0.0669281110167503,0.933594763278961,0.933594763278961;0.100392162799835,0.900392174720764,0.900392174720764;0.133856222033501,0.867189526557922,0.867189526557922;0.167320266366005,0.833986937999725,0.833986937999725;0.200784325599670,0.800784349441528,0.800784349441528;0.234248384833336,0.767581701278687,0.767581701278687;0.267712444067001,0.734379112720490,0.734379112720490;0.301176488399506,0.701176464557648,0.701176464557648;0.334640532732010,0.667973875999451,0.667973875999451;0.368104606866837,0.634771287441254,0.634771287441254;0.401568651199341,0.601568639278412,0.601568639278412;0.435032695531845,0.568366050720215,0.568366050720215;0.468496769666672,0.535163402557373,0.535163402557373;0.501960813999176,0.501960813999176,0.501960813999176;0.505851745605469,0.505851745605469,0.498039245605469;0.509742677211762,0.509742677211762,0.494117677211762;0.513633608818054,0.513633608818054,0.490196108818054;0.517524540424347,0.517524540424347,0.486274540424347;0.521415472030640,0.521415472030640,0.482352972030640;0.525306403636932,0.525306403636932,0.478431403636932;0.529197335243225,0.529197335243225,0.474509835243225;0.533088266849518,0.533088266849518,0.470588266849518;0.575534760951996,0.575534760951996,0.427807509899139;0.617981314659119,0.617981314659119,0.385026752948761;0.660427808761597,0.660427808761597,0.342246025800705;0.702874362468720,0.702874362468720,0.299465268850327;0.745320856571198,0.745320856571198,0.256684511899948;0.787767410278320,0.787767410278320,0.213903754949570;0.830213904380798,0.830213904380798,0.171123012900352;0.872660458087921,0.872660458087921,0.128342255949974;0.915106952190399,0.915106952190399,0.0855615064501762;0.957553505897522,0.957553505897522,0.0427807532250881;1,1,0;1,0.888888895511627,0;1,0.777777791023254,0;1,0.666666686534882,0;1,0.555555582046509,0;1,0.444444447755814,0;1,0.333333343267441,0;1,0.222222223877907,0;1,0.111111111938953,0;1,0,0;1,0,0;1,0,0;1,0,0;1,0,0;1,0,0;1,0,0;1,0,0];</span>
+</pre><pre class="codeoutput">fatband-Cu-SOC
+cmap need to be improved
+fatband-I-SOC
+cmap need to be improved
+
+ans = 
+
+  1&times;2 Figure &#25968;&#32452;:
+
+    Figure    Figure
+
+</pre><img vspace="5" hspace="5" src="pbandplot_01.png" alt=""> <img vspace="5" hspace="5" src="pbandplot_02.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2017b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% pbandplot
+%
+% plotpband 
+% 
+%
+% * Label: plot
+%
+%% Description of the Function:
+%%
+%% Usage: 
+%
+% * [fig,ax]=pbandplot(WEIGHTCAR_struct,EIGENCAR,Ecut,titlestring,cmap,klist_l,kpoints_l,kpoints_name,fontname,fig,ax)
+% * [fig,ax]=pbandplot(WEIGHTCAR_struct,EIGENCAR,Ecut,titlestring,cmap,klist_l,kpoints_l,kpoints_name,fontname)
+% * [fig,ax]=pbandplot(WEIGHTCAR_struct,EIGENCAR,Ecut,titlestring,cmap,klist_l,kpoints_l,kpoints_name)
+% * [fig,ax]=pbandplot(WEIGHTCAR_struct,EIGENCAR,Ecut,titlestring,cmap)
+% * [fig,ax]=pbandplot(WEIGHTCAR_struct,EIGENCAR,Ecut,titlestring)
+% * [fig,ax]=pbandplot(WEIGHTCAR_struct,EIGENCAR,Ecut)
+% * [fig,ax]=pbandplot(WEIGHTCAR_struct,EIGENCAR)
+% * [fig,ax]=pbandplot(WEIGHTCAR_struct,EIGENCAR)
+% * [fig,ax]=pbandplot(WEIGHTCAR_struct,EIGENCAR)
+% * [fig,ax]=pbandplot(WEIGHTCAR_struct)
+% * [fig,ax]=pbandplot()
+%% Input:
+%  
+% # input1:
+% # input2:
+% # input3:
+%
+%% Output:
+%
+% # fig:
+% # ax:
+%
+%% example:
+% for vasp
+%   bandplot();
+% for a eigencar
+%   bandplot(EIGENCAR)
+% use Ecut
+%   bandplot(EIGENCAR,Ecut)
+%   
+%% Note: 
+%
+%  Take advantage of the scope of application of the function.
+%
+%% Change log
+%
+% * Document Date: 2020/12/04
+% * Creation Date: 2020/12/04
+% * Last updated : 2020/12/04
+%
+%% Copyright
+%
+% * parkman
+% * <parkman@buaa.edu.cn>
+%
+%% Source code : 
+%
+function [fig,ax]=pbandplot(WEIGHTCAR_struct,EIGENCAR,Ecut,titlestring,cmap,klist_l,kpoints_l,kpoints_name,fontname,fig,ax)
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  init  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+    import vasplib_tool.*
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  narg  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+    if nargin < 10 & nargin > 0
+       [fig,ax] = creat_figure();
+    end
+    if nargin < 9
+        fontname="Helvetica";
+    end
+    if nargin < 8
+    end
+    if nargin < 7
+    end   
+    if nargin < 6
+        [~,klist_l,~,kpoints_l,kpoints_name]=kpathgen3D();
+    end
+    if nargin < 5
+        cmap = jet;
+        ncmap = length(cmap);
+    end
+    if nargin < 4
+        dirname = pwd;
+        dirname = strsplit(dirname,'/');
+        titlestring = dirname(length(dirname));
+        titlestring = strrep(titlestring,'_','-');
+    end 
+    if nargin < 3
+        Ecut=[-3,3];
+    end 
+    if nargin < 2
+        EIGENCAR=EIGENVAL_read();
+    end
+    if nargin < 1
+        % WEIGHTCAR_in_a_file;
+        [WEIGHTCAR_struct_cell,Name_list,~] = WEIGHTCAR_gen_dir('PBAND');
+        [~,nWEIGHTCAR_struct_cell] = size(WEIGHTCAR_struct_cell);
+        for i = 1:nWEIGHTCAR_struct_cell
+            titlestring_new = titlestring+"-"+Name_list(i,:);
+            disp(titlestring_new );
+            WEIGHTCAR_struct = WEIGHTCAR_struct_cell{i};
+            % rm the last
+            WEIGHTCAR_struct(end) = [];
+            [fig_temp,ax_temp]=pbandplot(WEIGHTCAR_struct,EIGENCAR,Ecut,titlestring_new ,cmap,klist_l,kpoints_l,kpoints_name,fontname);
+            %REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  fbug  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+            fig(i) = fig_temp;ax(i) = ax_temp;
+        end
+        %REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  fbug  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+        return;
+        % diedai ?
+    end
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  juge  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+    
+    if nargin >4
+        disp('cmap need to be improved');
+        if ~isa(cmap,'double')
+            color = str2rgb(color);
+        end
+        ncmap = length(cmap);
+    end
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH distri REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+    if isa(WEIGHTCAR_struct,'double')
+         pbandmode = 'patch'         ;
+         WEIGHTCAR = WEIGHTCAR_struct;
+    elseif isa(WEIGHTCAR_struct,'cell')
+         pbandmode = 'bubble_rough' ;
+         WEIGHTCAR_cell = WEIGHTCAR_struct;
+         nWEIGHTCAR = length(WEIGHTCAR_cell);
+         Name_list(nWEIGHTCAR ,:) = "";
+         %REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  bug  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+         if nWEIGHTCAR > ncmap
+             cmap = repmat(cmap,[(round(nWEIGHTCAR/ncmap)+1),1]);
+         elseif nWEIGHTCAR < ncmap
+             Dcmap = round(ncmap/nWEIGHTCAR);
+             for i = 1:nWEIGHTCAR
+                 cmap_new(i,:) =cmap((Dcmap-1)*i+i,:);
+             end
+             cmap = cmap_new;
+         end
+         for i = 1:nWEIGHTCAR
+             Name_list(i,:) = strcat('A',string(i));
+         end
+    elseif isa(WEIGHTCAR_struct,'struct')  
+         % it means we can rebuild code for highly user-like plot
+         pbandmode = 'bubble_refine';
+         nWEIGHTCAR = length(WEIGHTCAR_struct);
+         Name_list(nWEIGHTCAR ,:) = "";
+         WEIGHTCAR_cell{nWEIGHTCAR} = WEIGHTCAR_struct(nWEIGHTCAR).WEIGHTCAR;
+         for i = 1 : nWEIGHTCAR
+             WEIGHTCAR_cell{i} =  WEIGHTCAR_struct(i).WEIGHTCAR;
+             Name_list(i ,:) = WEIGHTCAR_struct(i).displayname;
+             % if color
+             % if alpha
+         end
+         %REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  bug  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+         if nWEIGHTCAR > ncmap
+             cmap = repmat(cmap,[(round(nWEIGHTCAR/ncmap)+1),1]);
+         elseif nWEIGHTCAR < ncmap
+             Dcmap = round(ncmap/nWEIGHTCAR);
+             for i = 1:nWEIGHTCAR
+                cmap_new(i,:) =cmap((Dcmap-1)*i+i,:);
+             end
+             cmap = cmap_new;
+         end
+    end
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  init  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+    Nbands=size(EIGENCAR,1);
+    klist=klist_l;
+    xmin=klist_l(1);
+    xmax=klist_l(length(klist_l));
+    Xcut = [xmin,xmax];
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHplotwholeREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH_
+     for Ei=1:Nbands
+        plot(ax,klist,EIGENCAR(Ei,:),'LineWidth',1.0,'Color',[0.1 0.1 0.1],'DisplayName',num2str(Ei));
+        %hold on;
+    end
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHplotweightREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+    switch pbandmode
+        case 'patch'
+            [fig,ax] = pband_plot_one_patch(klist,EIGENCAR,WEIGHTCAR,cmap,fig,ax);
+        case 'bubble_rough'
+            [fig,ax] = pband_plot_set(klist,EIGENCAR,WEIGHTCAR_cell,Name_list,cmap,fig,ax);
+        case 'bubble_refine'
+            [fig,ax] = pband_plot_set(klist,EIGENCAR,WEIGHTCAR_cell,Name_list,cmap,fig,ax);% waiting
+    end
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHreference REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+    [fig,ax] = set_reference(fig,ax,'band',Xcut,Ecut,kpoints_l,kpoints_name,fontname);
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  fbug  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+    titlestring = cell2mat(titlestring);
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  title  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+    title(ax,titlestring);
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  save  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+    %disp(class(titlestring));
+    
+    [fig,ax] = save_figure(fig,titlestring+".eps",ax);
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH return REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+end
+
+
+% cmap = [0,0,1;0,0.0769230797886848,1;0,0.153846159577370,1;0,0.230769231915474,1;0,0.307692319154739,1;0,0.384615391492844,1;0,0.461538463830948,1;0,0.538461565971375,1;0,0.615384638309479,1;0,0.692307710647583,1;0,0.769230782985687,1;0,0.846153855323792,1;0,0.923076927661896,1;0,1,1;0.0334640555083752,0.966797411441803,0.966797411441803;0.0669281110167503,0.933594763278961,0.933594763278961;0.100392162799835,0.900392174720764,0.900392174720764;0.133856222033501,0.867189526557922,0.867189526557922;0.167320266366005,0.833986937999725,0.833986937999725;0.200784325599670,0.800784349441528,0.800784349441528;0.234248384833336,0.767581701278687,0.767581701278687;0.267712444067001,0.734379112720490,0.734379112720490;0.301176488399506,0.701176464557648,0.701176464557648;0.334640532732010,0.667973875999451,0.667973875999451;0.368104606866837,0.634771287441254,0.634771287441254;0.401568651199341,0.601568639278412,0.601568639278412;0.435032695531845,0.568366050720215,0.568366050720215;0.468496769666672,0.535163402557373,0.535163402557373;0.501960813999176,0.501960813999176,0.501960813999176;0.505851745605469,0.505851745605469,0.498039245605469;0.509742677211762,0.509742677211762,0.494117677211762;0.513633608818054,0.513633608818054,0.490196108818054;0.517524540424347,0.517524540424347,0.486274540424347;0.521415472030640,0.521415472030640,0.482352972030640;0.525306403636932,0.525306403636932,0.478431403636932;0.529197335243225,0.529197335243225,0.474509835243225;0.533088266849518,0.533088266849518,0.470588266849518;0.575534760951996,0.575534760951996,0.427807509899139;0.617981314659119,0.617981314659119,0.385026752948761;0.660427808761597,0.660427808761597,0.342246025800705;0.702874362468720,0.702874362468720,0.299465268850327;0.745320856571198,0.745320856571198,0.256684511899948;0.787767410278320,0.787767410278320,0.213903754949570;0.830213904380798,0.830213904380798,0.171123012900352;0.872660458087921,0.872660458087921,0.128342255949974;0.915106952190399,0.915106952190399,0.0855615064501762;0.957553505897522,0.957553505897522,0.0427807532250881;1,1,0;1,0.888888895511627,0;1,0.777777791023254,0;1,0.666666686534882,0;1,0.555555582046509,0;1,0.444444447755814,0;1,0.333333343267441,0;1,0.222222223877907,0;1,0.111111111938953,0;1,0,0;1,0,0;1,0,0;1,0,0;1,0,0;1,0,0;1,0,0;1,0,0];
+
+##### SOURCE END #####
+--></body></html>

@@ -1,0 +1,24 @@
+Global Parameters
+SYSTEM = filename
+ISTART =  0            (Read existing wavefunction; if there)
+# ICHARG =  11         (Non-self-consistent: GGA/LDA band structures)
+LREAL  = .FALSE.          (Projection operators: automatic)
+ENCUT  =  500          (Cut-off energy for plane wave basis set, in eV,set it manually)
+PREC   =  Normal       (Precision level,PREC = Low | Normal(ENOUGH) | Single | Accurate )
+LWAVE  = .FALSE.        (Write WAVECAR or not)
+LCHARG = .TRUE.        (Write CHGCAR or not)
+ADDGRID= .TRUE.        (Increase grid; helps GGA convergence)
+
+Electronic Relaxation
+ISMEAR =  0            (Gaussian smearing; metals:1)
+SIGMA  =  0.05         (Smearing value in eV; metals:0.2)
+NELM   =  100           (Max electronic SCF steps)
+EDIFF  =  1E-06        (SCF energy convergence; in eV)
+NCORE  =  4
+KSPACING = 0.3
+KGAMMA=.TRUE. 
+
+NSW    =  500          (Max electronic SCF steps)
+IBRION =  2            (Algorithm: 0-MD; 1-Quasi-New; 2-CG)
+EDIFFG = -2E-02        (Ionic convergence; eV/AA)
+ISIF   =  3

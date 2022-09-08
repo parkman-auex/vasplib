@@ -1,0 +1,280 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>bandplot</title><meta name="generator" content="MATLAB 9.3"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2020-12-03"><meta name="DC.source" content="bandplot.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>bandplot</h1><!--introduction--><p>plotband</p><div><ul><li>Label: plot</li></ul></div><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Description of the Function:</a></li><li><a href="#3">Usage:</a></li><li><a href="#4">Input:</a></li><li><a href="#5">Output:</a></li><li><a href="#6">example:</a></li><li><a href="#7">Note:</a></li><li><a href="#8">Change log</a></li><li><a href="#9">Copyright</a></li><li><a href="#10">Source code :</a></li></ul></div><h2 id="1">Description of the Function:</h2><h2 id="3">Usage:</h2><div><ul><li>[fig,ax]=bandplot(EIGENCAR,Ecut,titlestring,color,klist_l,kpoints_l,kpoints_name,fontname,fig,ax)</li><li>[fig,ax]=bandplot(EIGENCAR,Ecut,titlestring,color,klist_l,kpoints_l,kpoints_name,fontname)</li><li>[fig,ax]=bandplot(EIGENCAR,Ecut,titlestring,color,klist_l,kpoints_l,kpoints_name)</li><li>[fig,ax]=bandplot(EIGENCAR,Ecut,titlestring,color)</li><li>[fig,ax]=bandplot(EIGENCAR,Ecut,titlestring)</li><li>[fig,ax]=bandplot(EIGENCAR,Ecut)</li><li>[fig,ax]=bandplot(EIGENCAR)</li></ul></div><h2 id="4">Input:</h2><div><ol><li>input1:</li><li>input2:</li><li>input3:</li></ol></div><h2 id="5">Output:</h2><div><ol><li>fig:</li><li>ax:</li></ol></div><h2 id="6">example:</h2><p>for vasp   bandplot(); for a eigencar   bandplot(EIGENCAR) use Ecut   bandplot(EIGENCAR,Ecut)</p><h2 id="7">Note:</h2><pre>Take advantage of the scope of application of the function.</pre><h2 id="8">Change log</h2><div><ul><li>Document Date: 2020/12/03</li><li>Creation Date: 2020/12/03</li><li>Last updated : 2020/12/03</li></ul></div><h2 id="9">Copyright</h2><div><ul><li>parkman</li><li><a href="parkman@buaa.edu.cn">parkman@buaa.edu.cn</a></li></ul></div><h2 id="10">Source code :</h2><pre class="codeinput"><span class="keyword">function</span> [fig,ax]=bandplot(EIGENCAR,Ecut,titlestring,color,klist_l,kpoints_l,kpoints_name,fontname,fig,ax)
+<span class="comment">%--------  init  --------</span>
+    import <span class="string">+vasplib_tool.*</span>
+<span class="comment">%--------  narg  --------</span>
+    <span class="keyword">if</span> nargin &lt; 9
+       [fig,ax] = creat_figure();
+    <span class="keyword">end</span>
+    <span class="keyword">if</span> nargin &lt; 8
+        fontname=<span class="string">"Helvetica"</span>;
+    <span class="keyword">end</span>
+    <span class="keyword">if</span> nargin &lt; 7
+    <span class="keyword">end</span>
+    <span class="keyword">if</span> nargin &lt; 6
+    <span class="keyword">end</span>
+    <span class="keyword">if</span> nargin &lt; 5
+        [~,klist_l,~,kpoints_l,kpoints_name]=kpathgen3D();
+
+    <span class="keyword">end</span>
+    <span class="keyword">if</span> nargin &lt; 4
+        color = [rand,rand,rand];
+    <span class="keyword">end</span>
+    <span class="keyword">if</span> nargin &lt; 3
+        dirname = pwd;
+        dirname = strsplit(dirname,<span class="string">'/'</span>);
+        titlestring = dirname(length(dirname));
+        titlestring = strrep(titlestring,<span class="string">'_'</span>,<span class="string">'-'</span>);
+    <span class="keyword">end</span>
+    <span class="keyword">if</span> nargin &lt; 2
+        Ecut=[-3,3];
+    <span class="keyword">end</span>
+    <span class="keyword">if</span> nargin &lt; 1
+        EIGENCAR=EIGENVAl_read();
+    <span class="keyword">end</span>
+<span class="comment">%--------  juge  --------</span>
+	<span class="keyword">if</span> ~strcmp(class(color),<span class="string">'double'</span>)
+        color = str2rgb(color);
+    <span class="keyword">end</span>
+<span class="comment">%--------  init  --------</span>
+    Nbands=size(EIGENCAR,1);
+    klist=klist_l;
+    xmin=klist_l(1);
+    xmax=klist_l(length(klist_l));
+    Xcut = [xmin,xmax];
+    ax.XLim = Xcut;
+    ax.YLim = Ecut;
+<span class="comment">%--------reference -------</span>
+<span class="comment">% reference line</span>
+    X=[xmin xmax];
+    Y=[Ecut(1) Ecut(2)];
+    line(X,[0 0],<span class="string">'LineWidth'</span>,0.1,<span class="string">'Color'</span>,[0. 0. 0.],<span class="string">'DisplayName'</span>,<span class="string">'fermi-level'</span>)
+    <span class="keyword">for</span> i=1:(length(kpoints_name)-2)
+        X=[kpoints_l(i+1) kpoints_l(i+1)];
+        line(X,Y,<span class="string">'LineWidth'</span>,0.1,<span class="string">'Color'</span>,[0 0. 0.],<span class="string">'DisplayName'</span>,<span class="string">'K-path'</span>);
+    <span class="keyword">end</span>
+<span class="comment">%--------plotwhole--------</span>
+    <span class="keyword">for</span> Ei=1:Nbands
+        plot(ax,klist,EIGENCAR(Ei,:),<span class="string">'LineWidth'</span>,1.0,<span class="string">'Color'</span>,color,<span class="string">'DisplayName'</span>,num2str(Ei));
+        <span class="comment">%hold on;</span>
+    <span class="keyword">end</span>
+<span class="comment">%-------- set label-------</span>
+    set(ax,<span class="string">'XTickLabel'</span>,<span class="string">''</span>)  ;
+    set(ax,<span class="string">'FontName'</span>,fontname,<span class="string">'FontSize'</span>,24,<span class="string">'LineWidth'</span>,1,<span class="keyword">...</span>
+    <span class="string">'XTick'</span>,kpoints_l,<span class="string">'XTickLabel'</span>,<span class="keyword">...</span>
+    kpoints_name);
+    ylabel(ax,<span class="string">'E(eV)'</span>,<span class="string">'FontName'</span>,fontname);
+<span class="comment">%--------  fbug  --------</span>
+    titlestring = cell2mat(titlestring);
+<span class="comment">%--------  title  -------</span>
+    title(ax,titlestring);
+<span class="comment">%--------  save  --------</span>
+    <span class="comment">%disp(class(titlestring));</span>
+
+    [fig,ax] = save_figure(fig,titlestring+<span class="string">".eps"</span>,ax);
+<span class="comment">%-------- return --------</span>
+<span class="keyword">end</span>
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2017b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% bandplot
+%
+% plotband 
+% 
+%
+% * Label: plot
+%
+%% Description of the Function:
+%%
+%% Usage: 
+%
+% * [fig,ax]=bandplot(EIGENCAR,Ecut,titlestring,color,klist_l,kpoints_l,kpoints_name,fontname,fig,ax)
+% * [fig,ax]=bandplot(EIGENCAR,Ecut,titlestring,color,klist_l,kpoints_l,kpoints_name,fontname)
+% * [fig,ax]=bandplot(EIGENCAR,Ecut,titlestring,color,klist_l,kpoints_l,kpoints_name)
+% * [fig,ax]=bandplot(EIGENCAR,Ecut,titlestring,color)
+% * [fig,ax]=bandplot(EIGENCAR,Ecut,titlestring)
+% * [fig,ax]=bandplot(EIGENCAR,Ecut)
+% * [fig,ax]=bandplot(EIGENCAR)
+%% Input:
+%  
+% # input1:
+% # input2:
+% # input3:
+%
+%% Output:
+%
+% # fig:
+% # ax:
+%
+%% example:
+% for vasp
+%   bandplot();
+% for a eigencar
+%   bandplot(EIGENCAR)
+% use Ecut
+%   bandplot(EIGENCAR,Ecut)
+%   
+%% Note: 
+%
+%  Take advantage of the scope of application of the function.
+%
+%% Change log
+%
+% * Document Date: 2020/12/03
+% * Creation Date: 2020/12/03
+% * Last updated : 2020/12/03
+%
+%% Copyright
+%
+% * parkman
+% * <parkman@buaa.edu.cn>
+%
+%% Source code : 
+%
+function [fig,ax]=bandplot(EIGENCAR,Ecut,titlestring,color,klist_l,kpoints_l,kpoints_name,fontname,fig,ax)
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  init  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+    import +vasplib_tool.*
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  narg  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+    if nargin < 9
+       [fig,ax] = creat_figure();
+    end
+    if nargin < 8
+        fontname="Helvetica";
+    end
+    if nargin < 7
+    end
+    if nargin < 6
+    end   
+    if nargin < 5
+        [~,klist_l,~,kpoints_l,kpoints_name]=kpathgen3D();
+        
+    end
+    if nargin < 4
+        color = [rand,rand,rand];
+    end
+    if nargin < 3
+        dirname = pwd;
+        dirname = strsplit(dirname,'/');
+        titlestring = dirname(length(dirname));
+        titlestring = strrep(titlestring,'_','-');
+    end 
+    if nargin < 2
+        Ecut=[-3,3];
+    end 
+    if nargin < 1
+        EIGENCAR=EIGENVAl_read();
+    end  
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  juge  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+	if ~strcmp(class(color),'double')
+        color = str2rgb(color);
+    end
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  init  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+    Nbands=size(EIGENCAR,1);
+    klist=klist_l;
+    xmin=klist_l(1);
+    xmax=klist_l(length(klist_l));
+    Xcut = [xmin,xmax];
+    ax.XLim = Xcut;
+    ax.YLim = Ecut;
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHreference REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+% reference line    
+    X=[xmin xmax];                                                
+    Y=[Ecut(1) Ecut(2)];
+    line(X,[0 0],'LineWidth',0.1,'Color',[0. 0. 0.],'DisplayName','fermi-level')
+    for i=1:(length(kpoints_name)-2)                                           
+        X=[kpoints_l(i+1) kpoints_l(i+1)];
+        line(X,Y,'LineWidth',0.1,'Color',[0 0. 0.],'DisplayName','K-path');
+    end
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHplotwholeREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+    for Ei=1:Nbands
+        plot(ax,klist,EIGENCAR(Ei,:),'LineWidth',1.0,'Color',color,'DisplayName',num2str(Ei));
+        %hold on;
+    end
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH set labelREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+    set(ax,'XTickLabel','')  ;
+    set(ax,'FontName',fontname,'FontSize',24,'LineWidth',1,...
+    'XTick',kpoints_l,'XTickLabel',...
+    kpoints_name);
+    ylabel(ax,'E(eV)','FontName',fontname);
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  fbug  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+    titlestring = cell2mat(titlestring);
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  title  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+    title(ax,titlestring);
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  save  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+    %disp(class(titlestring));
+    
+    [fig,ax] = save_figure(fig,titlestring+".eps",ax);
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH return REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+end
+
+    
+
+
+##### SOURCE END #####
+--></body></html>

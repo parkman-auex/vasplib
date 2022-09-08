@@ -1,0 +1,34 @@
+#!/bin/bash
+
+cd ..
+WORKSPACE=`pwd`
+cd tools
+C_database_cif=${WORKSPACE}'/C_data'
+C_database_poscar=${WORKSPACE}'/C_poscar_database'
+workshop=${WORKSPACE}'/workshop'
+echo WORKSPACE $WORKSPACE
+echo C_database_cif $C_database_cif
+echo C_database_poscar $C_database_poscar
+echo workshop $workshop
+
+
+cif2struct_run='/opt/wien2k/cif2struct'
+struct2poscar_run='/opt/wien2k/struct2poscar'
+wien2k_x='/opt/wien2k/x'
+cd ${C_database_cif}
+
+id=1
+
+for i in *
+do
+echo $i
+cp $i $workshop/workshop.cif
+cd $workshop
+$cif2struct_run workshop.cif
+#ls
+$wien2k_x struct2poscar   
+cp workshop.poscar $C_database_poscar/POSCAR.$id
+id=$((id+1))
+cd ${C_database_cif}
+done
+

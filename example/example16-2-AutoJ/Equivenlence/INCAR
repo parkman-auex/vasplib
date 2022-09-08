@@ -1,0 +1,33 @@
+SYSTEM = NaTmO2-soc_ncol-U=3-AFM-gen3gen31-upupdown_z
+ISTART = 1
+ICHARG = 11
+ISPIN  = 1
+LSORBIT  = .TRUE.
+LNONCOLLINEAR  = .TRUE.
+
+LREAL  = .FALSE.          (Projection operators: automatic)
+ENCUT  =  500          (Cut-off energy for plane wave basis set, in eV,set it manually)
+PREC   =  Normal       (Precision level,PREC = Low | Normal(ENOUGH) | Single | Accurate )
+LWAVE  = .TRUE.        (Write WAVECAR or not)
+LCHARG = .TRUE.        (Write CHGCAR or not)
+ADDGRID= .TRUE.        (Increase grid; helps GGA convergence)
+KSPACING = 0.5
+NCORE  = 4
+
+ISMEAR =  0            (gaussian smearing method)
+SIGMA  =  0.05         (please check the width of the smearing)
+LORBIT =  11           (PAW radii for projected DOS)
+NELM   =  500           (Max electronic SCF steps) 
+EDIFF  =  1E-06        (SCF energy convergence; in eV)
+GGA_COMPAT = .FALSE.   (Apply spherical cutoff on gradient field)
+VOSKOWN    =  1        (Enhances the magnetic moments and the magnetic energies)
+
+LDAU   = .TRUE.        (Activate DFT+U)
+LDATYPE=  2            (Dudarev; only U-J matters)
+LDAUL  =  3 -1 -1            (Orbitals for each species)
+LDAUU  =  3 0 0            (U for each species)
+LDAUJ  =  0 0 0            (J for each species)
+LMAXMIX=  6            (Mixing cut-off; 4-d, 6-f)
+
+MAGMOM = 0 0 7 0 0 -7 0 0 7 27*0
+#NBANDS = 

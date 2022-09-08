@@ -1,0 +1,258 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>To Get EIGENCAR from file EIGENVAL</title><meta name="generator" content="MATLAB 9.3"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2020-12-03"><meta name="DC.source" content="EIGENVAl_read.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>To Get EIGENCAR from file EIGENVAL</h1><!--introduction--><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Description of the Function:</a></li><li><a href="#2">Usage:</a></li><li><a href="#3">Input:</a></li><li><a href="#4">Output:</a></li><li><a href="#5">example:</a></li><li><a href="#6">for VASP_spinless/SOC:</a></li><li><a href="#7">for VASP_spinful:</a></li><li><a href="#8">for vaspkit:</a></li><li><a href="#9">Note:</a></li><li><a href="#10">Change log</a></li><li><a href="#11">Copyright</a></li><li><a href="#12">Source code :</a></li></ul></div><h2 id="1">Description of the Function:</h2><h2 id="2">Usage:</h2><div><ul><li>[EIGENCAR,EIGENCAR2,Efermi]=EIGENVAl_read(mode,EIGENVAL,Efermi)</li><li>[EIGENCAR,EIGENCAR2,Efermi]=EIGENVAl_read(mode,EIGENVAL)</li><li>[EIGENCAR,EIGENCAR2,Efermi]=EIGENVAl_read(mode)</li></ul></div><h2 id="3">Input:</h2><div><ol><li>Efermi: for handy</li><li>EIGENVAL: filename</li><li>mode: vasp qe vaspkit</li></ol></div><h2 id="4">Output:</h2><div><ol><li>EIGENCAR :</li><li>EIGENCAR2: for spinful</li><li>Efermi :</li></ol></div><h2 id="5">example:</h2><h2 id="6">for VASP_spinless/SOC:</h2><pre class="language-matlab">EIGENCAR=EIGENVAl_read()
+</pre><h2 id="7">for VASP_spinful:</h2><pre class="language-matlab">[EIGENCAR,EIGENCAR] = EIGENVAl_read()
+</pre><h2 id="8">for vaspkit:</h2><pre class="language-matlab">EIGENCAR = EIGENVAl_read(<span class="string">'vaspkit'</span>,<span class="string">'BAND.dat'</span>,0)
+</pre><h2 id="9">Note:</h2><pre>Take advantage of the scope of application of the function.</pre><h2 id="10">Change log</h2><div><ul><li>Document Date: 2020/12/03</li><li>Creation Date: 2020/12/03</li><li>Last updated : 2020/12/03</li></ul></div><h2 id="11">Copyright</h2><div><ul><li>parkman</li><li><a href="parkman@buaa.edu.cn">parkman@buaa.edu.cn</a></li></ul></div><h2 id="12">Source code :</h2><pre class="codeinput"><span class="keyword">function</span> [EIGENCAR,EIGENCAR2,Efermi]=EIGENVAl_read(mode,EIGENVAL,Efermi)
+    <span class="comment">%--------  init  --------</span>
+    <span class="comment">%I = 1i;</span>
+    <span class="comment">%--------  narg  --------</span>
+    <span class="keyword">if</span> nargin &lt;1
+        mode = <span class="string">'vasp'</span>;
+    <span class="keyword">end</span>
+    <span class="keyword">if</span> nargin &lt; 2
+        <span class="keyword">if</span> strcmp(mode,<span class="string">'vasp'</span>)
+            EIGENVAL = <span class="string">'EIGENVAL'</span>;
+        <span class="keyword">elseif</span> strcmp(mode,<span class="string">'qe'</span>)
+            EIGENVAL = <span class="string">'BAND.dat'</span>;
+        <span class="keyword">else</span>
+            EIGENVAL = <span class="string">'BAND.dat'</span>;
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+    <span class="keyword">if</span> nargin &lt;3
+        <span class="keyword">if</span> strcmp(mode,<span class="string">'vaspkit'</span>)
+            Efermi = 0;
+        <span class="keyword">elseif</span> exist(<span class="string">'Efermi'</span>,<span class="string">'file'</span>)
+            Efermi = textscan(<span class="string">'Efermi'</span>);
+        <span class="keyword">elseif</span> exist(<span class="string">'DOSCAR'</span>,<span class="string">'file'</span>) &amp; strcmp(mode,<span class="string">'vasp'</span>)
+            Efermi = GetFermi(<span class="string">'vasp'</span>);
+        <span class="keyword">elseif</span> exist(<span class="string">'scf.out'</span>,<span class="string">'file'</span>) &amp; strcmp(mode,<span class="string">'qe'</span>)
+            Efermi = GetFermi(<span class="string">'qe'</span>);
+        <span class="keyword">else</span>
+            Efermi = 0;
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+    <span class="comment">%--------  chek  --------</span>
+    <span class="keyword">if</span> strcmp(mode,<span class="string">'vasp'</span>)
+        <span class="comment">% read EIGENVAL</span>
+        data=textread(EIGENVAL,<span class="string">''</span>,<span class="string">'headerlines'</span>,5);
+        NBands=data(1,3);
+        Nelectrons=data(1,1);
+        Ktotal=data(1,2);
+        <span class="comment">% setup EIGENCAR</span>
+        data=textread(EIGENVAL,<span class="string">''</span>,<span class="string">'headerlines'</span>,8);
+        <span class="keyword">for</span> i=1:1:NBands
+            <span class="keyword">for</span> j=1:1:Ktotal
+                Pup(j,: )=[j,data((NBands+1)*(j-1)+i,2)-Efermi];         <span class="comment">%</span>
+                Pdown(j,: )=[j,data((NBands+1)*(j-1)+i,3)-Efermi];         <span class="comment">%</span>
+            <span class="keyword">end</span>
+            EIGENCAR(i,:)=Pup(:,2)';
+            EIGENCAR2(i,:)=Pdown(:,2)';
+        <span class="keyword">end</span>
+    <span class="keyword">elseif</span> strcmp(mode,<span class="string">'qe'</span>)
+        import <span class="string">linux_matlab.*</span>;
+        [~,num_list] = grep(EIGENVAL,<span class="string">'    0.0000'</span>,<span class="string">'silence'</span>);
+        NBands = length(num_list)  ;
+        data = load(EIGENVAL)    ;
+        [tot_row,~] = size(data );
+        Ktotal = tot_row/NBands  ;
+        EIGENCAR = reshape(data(:,2),Ktotal,NBands);
+        EIGENCAR = EIGENCAR.' - Efermi*ones(NBands,Ktotal);
+    <span class="keyword">elseif</span> strcmp(mode,<span class="string">'vaspkit'</span>)
+        import <span class="string">linux_matlab.*</span>;
+        [~,num_list] = grep(EIGENVAL,<span class="string">'    0.0000'</span>,<span class="string">'silence'</span>);
+        NBands = length(num_list)  ;
+        data = load(EIGENVAL)    ;
+        [tot_row,~] = size(data );
+        Ktotal = tot_row/NBands  ;
+        EIGENCAR = reshape(data(:,2),Ktotal,NBands);
+        EIGENCAR = EIGENCAR.' - Efermi*ones(NBands,Ktotal);
+    <span class="keyword">end</span>
+
+<span class="keyword">end</span>
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2017b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% To Get EIGENCAR from file EIGENVAL
+%
+%
+%% Description of the Function:
+%
+%% Usage: 
+%
+% * [EIGENCAR,EIGENCAR2,Efermi]=EIGENVAl_read(mode,EIGENVAL,Efermi)
+% * [EIGENCAR,EIGENCAR2,Efermi]=EIGENVAl_read(mode,EIGENVAL)
+% *  [EIGENCAR,EIGENCAR2,Efermi]=EIGENVAl_read(mode)
+%
+%% Input:
+%  
+% # Efermi: for handy
+% # EIGENVAL: filename
+% # mode: vasp qe vaspkit
+%
+%% Output:
+%
+% # EIGENCAR :
+% # EIGENCAR2: for spinful
+% # Efermi :
+%
+%% example:
+%%% for VASP_spinless/SOC:
+%   EIGENCAR=EIGENVAl_read()
+%%% for VASP_spinful: 
+%   [EIGENCAR,EIGENCAR] = EIGENVAl_read()
+%%% for vaspkit:
+%   EIGENCAR = EIGENVAl_read('vaspkit','BAND.dat',0)
+%   
+%% Note: 
+%
+%  Take advantage of the scope of application of the function.
+%
+%% Change log
+%
+% * Document Date: 2020/12/03
+% * Creation Date: 2020/12/03
+% * Last updated : 2020/12/03
+%
+%% Copyright
+%
+% * parkman
+% * <parkman@buaa.edu.cn>
+%
+%% Source code : 
+%
+function [EIGENCAR,EIGENCAR2,Efermi]=EIGENVAl_read(mode,EIGENVAL,Efermi)
+    %REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  init  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+    %I = 1i;
+    %REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  narg  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+    if nargin <1
+        mode = 'vasp';
+    end
+    if nargin < 2
+        if strcmp(mode,'vasp')
+            EIGENVAL = 'EIGENVAL';
+        elseif strcmp(mode,'qe')
+            EIGENVAL = 'BAND.dat';
+        else
+            EIGENVAL = 'BAND.dat';
+        end
+    end
+    if nargin <3
+        if strcmp(mode,'vaspkit')
+            Efermi = 0;
+        elseif exist('Efermi','file')
+            Efermi = textscan('Efermi');
+        elseif exist('DOSCAR','file') & strcmp(mode,'vasp')
+            Efermi = GetFermi('vasp');
+        elseif exist('scf.out','file') & strcmp(mode,'qe')
+            Efermi = GetFermi('qe');
+        else
+            Efermi = 0;
+        end
+    end
+    %REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  chek  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+    if strcmp(mode,'vasp')
+        % read EIGENVAL
+        data=textread(EIGENVAL,'','headerlines',5);
+        NBands=data(1,3);
+        Nelectrons=data(1,1);
+        Ktotal=data(1,2);
+        % setup EIGENCAR
+        data=textread(EIGENVAL,'','headerlines',8);
+        for i=1:1:NBands
+            for j=1:1:Ktotal
+                Pup(j,: )=[j,data((NBands+1)*(j-1)+i,2)-Efermi];         %
+                Pdown(j,: )=[j,data((NBands+1)*(j-1)+i,3)-Efermi];         %
+            end
+            EIGENCAR(i,:)=Pup(:,2)';
+            EIGENCAR2(i,:)=Pdown(:,2)';
+        end
+    elseif strcmp(mode,'qe')
+        import linux_matlab.*;
+        [~,num_list] = grep(EIGENVAL,'    0.0000','silence');
+        NBands = length(num_list)  ;
+        data = load(EIGENVAL)    ;
+        [tot_row,~] = size(data );
+        Ktotal = tot_row/NBands  ;
+        EIGENCAR = reshape(data(:,2),Ktotal,NBands);
+        EIGENCAR = EIGENCAR.' - Efermi*ones(NBands,Ktotal);
+    elseif strcmp(mode,'vaspkit')
+        import linux_matlab.*;
+        [~,num_list] = grep(EIGENVAL,'    0.0000','silence');
+        NBands = length(num_list)  ;
+        data = load(EIGENVAL)    ;
+        [tot_row,~] = size(data );
+        Ktotal = tot_row/NBands  ;
+        EIGENCAR = reshape(data(:,2),Ktotal,NBands);
+        EIGENCAR = EIGENCAR.' - Efermi*ones(NBands,Ktotal);
+    end
+
+end
+
+##### SOURCE END #####
+--></body></html>

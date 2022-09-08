@@ -1,0 +1,16 @@
+#!/bin/bash
+workdir=`pwd`
+vasprun=home/soft/vasp.5.4.4/bin/vasp_ncl
+mpirun=/home/soft/intel_studio/compilers_and_libraries_2018.3.222/linux/mpi/intel64/bin/mpirun
+vasp_dir=$1
+system_name=`echo $vasp_dir|awk -F '/' '{print $NF}'`
+cd $vasp_dir
+pwd
+mpirun -np 8 vasp_ncl >log 2>err &
+wait
+cd ../../soc_ncol/$system_name
+pwd
+cp ../../nosoc_ncol/$system_name/CHGCAR .
+mpirun -np 8 vasp_ncl >log 2>err &
+wait
+echo done

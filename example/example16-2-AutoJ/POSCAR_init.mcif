@@ -1,0 +1,61 @@
+# CIF Gen by MATLAB
+#email: parkman@buaa.edu.cn
+## Date: 06-Mar-2021
+
+# POSCAR_init.mcif
+
+# --- Displacement Data ---
+
+data_park814.7237
+_audit_creation_date    06-Mar-2021
+_audit_creation_method   vasplib
+###non-st# _data_type "displacement"
+
+#####################################################
+# Please be warned that this structure is actually  #
+# *NOT* magnetic but is represented as such to be   #
+# able to visualize the symmetry modes.             #
+#####################################################
+
+_space_group.magn_number_BNS       "?"
+_space_group.magn_name_BNS         "?"
+_cell_length_a            5.828351
+_cell_length_b            5.828352
+_cell_length_c            5.889262
+_cell_angle_alpha        80.506082
+_cell_angle_beta         70.738157
+_cell_angle_gamma        59.999996
+
+loop_
+_space_group_symop.magn_id
+_space_group_symop.magn_operation_xyz
+1   x,y,z,+1
+
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+ Tm1  Tm 0.00000 0.00000 0.00000 1.0000
+ Tm2  Tm 0.33333 0.33333 0.00000 1.0000
+ Tm3  Tm 0.66667 0.66667 0.00000 1.0000
+ Na1  Na 0.83333 0.33333 0.50000 1.0000
+ Na2  Na 0.16667 0.66667 0.50000 1.0000
+ Na3  Na 0.50000 0.00000 0.50000 1.0000
+  O1   O 0.06954 0.33333 0.79136 1.0000
+  O2   O 0.40288 0.66667 0.79136 1.0000
+  O3   O 0.73621 0.00000 0.79136 1.0000
+  O4   O 0.26379 0.00000 0.20864 1.0000
+  O5   O 0.59712 0.33333 0.20864 1.0000
+  O6   O 0.93046 0.66667 0.20864 1.0000
+
+loop_
+_atom_site_moment_label
+_atom_site_moment_crystalaxis_x
+_atom_site_moment_crystalaxis_y
+_atom_site_moment_crystalaxis_z
+ Tm1 -0.02331 0.01749 1.10659
+ Tm2 -0.02331 0.01749 1.10659
+ Tm3 0.64986 0.70931 -0.53474

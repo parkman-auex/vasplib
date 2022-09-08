@@ -1,0 +1,26 @@
+(1) SYSTEM= Materials
+   ISTART = 1
+   ISPIN=1
+#   MAGMOM =1
+#   ICHARG  = 2
+#   NUPDOWN=1
+
+(2) Electronic Relaxation
+   ISMEAR =  -5
+   SIGMA  =  0.05
+   NELM   =   40
+   EDIFF  =  1E-05
+   LORBIT=10
+   NEDOS=2001
+
+(4) DFT-D2
+   IVDW=1
+
+(5) Global parameter
+   ENCUT=520
+   LREAL=.FALSE.
+   PREC=high
+   LWAVE= T
+   LCHARG = F
+
+NCORE = 4

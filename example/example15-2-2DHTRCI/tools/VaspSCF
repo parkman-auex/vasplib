@@ -1,0 +1,134 @@
+#!/bin/bash
+
+cd ..
+WORKSPACE=`pwd`
+cd tools
+#
+C_database_optimize=${WORKSPACE}'/C_optimize_database'
+# has inversion
+C_database_symmetry=${WORKSPACE}'/C_symmetry_database'
+# double check is insulator
+C_database_insulator=${WORKSPACE}'/C_insulator_database/'
+# 2nd check is metal BandGap <= 0
+C_database_semimetal=${WORKSPACE}'/C_semimetal_database/'
+# 1st check BandGap <0
+C_database_metal=${WORKSPACE}'/C_metal_database/'
+# 1st check BandGap >= 0
+C_database_nonmetal=${WORKSPACE}'/C_nonmetal_database/'
+
+workshop=${WORKSPACE}'/C_vaspscf_database'
+INCAR_dir=${WORKSPACE}'/INCAR_collection'
+vasp_run='/opt/vasp.5.4.4/bin/vasp_std_w2.1'
+#Accuracy=0.05
+NP=32
+#workshop='${WORKSPACE}/workshop'
+echo 'SCF Caculation Start:' `date`
+# begin check
+cd $C_database_optimize
+run_id=1
+for i in *
+do
+echo `pwd`"/"$i"/scf"
+echo '*****************************************************************'
+echo `date`
+echo $i
+echo $run_id th vaspSCF in this run
+# load information
+SG=`echo $i|awk -F '-' '{print $1}'`
+Sym_num=`echo $i|awk -F '-' '{print $2}'`
+Num_atom=`echo $i|awk -F '-' '{print $3}'`
+isInversion=`echo $i|awk -F '-' '{print $4}'`
+isC2z=`echo $i|awk -F '-' '{print $5}'`
+ID=`echo $i|awk -F '-' '{print $6}'`
+echo 'ID:' $ID
+echo 'SG: ' $SG
+echo 'isInversion' $isInversion
+echo 'isC2z' $isC2z
+echo 'Atom_num' $Num_atom
+cd $workshop
+# first check 
+mkdir -p $i
+mkdir -p $i/scf
+cd $i/scf
+echo 'vasp preparing ...'
+cp $C_database_symmetry/$i POSCAR
+cp $INCAR_dir/INCAR.scf INCAR
+#
+sed -i "s/filename/${i}/g" INCAR
+#
+(echo 103;)|vaspkit > potcar_gen.log
+# (echo 102;echo 2;echo $Accuracy ;)|vaspkit > kpoints_gen.log
+rm -f KPOINTS
+# 
+echo 'vasp runing...'
+mpirun -np $NP $vasp_run >log 2>err &
+wait
+RUNstep=`tail -n 2 OSZICAR |head -n 1|awk -F ':' '{print $NF}'|awk -F ' ' '{print $1}'`
+echo 'vasp scf complete in ' $RUNstep 'steps'
+#
+#echo 'insulator or not?'
+#
+(echo 911;)|vaspkit > vaspkit.log
+BAND_gap=`grep 'Band Gap (eV):' vaspkit.log|awk -F ':' '{print $NF}'|awk -F ' ' '{print $NF}'`
+echo 'BAND_gap:' $BAND_gap
+HOMO=`grep 'HOMO' vaspkit.log |awk -F ':' '{print $NF}'|awk -F ' ' '{print $1}'`
+echo 'HOMO:' $HOMO
+
+echo $HOMO >HOMO
+echo $BAND_gap >BAND_gap
+
+InsulatorOrnot=`echo ${BAND_gap}" >=0" | bc`
+echo $InsulatorOrnot >InsulatorOrnot
+# check 1st
+if [ $InsulatorOrnot -eq 1 ]
+then 
+echo InsulatorOrnot?: $InsulatorOrnot
+# recheck
+cd $workshop
+cp -r $i $C_database_nonmetal
+cd $C_database_nonmetal/$i/scf
+cp $INCAR_dir/INCAR.scf.refined INCAR
+sed -i "s/filename/${i}/g" INCAR
+rm -f KPOINTS
+# 
+echo 'vasp refined runing...'
+mpirun -np $NP $vasp_run >log 2>err &
+wait
+RUNstep=`tail -n 2 OSZICAR |head -n 1|awk -F ':' '{print $NF}'|awk -F ' ' '{print $1}'`
+echo 'vasp refined scf complete' $RUNstep 'steps'
+# check 2nd
+(echo 911;)|vaspkit > vaspkit.log
+BAND_gap=`grep 'Band Gap (eV):' vaspkit.log|awk -F ':' '{print $NF}'|awk -F ' ' '{print $NF}'`
+echo 'BAND_gap:' $BAND_gap
+HOMO=`grep 'HOMO' vaspkit.log |awk -F ':' '{print $NF}'|awk -F ' ' '{print $1}'`
+echo 'HOMO:' $HOMO
+echo $HOMO >HOMO
+echo $BAND_gap >BAND_gap
+InsulatorOrnot=`echo ${BAND_gap}" >0" | bc`
+echo $InsulatorOrnot >InsulatorOrnot
+
+if [ $InsulatorOrnot -eq 1 ]
+then
+echo InsulatorOrnot Still?: $InsulatorOrnot
+cd $workshop
+cp -r $i $C_database_insulator
+else
+echo InsulatorOrnot Still?: $((InsulatorOrnot+2))
+cd $workshop
+cp -r $i $C_database_semimetal
+fi
+# if metal
+else
+echo InsulatorOrnot?: $InsulatorOrnot
+cd $workshop
+cp -r $i $C_database_metal
+fi
+
+
+echo '-----------------------------------------------------'
+echo '-----------------------------------------------------'
+cd $workshop
+run_id=$((run_id+1))
+done
+echo 'SCF Caculation Finished:' `date`
+

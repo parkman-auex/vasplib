@@ -1,0 +1,63 @@
+#!/bin/bash
+
+cd ..
+WORKSPACE=`pwd`
+cd tools
+#
+database_struct=${WORKSPACE}'/POSCAR_collection'
+#
+database_optimize=${WORKSPACE}'/POSCAR_optimize'
+
+workshop=${WORKSPACE}'/Struct_run_database'
+INCAR_dir=${WORKSPACE}'/INCAR_collection'
+vasp_run='/opt/vasp.5.4.4/bin/vasp_std_w2.1'
+#Accuracy=0.05
+NP=32
+#workshop='${WORKSPACE}/workshop'
+echo 'STRUCT Caculation Start:' `date`
+# begin check
+cd $database_struct
+run_id=1
+for i in *
+do
+cd $workshop
+echo `pwd`"/"$i"/struct"
+echo '*****************************************************************'
+echo `date`
+echo $i
+echo $run_id th vaspSTRUCT in this run
+# load information
+ID=`echo $i`
+echo 'ID:' $ID
+
+cd $workshop
+# first check 
+mkdir -p $i
+mkdir -p $i/struct
+cd $i/struct
+echo 'vasp struct preparing ...'
+cp $database_struct/$i POSCAR
+cp $INCAR_dir/INCAR.struct INCAR
+#
+sed -i "s/filename/${i}/g" INCAR
+#
+(echo 103;)|vaspkit > potcar_gen.log
+# (echo 102;echo 2;echo $Accuracy ;)|vaspkit > kpoints_gen.log
+rm -f KPOINTS
+# 
+echo 'vasp struct runing...'
+mpirun -np $NP $vasp_run >log 2>err &
+wait
+RUNstep=`tail -n 2 OSZICAR |head -n 1|awk -F ':' '{print $NF}'|awk -F ' ' '{print $1}'`
+echo 'vasp struct complete in ' $RUNstep 'steps'
+#
+#echo 'insulator or not?'
+#
+cp CONTCAR $database_optimize/$i
+echo '-----------------------------------------------------'
+echo '-----------------------------------------------------'
+cd $workshop
+run_id=$((run_id+1))
+done
+
+echo 'STRUCT Caculation Finished:' `date`

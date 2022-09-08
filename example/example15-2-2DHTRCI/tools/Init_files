@@ -1,0 +1,8 @@
+#!/bin/bash
+
+cd ..
+WORKSPACE=`pwd`
+rm -rf C_operation_database C_insulator_database C_semimetal_database C_nonmetal_database C_poscar_database  C_realChern_database  C_symmetry_database  C_vaspscf_database C_struct_database C_optimize_database workshop 
+
+mkdir -p C_operation_database C_insulator_database C_semimetal_database C_nonmetal_database  C_poscar_database  C_realChern_database  C_symmetry_database  C_vaspscf_database C_struct_database C_optimize_database workshop
+

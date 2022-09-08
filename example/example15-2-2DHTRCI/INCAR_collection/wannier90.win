@@ -1,0 +1,7 @@
+num_wann = Num_Orb
+num_bands = Num_Orb
+spinors : false
+num_iter 0
+shell_list 1
+skip_B1_tests : true
+exclude_bands Num_orb_plus-NBANDSNUM

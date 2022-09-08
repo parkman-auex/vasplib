@@ -1,0 +1,30 @@
+# CIF Gen by MATLAB
+#email: parkman@buaa.edu.cn
+## Date: 09-Mar-2021
+
+# POSCAR.cif
+
+_cell_length_a            4.298629
+_cell_length_b            4.298629
+_cell_length_c            7.575157
+_cell_angle_alpha        90.000000
+_cell_angle_beta         73.516930
+_cell_angle_gamma       120.000000
+
+loop_
+_space_group_symop.magn_id
+_space_group_symop.magn_operation_xyz
+1   x,y,z,+1
+
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+ Cu  Cu 0.75403 0.87702 0.36895 1.0000
+ Cu  Cu 0.24597 0.12298 0.63104 1.0000
+  I   I 0.00000 0.00000 0.00000 1.0000
+  I   I 0.00000 0.50000 0.50000 1.0000
+

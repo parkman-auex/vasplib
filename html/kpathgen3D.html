@@ -1,0 +1,233 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>To generate klist for caculation and plot</title><meta name="generator" content="MATLAB 9.3"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2020-12-03"><meta name="DC.source" content="kpathgen3D.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>To generate klist for caculation and plot</h1><!--introduction--><p>creat kpath from KPOINTS or otherfile</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Description of the Function:</a></li><li><a href="#3">Usage:</a></li><li><a href="#4">Input:</a></li><li><a href="#5">Output:</a></li><li><a href="#6">example:</a></li><li><a href="#7">Note:</a></li><li><a href="#8">Change log</a></li><li><a href="#9">Copyright</a></li><li><a href="#10">Source code :</a></li></ul></div><h2 id="1">Description of the Function:</h2><h2 id="3">Usage:</h2><div><ul><li>[klist_r,klist_l,klist_s,kpoints_l,kpoints_name]=kpathgen3D(Rm,kpoints,nodes,kpoints_name)</li><li>[klist_r,klist_l,klist_s,kpoints_l,kpoints_name]=kpathgen3D(Rm,kpoints,nodes)</li><li>[klist_r,klist_l,klist_s,kpoints_l,kpoints_name]=kpathgen3D(Rm,kpoints)</li><li>[klist_r,klist_l,klist_s,kpoints_l,kpoints_name]=kpathgen3D(Rm)</li></ul></div><h2 id="4">Input:</h2><div><ol><li>input1:</li><li>input2:</li><li>kpoints:</li></ol></div><pre class="codeinput">              <span class="comment">%kpoints=[ k1x k1y k1z;...</span>
+              <span class="comment">%          k2x k2y k2z;...</span>
+              <span class="comment">%          k2x k2y k2z;...</span>
+              <span class="comment">%          k3x k3y k3z;...</span>
+              <span class="comment">%                .</span>
+              <span class="comment">%                .</span>
+              <span class="comment">%                .</span>
+              <span class="comment">%          kn-1x kn-1y kn-1z;]</span>
+              <span class="comment">%          kn-1x kn-1y kn-1z;]</span>
+              <span class="comment">%          knx kny knz;]</span>
+<span class="comment">% # nodes: (nodes along each k-path)</span>
+<span class="comment">% # kpoints_name: [K1;K2;K3]</span>
+<span class="comment">%</span>
+</pre><h2 id="5">Output:</h2><div><ol><li>klist_l      (for plot : the x-&gt; will be klist_l for each band ,one-dimension)</li><li>kpoints_l    (for plot : To gen high symmetry points along k-path,one-dimension)</li><li>kpoints_name (for plot : To gen high symmetry points name along k-path,one-dimension)</li><li>klist_r   (for caculation: cati real)</li><li>klist_s   (for other function you need )</li></ol></div><h2 id="6">example:</h2><pre class="language-matlab">commmad
+</pre><pre class="language-matlab">result
+</pre><h2 id="7">Note:</h2><p>if [klist_r,klist_l,klist_s,kpoints_l,kpoints_name]=kpathgen3D()          the kpoints , nodes ,kpoints_name will be given by KPOINTS POSCAR file</p><p>if [klist_r,klist_l,klist_s,kpoints_l,kpoints_name]=kpathgen3D(Rm)          the kpoints , nodes ,kpoints_name will be given by KPOINTS file note : ['Line-Mode' ],['Reciprocal' ]}</p><h2 id="8">Change log</h2><div><ul><li>Document Date: 2020/12/03</li><li>Creation Date: 2020/12/03</li><li>Last updated : 2020/12/03</li></ul></div><h2 id="9">Copyright</h2><div><ul><li>parkman</li><li><a href="parkman@buaa.edu.cn">parkman@buaa.edu.cn</a></li></ul></div><h2 id="10">Source code :</h2><pre class="codeinput"><span class="keyword">function</span> [klist_r,klist_l,klist_s,kpoints_l,kpoints_name]=kpathgen3D(Rm,kpoints,nodes,kpoints_name)
+<span class="comment">%--------  narg  --------</span>
+    <span class="keyword">if</span> nargin &lt; 1
+        POSCAR_read;
+    <span class="keyword">end</span>
+    <span class="keyword">if</span> nargin &lt;2
+        [kpoints,nodes,kpoints_name] = KPOINTS_read();
+    <span class="keyword">end</span>
+    <span class="comment">%--------  init  --------</span>
+    Gk  = (eye(3)*2*pi/Rm)' ;
+    n = length(kpoints)/2;
+    <span class="comment">%--------  main  --------</span>
+    <span class="comment">%klist_symbolic</span>
+    klist_s=[];
+    <span class="keyword">for</span> i = 1:n
+        klisttempX = linspace(kpoints(2*i-1,1),kpoints(2*i,1),nodes);
+        klisttempY = linspace(kpoints(2*i-1,2),kpoints(2*i,2),nodes);
+        klisttempZ = linspace(kpoints(2*i-1,3),kpoints(2*i,3),nodes);
+        klist_s   = [klist_s ;klisttempX' klisttempY' klisttempZ'];
+    <span class="keyword">end</span>
+    <span class="comment">%klist_liner &amp; kpoints_liner</span>
+    kpoints_l=[0];
+    <span class="keyword">for</span> i = 1:n
+        lenghth = norm((kpoints(2*i,:)-kpoints(2*i-1,:))*Gk);
+        temp = kpoints_l(i)+lenghth;
+        kpoints_l = [kpoints_l;temp];
+    <span class="keyword">end</span>
+    klist_l = [];
+    <span class="keyword">for</span> i = 1:n
+        klisttemp = linspace(kpoints_l(i),kpoints_l(i+1),nodes);
+        klist_l = [klist_l klisttemp];
+    <span class="keyword">end</span>
+    <span class="comment">%klist_real for caculation</span>
+    klist_r=klist_s*Gk;
+    <span class="comment">%high symmetry points store</span>
+
+<span class="keyword">end</span>
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2017b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% To generate klist for caculation and plot
+%
+% creat kpath from KPOINTS or otherfile 
+%
+%% Description of the Function:
+%%
+%% Usage: 
+%
+% * [klist_r,klist_l,klist_s,kpoints_l,kpoints_name]=kpathgen3D(Rm,kpoints,nodes,kpoints_name)
+% * [klist_r,klist_l,klist_s,kpoints_l,kpoints_name]=kpathgen3D(Rm,kpoints,nodes)
+% * [klist_r,klist_l,klist_s,kpoints_l,kpoints_name]=kpathgen3D(Rm,kpoints)
+% * [klist_r,klist_l,klist_s,kpoints_l,kpoints_name]=kpathgen3D(Rm)
+%
+%% Input:
+%  
+% # input1: 
+% # input2:
+% # kpoints:
+              %kpoints=[ k1x k1y k1z;...
+              %          k2x k2y k2z;...
+              %          k2x k2y k2z;...
+              %          k3x k3y k3z;...
+              %                .
+              %                .
+              %                .
+              %          kn-1x kn-1y kn-1z;]
+              %          kn-1x kn-1y kn-1z;]              
+              %          knx kny knz;]
+% # nodes: (nodes along each k-path)
+% # kpoints_name: [K1;K2;K3]
+%
+%% Output:
+%
+% # klist_l      (for plot : the x-> will be klist_l for each band ,one-dimension)
+% # kpoints_l    (for plot : To gen high symmetry points along k-path,one-dimension)
+% # kpoints_name (for plot : To gen high symmetry points name along k-path,one-dimension)
+% # klist_r   (for caculation: cati real)
+% # klist_s   (for other function you need )       
+%          
+%% example:
+%   commmad
+% 
+% 
+%   result
+%   
+%% Note: 
+% if [klist_r,klist_l,klist_s,kpoints_l,kpoints_name]=kpathgen3D() 
+%          the kpoints , nodes ,kpoints_name will be given by KPOINTS POSCAR file
+%
+% if [klist_r,klist_l,klist_s,kpoints_l,kpoints_name]=kpathgen3D(Rm) 
+%          the kpoints , nodes ,kpoints_name will be given by KPOINTS file
+% note : ['Line-Mode' ],['Reciprocal' ]}
+%
+%% Change log
+%
+% * Document Date: 2020/12/03
+% * Creation Date: 2020/12/03
+% * Last updated : 2020/12/03
+%
+%% Copyright
+%
+% * parkman
+% * <parkman@buaa.edu.cn>
+%
+%% Source code : 
+%
+
+function [klist_r,klist_l,klist_s,kpoints_l,kpoints_name]=kpathgen3D(Rm,kpoints,nodes,kpoints_name)   
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  narg  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+    if nargin < 1
+        POSCAR_read;
+    end
+    if nargin <2
+        [kpoints,nodes,kpoints_name] = KPOINTS_read();
+    end
+    %REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  init  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+    Gk  = (eye(3)*2*pi/Rm)' ;
+    n = length(kpoints)/2;
+    %REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  main  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+    %klist_symbolic
+    klist_s=[];
+    for i = 1:n
+        klisttempX = linspace(kpoints(2*i-1,1),kpoints(2*i,1),nodes);
+        klisttempY = linspace(kpoints(2*i-1,2),kpoints(2*i,2),nodes);
+        klisttempZ = linspace(kpoints(2*i-1,3),kpoints(2*i,3),nodes);
+        klist_s   = [klist_s ;klisttempX' klisttempY' klisttempZ'];
+    end
+    %klist_liner & kpoints_liner
+    kpoints_l=[0];
+    for i = 1:n
+        lenghth = norm((kpoints(2*i,:)-kpoints(2*i-1,:))*Gk);
+        temp = kpoints_l(i)+lenghth;
+        kpoints_l = [kpoints_l;temp];
+    end
+    klist_l = [];
+    for i = 1:n
+        klisttemp = linspace(kpoints_l(i),kpoints_l(i+1),nodes);
+        klist_l = [klist_l klisttemp];
+    end
+    %klist_real for caculation
+    klist_r=klist_s*Gk;
+    %high symmetry points store
+    
+end
+
+
+
+
+
+##### SOURCE END #####
+--></body></html>

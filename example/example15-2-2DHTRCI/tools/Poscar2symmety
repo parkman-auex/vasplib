@@ -1,0 +1,60 @@
+#!/bin/bash
+
+
+cd ..
+WORKSPACE=`pwd`
+cd tools
+
+C_database_poscar=${WORKSPACE}'/C_poscar_database'
+C_database_symmetry=${WORKSPACE}'/C_symmetry_database'
+C_database_operation=${WORKSPACE}'/C_operation_database'
+workshop=${WORKSPACE}'/workshop'
+
+
+phonopy_run='/opt/anaconda3/bin/phonopy --tolerance 0.01 --symmetry -c POSCAR '
+extract_SG="cat POSCAR.sym | head -n 3 | tail -n 1 | awk -F ': ' '{print $NF}'"
+#python_run='/opt/anaconda3/bin/python'
+#isInversion=${WORKSPACE}'/tools/isInversion.m'
+matlab_run='/usr/local/bin/matlab -nojvm  -nodesktop -nodisplay -nosplash'
+matlab_file=${WORKSPACE}'/tools/isInversion.m'
+
+cd $C_database_poscar
+
+for i in *
+do
+echo '-------------------------------------------------------------'
+echo $i
+j=`echo $i|awk -F 'POSCAR.' '{print $NF}'`
+#echo "check ${j} th POSAR"
+rm -f $workshop/*
+cp $i $workshop/POSCAR
+cd $workshop
+$phonopy_run > POSCAR.sym
+cp PPOSCAR POSCAR
+$phonopy_run >POSCAR.sym
+SG=`cat POSCAR.sym | head -n 3 | tail -n 1 | awk -F ': ' '{print $NF}'`
+Sym_num=`cat POSCAR.sym|grep 'rotation: #'|tail -n 1 |awk -F '# ' '{print $NF}'`
+$matlab_run < $matlab_file >matlabrun.log 2>matlabrun.err
+PorNot=`cat isInversion`
+echo ${j} 'th POSCAR'
+echo 'SG: ' $SG
+echo 'Sym_num' $Sym_num
+echo 'Inversion?' $PorNot
+Num_atom=`cat PPOSCAR |head -n 7 |tail -n 1 |awk -F ' ' '{print $NF}'`
+filename=$SG-$Sym_num-$Num_atom-$j
+echo 'Num_atom' $Num_atom
+echo 'filename:' $filename
+if [ $PorNot -eq 1 ]
+then
+#echo ${j} 'th POSAR has inversion symmetry'
+cp PPOSCAR $C_database_symmetry/$filename
+echo '-------------------------------------------------------------'
+fi 
+cp POSCAR.sym $C_database_operation/${filename}.sym
+cd $C_database_poscar
+done
+
+echo 'complete'
+
+
+

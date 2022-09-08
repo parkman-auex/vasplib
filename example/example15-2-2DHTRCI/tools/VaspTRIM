@@ -1,0 +1,154 @@
+#!/bin/bash
+
+modifyOUTCAR(){
+irot_num=`grep -n irot OUTCAR|awk -F ':' '{print $1}'`
+Sym_num=$1
+ESYM_file=$2
+irot_num_plus1=$(echo $irot_num"+1"|bc )
+irot_num_plusSym_num=$(echo $irot_num"+"$Sym_num |bc )
+sed -i "${irot_num_plus1},${irot_num_plusSym_num}d" OUTCAR
+sed -i "${irot_num} r $ESYM_file" OUTCAR
+}
+
+cd ..
+WORKSPACE=`pwd`
+cd tools
+
+C_database_semimetal=${WORKSPACE}'/C_semimetal_database/'
+C_database_insulator=${WORKSPACE}'/C_insulator_database/'
+# parity nontrival    for z2pack run
+C_database_realChern=${WORKSPACE}'/C_realChern_database/'
+# 
+workshop=${WORKSPACE}'/C_insulator_database'
+INCAR_dir=${WORKSPACE}'/INCAR_collection'
+
+EP_file=${WORKSPACE}'/INCAR_collection/EP_file'
+EC2_file=${WORKSPACE}'/INCAR_collection/EC2_file'
+vasp_run='/opt/vasp.5.4.4/bin/vasp_std_w2.1'
+irvsp_run='/opt/vasp.5.4.4/bin/irvsp_1'
+irrep_gen='/home/parkman/bin/irrep_gen'
+matlab_run='/usr/local/bin/matlab -nodesktop -nojvm -nodisplay -nosplash'
+matlab_file=${WORKSPACE}'/tools/run_parity.m'
+#Accuracy=0.05
+NP=16
+
+# inuslator first
+cd $C_database_insulator
+
+echo 'TRIM Caculation Start :' `date`
+run_id=1
+for i in *
+do
+echo `pwd`"/"$i"/TRIM"
+echo '*****************************************************************'
+echo `date`
+echo $i 
+echo $run_id th vaspTRIM in this run
+# load information
+SG=`echo $i|awk -F '-' '{print $1}'`
+Sym_num=`echo $i|awk -F '-' '{print $2}'`
+Num_atom=`echo $i|awk -F '-' '{print $3}'`
+isInversion=`echo $i|awk -F '-' '{print $4}'`
+isC2z=`echo $i|awk -F '-' '{print $5}'`
+ID=`echo $i|awk -F '-' '{print $6}'`
+echo 'ID:' $ID
+echo 'isInversion' $isInversion
+echo 'isC2z' $isC2z
+echo 'SG: ' $SG
+echo 'Sym_num' $Sym_num
+echo 'Atom_num' $Num_atom
+# insulator
+cd $workshop
+#mkdir -p $i
+mkdir -p $i/TRIM
+cd $i/TRIM
+cp $C_database_insulator/$i/scf/* . 
+HOMO=`cat HOMO`
+Num_Orb_plus=$(echo $HOMO"+1"|bc )
+BAND_gap=`cat BAND_gap`
+echo 'HOMO' $HOMO 
+echo 'BAND_gap:' $BAND_gap
+echo '------------------------------'
+echo 'vasp TRIM  preparing ...'
+cp $INCAR_dir/INCAR.parity INCAR
+cp $INCAR_dir/KPOINTS.TRIM KPOINTS
+#
+sed -i "s/filename/${i}/g" INCAR
+#
+#
+echo 'vasp TRIM runing...'
+mpirun -np $NP $vasp_run >log 2>err &
+wait
+echo 'vasp TRIM complete'
+# modify OUTCAR
+cp OUTCAR OUTCAR.bk
+# is inversion
+if [  $isInversion -eq 1 ]
+then
+cp OUTCAR.bk OUTCAR 
+modifyOUTCAR $Sym_num $EP_file
+NBANDSNUM=`grep NBANDS OUTCAR|awk -F ' ' '{print $NF}'`
+echo 'NBANDSNUM' $NBANDSNUM 
+# 
+$irvsp_run >irrep.dat
+#
+grep 'inversion' irrep.dat
+$irrep_gen
+#
+echo 'inversion irrep gen complete'
+$matlab_run < $matlab_file >matlabrun.log 2>matlabrun.err 
+#
+elif  [ $isC2z -eq 1 ]
+then
+cp OUTCAR.bk OUTCAR
+modifyOUTCAR $Sym_num $EC2_file
+NBANDSNUM=`grep NBANDS OUTCAR|awk -F ' ' '{print $NF}'`
+echo 'NBANDSNUM' $NBANDSNUM
+#
+$irvsp_run >irrep.dat
+#
+
+$irrep_gen
+#
+echo 'C2z irrep gen complete'
+$matlab_run < $matlab_file >matlabrun.log 2>matlabrun.err
+#
+
+fi
+## C2
+
+RealChernOrnot=$(echo `cat IsRealChern`">0" | bc)
+echo RealChernOrnot?: $RealChernOrnot
+#
+echo '____________________________'
+echo TRIM information:
+cat TRIM.dat
+if [ $RealChernOrnot -eq 1 ]
+then 
+cd $workshop
+cp -r $i $C_database_realChern
+# prepare z2pack
+mkdir -p $C_database_realChern/$i/wilson
+cd $C_database_realChern/$i/wilson
+cp $INCAR_dir/wilson.py .
+sed -i "s/FILENAME/$i/g" wilson.py
+mkdir -p input
+cd input
+cp $C_database_realChern/$i/scf/POTCAR .
+cp $C_database_realChern/$i/scf/CHGCAR .
+cp $C_database_realChern/$i/scf/POSCAR .
+cp $INCAR_dir/INCAR.z2pack INCAR
+cp $INCAR_dir/wannier90.win .
+# modify
+sed -i "s/NBANDSNUM/$NBANDSNUM/g" INCAR
+sed -i "s/NBANDSNUM/$NBANDSNUM/g" wannier90.win
+sed -i "s/Num_Orb/$HOMO/g" wannier90.win
+sed -i "s/Num_orb_plus/$Num_Orb_plus/g" wannier90.win
+echo 'z2pack input preparation complete' 
+fi
+echo '========================================================='
+cd $workshop
+run_id=$((run_id+1))
+done
+
+echo 'TRIM Caculation Finished :' `date`

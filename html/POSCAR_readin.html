@@ -1,0 +1,397 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>POSCAR_readin</title><meta name="generator" content="MATLAB 9.3"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2020-12-03"><meta name="DC.source" content="POSCAR_readin.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>POSCAR_readin</h1><!--introduction--><p>get poscar information from vasp and others * Label:</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Description of the Function:</a></li><li><a href="#3">Usage:</a></li><li><a href="#4">Input:</a></li><li><a href="#5">Output:</a></li><li><a href="#6">example:</a></li><li><a href="#7">Note:</a></li><li><a href="#8">Change log</a></li><li><a href="#9">Copyright</a></li><li><a href="#10">Source code :</a></li><li><a href="#11">note: POSCAR is Direct mode</a></li></ul></div><h2 id="1">Description of the Function:</h2><h2 id="3">Usage:</h2><div><ul><li>[Rm,sites,Atom_name,Atom_num]= POSCAR_readin(filename,mode)</li><li>[Rm,sites,Atom_name,Atom_num] = POSCAR_readin(filename)</li><li>[Rm,sites,Atom_name,Atom_num] = POSCAR_readin()</li></ul></div><h2 id="4">Input:</h2><div><ol><li>POSCAR in current dir</li></ol></div><h2 id="5">Output:</h2><div><ol><li>a_crystal_constance</li><li>Rm</li><li>Atom_name</li><li>Atom_num</li><li>element_information: sites unit A?e-6</li></ol></div><h2 id="6">example:</h2><pre class="language-matlab">commmad
+</pre><pre class="language-matlab">result
+</pre><h2 id="7">Note:</h2><pre>site=struct('seq',[],'inseq',[],'rc1',[],'rc2',[],'rc3',[],'name',[],'nameseq',[],'mag',[]);</pre><h2 id="8">Change log</h2><div><ul><li>Document Date: 2020/12/03</li><li>Creation Date: 2020/12/03</li><li>Last updated : 2020/12/03</li></ul></div><h2 id="9">Copyright</h2><div><ul><li>parkman</li><li><a href="parkman@buaa.edu.cn">parkman@buaa.edu.cn</a></li></ul></div><h2 id="10">Source code :</h2><h2 id="11">note: POSCAR is Direct mode</h2><p>input : POSCAR in current dir</p><pre class="codeinput"><span class="keyword">function</span> [Rm,sites,Atom_name,Atom_num]=POSCAR_readin(filename,mode)
+<span class="comment">%--------  init  --------</span>
+<span class="comment">%--------  narg  --------</span>
+    <span class="keyword">if</span> nargin &lt; 2
+        mode = <span class="string">'vasp'</span>;
+    <span class="keyword">end</span>
+    <span class="keyword">if</span> nargin &lt; 1
+        filename = <span class="string">'POSCAR'</span>;
+    <span class="keyword">end</span>
+<span class="comment">%--------  chek  --------</span>
+    <span class="keyword">if</span> ~exist(filename,<span class="string">'file'</span>)
+        error(fprint(<span class="string">'No such file: %s\n'</span>,filename));
+    <span class="keyword">end</span>
+<span class="comment">%--------  fbug  --------</span>
+<span class="comment">%--------  juge  --------</span>
+    <span class="keyword">if</span> strcmp(mode,<span class="string">'vasp'</span>)
+        <span class="comment">% init struct</span>
+        site=struct(<span class="string">'seq'</span>,[],<span class="string">'inseq'</span>,[],<span class="string">'rc1'</span>,[],<span class="string">'rc2'</span>,[],<span class="string">'rc3'</span>,[],<span class="string">'name'</span>,[],<span class="string">'nameseq'</span>,[],<span class="string">'mag'</span>,[],<span class="string">'ion_type'</span>,[]);
+        digits(6); <span class="comment">%take care</span>
+        <span class="comment">% POSCAR</span>
+        <span class="comment">% Initialize variables</span>
+        startRow = 2;
+        delimiter = {<span class="string">'\t'</span>,<span class="string">' '</span>};
+        formatSpec = <span class="string">'%s%s%s%s%*s%[^\n\r]'</span>;
+        fileID = fopen(filename,<span class="string">'r'</span>);
+        dataArray = textscan(fileID, formatSpec, <span class="string">'Delimiter'</span>, delimiter, <span class="string">'MultipleDelimsAsOne'</span>, true, <span class="string">'TextType'</span>, <span class="string">'string'</span>, <span class="string">'HeaderLines'</span> ,startRow-1, <span class="string">'ReturnOnError'</span>, false, <span class="string">'EndOfLine'</span>, <span class="string">'\r\n'</span>);
+        fclose(fileID);
+        raw = repmat({<span class="string">''</span>},length(dataArray{1}),length(dataArray)-1);
+        <span class="keyword">for</span> col=1:length(dataArray)-1
+            raw(1:length(dataArray{col}),col) = mat2cell(dataArray{col}, ones(length(dataArray{col}), 1));
+        <span class="keyword">end</span>
+        rawStringColumns = string(raw(:,:));
+        POSCAR=rawStringColumns;
+        clearvars <span class="string">filename</span> <span class="string">delimiter</span> <span class="string">startRow</span> <span class="string">formatSpec</span> <span class="string">fileID</span> <span class="string">dataArray</span> <span class="string">ans</span> <span class="string">rawStringColumns</span> <span class="string">raw</span>;
+
+        <span class="comment">% a_crystal_constance=str2double(char(POSCAR(1,1)));</span>
+        <span class="comment">% Rm</span>
+        a1=[str2double(char(POSCAR(2,1))) str2double(char(POSCAR(2,2))) str2double(char(POSCAR(2,3)))];
+        a2=[str2double(char(POSCAR(3,1))) str2double(char(POSCAR(3,2))) str2double(char(POSCAR(3,3)))];
+        a3=[str2double(char(POSCAR(4,1))) str2double(char(POSCAR(4,2))) str2double(char(POSCAR(4,3)))];
+        Rm=[a1;a2;a3];
+        <span class="comment">% read atom</span>
+        n_atom=length(POSCAR(5,:));
+        <span class="keyword">for</span> i=1:n_atom
+            <span class="keyword">if</span> POSCAR(5,i) ~= <span class="string">""</span>
+                Atom_name(i) = POSCAR(5,i);
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+        <span class="comment">% need</span>
+        <span class="keyword">for</span> i=1:length(Atom_name)
+            Atom_num(i)=str2double(char(POSCAR(6,i)));
+        <span class="keyword">end</span>
+        <span class="comment">%site_num</span>
+        sites_num=sum(Atom_num);
+        sites=repmat(site,[1 sites_num]);
+        <span class="comment">% coordinate pattern</span>
+        <span class="comment">% Coordinates_pattern=POSCAR(7,1);</span>
+        <span class="comment">% temp : frac support</span>
+        <span class="comment">% struct</span>
+        sequence=1;
+        n_atom=length(Atom_name);
+        beginline=8;
+        <span class="comment">%first</span>
+        <span class="keyword">for</span> j=beginline:beginline+Atom_num(1)-1
+            <span class="comment">%id</span>
+            sites(sequence).seq=sequence;
+
+            <span class="comment">%inid</span>
+            sites(sequence).inseq=j-beginline+1;
+            <span class="comment">%name</span>
+            sites(sequence).nameseq=1;
+            sites(sequence).name=Atom_name(1)+num2str(sites(sequence).inseq);
+            sites(sequence).ion_num=Atom_num(1);
+            <span class="comment">%sites(sequence).ion_type=Atom_num(1);</span>
+            <span class="comment">%sites(sequence).ion_type=char(Atom_name(1));</span>
+            <span class="comment">%sites(sequence).ion_type_num=1;</span>
+            <span class="comment">%incoordinate</span>
+            sites(sequence).rc1=str2double(char(POSCAR(j,1)));
+            sites(sequence).rc2=str2double(char(POSCAR(j,2)));
+            sites(sequence).rc3=str2double(char(POSCAR(j,3)));
+            <span class="comment">%</span>
+            sequence=sequence+1;
+        <span class="keyword">end</span>
+        <span class="comment">%beginline=8;</span>
+        <span class="comment">%other</span>
+        <span class="keyword">if</span> n_atom &gt;= 2
+            <span class="keyword">for</span> i=2:n_atom
+                beginline=beginline+Atom_num(i-1);
+                <span class="keyword">for</span> j=beginline:beginline+Atom_num(i)-1
+                    <span class="comment">%id</span>
+                    sites(sequence).seq=sequence;
+
+                    <span class="comment">%inid</span>
+                    sites(sequence).inseq=j-beginline+1;
+                    <span class="comment">%name</span>
+                    sites(sequence).nameseq=i;
+                    sites(sequence).name=Atom_name(i)+num2str(sites(sequence).inseq);
+                    sites(sequence).ion_num=Atom_num(i);
+                    <span class="comment">%sites(sequence).ion_type_num=i;</span>
+                    <span class="comment">%incoordinate</span>
+                    sites(sequence).rc1=str2double(char(POSCAR(j,1)));
+                    sites(sequence).rc2=str2double(char(POSCAR(j,2)));
+                    sites(sequence).rc3=str2double(char(POSCAR(j,3)));
+                    <span class="comment">%</span>
+                    sequence=sequence+1;
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+        <span class="keyword">if</span> length(POSCAR)&gt;j
+            <span class="comment">%disp('mag_mode');</span>
+            sequence=1;
+            beginline=j+1;
+            <span class="comment">%first</span>
+            <span class="keyword">for</span> j=beginline:beginline+Atom_num(1)-1
+                <span class="comment">%id</span>
+                sites(sequence).mag=double(POSCAR(j,1:3));
+                sequence=sequence+1;
+            <span class="keyword">end</span>
+            <span class="comment">%other</span>
+            <span class="keyword">if</span> n_atom &gt;= 2
+                <span class="keyword">for</span> i=2:n_atom
+                    beginline=beginline+Atom_num(i-1);
+                    <span class="keyword">for</span> j=beginline:beginline+Atom_num(i)-1
+                        <span class="comment">%id</span>
+                        sites(sequence).mag=double(POSCAR(j,1:3));
+                        sequence=sequence+1;
+                    <span class="keyword">end</span>
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+        clearvars <span class="string">beginline</span> <span class="string">i</span> <span class="string">j</span> <span class="string">sequence</span> <span class="string">n_atom</span> <span class="string">col</span> ;
+    <span class="keyword">end</span>
+
+<span class="keyword">end</span>
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2017b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% POSCAR_readin
+%
+% get poscar information from vasp and others
+% * Label:
+%
+%% Description of the Function:
+%%
+%% Usage: 
+%
+% * [Rm,sites,Atom_name,Atom_num]= POSCAR_readin(filename,mode)
+% * [Rm,sites,Atom_name,Atom_num] = POSCAR_readin(filename)
+% * [Rm,sites,Atom_name,Atom_num] = POSCAR_readin()
+%
+%% Input:
+%  
+% # POSCAR in current dir
+%
+%% Output:
+%
+% # a_crystal_constance
+% # Rm
+% # Atom_name
+% # Atom_num
+% # element_information: sites 
+% unit A?e-6
+%
+%% example:
+%   commmad
+% 
+% 
+%   result
+%   
+%% Note: 
+%
+%  site=struct('seq',[],'inseq',[],'rc1',[],'rc2',[],'rc3',[],'name',[],'nameseq',[],'mag',[]);
+%
+%% Change log
+%
+% * Document Date: 2020/12/03
+% * Creation Date: 2020/12/03
+% * Last updated : 2020/12/03
+%
+%% Copyright
+%
+% * parkman
+% * <parkman@buaa.edu.cn>
+%
+%% Source code : 
+%
+%% note: POSCAR is Direct mode
+% input : POSCAR in current dir
+
+
+function [Rm,sites,Atom_name,Atom_num]=POSCAR_readin(filename,mode)
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  init  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  narg  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+    if nargin < 2
+        mode = 'vasp';
+    end
+    if nargin < 1
+        filename = 'POSCAR';
+    end
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  chek  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+    if ~exist(filename,'file')
+        error(fprint('No such file: %s\n',filename));
+    end
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  fbug  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH  juge  REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+    if strcmp(mode,'vasp')
+        % init struct
+        site=struct('seq',[],'inseq',[],'rc1',[],'rc2',[],'rc3',[],'name',[],'nameseq',[],'mag',[],'ion_type',[]);
+        digits(6); %take care
+        % POSCAR
+        % Initialize variables
+        startRow = 2;
+        delimiter = {'\t',' '};
+        formatSpec = '%s%s%s%s%*s%[^\n\r]';
+        fileID = fopen(filename,'r');
+        dataArray = textscan(fileID, formatSpec, 'Delimiter', delimiter, 'MultipleDelimsAsOne', true, 'TextType', 'string', 'HeaderLines' ,startRow-1, 'ReturnOnError', false, 'EndOfLine', '\r\n');
+        fclose(fileID);
+        raw = repmat({''},length(dataArray{1}),length(dataArray)-1);
+        for col=1:length(dataArray)-1
+            raw(1:length(dataArray{col}),col) = mat2cell(dataArray{col}, ones(length(dataArray{col}), 1));
+        end
+        rawStringColumns = string(raw(:,:));
+        POSCAR=rawStringColumns;
+        clearvars filename delimiter startRow formatSpec fileID dataArray ans rawStringColumns raw;
+
+        % a_crystal_constance=str2double(char(POSCAR(1,1)));
+        % Rm
+        a1=[str2double(char(POSCAR(2,1))) str2double(char(POSCAR(2,2))) str2double(char(POSCAR(2,3)))];
+        a2=[str2double(char(POSCAR(3,1))) str2double(char(POSCAR(3,2))) str2double(char(POSCAR(3,3)))];
+        a3=[str2double(char(POSCAR(4,1))) str2double(char(POSCAR(4,2))) str2double(char(POSCAR(4,3)))];
+        Rm=[a1;a2;a3];
+        % read atom
+        n_atom=length(POSCAR(5,:));
+        for i=1:n_atom
+            if POSCAR(5,i) ~= ""
+                Atom_name(i) = POSCAR(5,i);
+            end
+        end
+        % need
+        for i=1:length(Atom_name)
+            Atom_num(i)=str2double(char(POSCAR(6,i)));
+        end
+        %site_num
+        sites_num=sum(Atom_num);
+        sites=repmat(site,[1 sites_num]);
+        % coordinate pattern
+        % Coordinates_pattern=POSCAR(7,1);
+        % temp : frac support
+        % struct
+        sequence=1;
+        n_atom=length(Atom_name);
+        beginline=8;
+        %first
+        for j=beginline:beginline+Atom_num(1)-1
+            %id
+            sites(sequence).seq=sequence;
+            
+            %inid
+            sites(sequence).inseq=j-beginline+1;
+            %name
+            sites(sequence).nameseq=1;
+            sites(sequence).name=Atom_name(1)+num2str(sites(sequence).inseq);
+            sites(sequence).ion_num=Atom_num(1);
+            %sites(sequence).ion_type=Atom_num(1);
+            %sites(sequence).ion_type=char(Atom_name(1));
+            %sites(sequence).ion_type_num=1;
+            %incoordinate
+            sites(sequence).rc1=str2double(char(POSCAR(j,1)));
+            sites(sequence).rc2=str2double(char(POSCAR(j,2)));
+            sites(sequence).rc3=str2double(char(POSCAR(j,3)));
+            %
+            sequence=sequence+1;
+        end
+        %beginline=8;
+        %other
+        if n_atom >= 2
+            for i=2:n_atom
+                beginline=beginline+Atom_num(i-1);
+                for j=beginline:beginline+Atom_num(i)-1
+                    %id
+                    sites(sequence).seq=sequence;
+                    
+                    %inid
+                    sites(sequence).inseq=j-beginline+1;
+                    %name
+                    sites(sequence).nameseq=i;
+                    sites(sequence).name=Atom_name(i)+num2str(sites(sequence).inseq);
+                    sites(sequence).ion_num=Atom_num(i);
+                    %sites(sequence).ion_type_num=i;
+                    %incoordinate
+                    sites(sequence).rc1=str2double(char(POSCAR(j,1)));
+                    sites(sequence).rc2=str2double(char(POSCAR(j,2)));
+                    sites(sequence).rc3=str2double(char(POSCAR(j,3)));
+                    %
+                    sequence=sequence+1;
+                end
+            end
+        end
+        if length(POSCAR)>j
+            %disp('mag_mode');
+            sequence=1;
+            beginline=j+1;
+            %first
+            for j=beginline:beginline+Atom_num(1)-1
+                %id
+                sites(sequence).mag=double(POSCAR(j,1:3));
+                sequence=sequence+1;
+            end
+            %other
+            if n_atom >= 2
+                for i=2:n_atom
+                    beginline=beginline+Atom_num(i-1);
+                    for j=beginline:beginline+Atom_num(i)-1
+                        %id
+                        sites(sequence).mag=double(POSCAR(j,1:3));
+                        sequence=sequence+1;
+                    end
+                end
+            end
+        end
+        clearvars beginline i j sequence n_atom col ;
+    end
+
+end    
+    
+
+##### SOURCE END #####
+--></body></html>

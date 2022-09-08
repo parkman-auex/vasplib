@@ -1,0 +1,94 @@
+%% RUN BHZ_kzkplus model
+clear;
+% mode panel
+bulkmode =2;
+slabmode = 1;
+nanodisk_mode =2;
+%% load MODEL
+!cp POSCAR_QWZ_2 POSCAR
+MODEL_BHZ_test;
+if 1==1 % 1 TB 2 kp
+    K_xyz2K_123;
+    Discretize_kp2TB;
+    Split_Hamilton_kp2TB_smart;
+end
+%% para
+PARA_QWZ;
+B1 =   0;
+glue_edges = 'false';
+repeatnum = 21;
+fin_direction = 2;
+fin_direction2 =1;
+norb_enforce = 12;
+%% subs
+BHZ_kzkplusTB_2Dn = simple_hr(Subsall(H_xyz,'struct'));
+Gen_hr(simple_hr(BHZ_kzkplusTB_2Dn),'BHZ_kzkplusTB_2Dn.dat');
+%% plot
+if bulkmode == 1
+    EIGENCAR = EIGENCAR_gen(BHZ_kzkplusTB_2Dn,'t');
+    bandplot(EIGENCAR,[-3,3],'BHZ_kzkplus-2D');
+end
+%% Slab
+[temp_sparse,~,~] = hr2hr_sparse(BHZ_kzkplusTB_2Dn);
+if slabmode ==1
+ 
+    orbital_init =   [ 0.5 0.5 0.50000  ;...  % AgAs1 px up
+                                        0.5 0.5 0.50000  ;...  % AgAs2 px up
+                                        0.5 0.5 0.50000  ;...  % AgAs1 px dn]8907hjkjyui
+                                        0.5 0.5 0.50000  ];... % AgAs2 py dn   
+    !cp POSCAR_origin POSCAR
+    tic
+    disp('first direction');
+    [temp_slab_sparse,fin_orb1] = cut_piece(temp_sparse,repeatnum,fin_direction,glue_edges,orbital_init,'hrsn-sgl');
+    toc
+    !cp POSCAR_super_fin POSCAR
+    tic
+    !cp KPOINTS_1D_X KPOINTS
+    [EIGENCAR_slab,~]  = EIGENCAR_gen(temp_slab_sparse,'ts');
+    bandplot(EIGENCAR_slab,[-3,3],'Slab-BHZ_kzkplus-modified');
+    % Gen_hr
+    BHZ_kzkplus_slab = hr_sparse2hr(temp_slab_sparse);
+    BHZ_kzkplus_slab = simple_hr(BHZ_kzkplus_slab);
+    Gen_hr(BHZ_kzkplus_slab,'wannier90_hr.dat.slab') ;
+end
+ 
+if nanodisk_mode ==1
+    disp('second direction');
+
+    [temp_slab_sparse2,fin_orb2] = cut_piece(temp_slab_sparse,repeatnum,fin_direction2,glue_edges,fin_orb1,'hrsn-sgl');
+    toc
+    !cp KPOINTS_1D KPOINTS
+    !cp POSCAR_super_fin POSCAR
+    orb_list = fin_orb2;
+    
+    % cut hexagonal disk
+    % a pall nod
+    tic
+    disp('EIGENCAR_caculate');
+    [EIGENCAR_mono,WAVECAR_disk]  = EIGENCAR_gen(temp_slab_sparse2,'ms',0,norb_enforce,[-0.00,0,0.5]);
+    Y1 = EIGENCAR_mono;
+    figure();
+    % save('EuAgAs_kp1_soc1_EIGENCAR2_WAVECAR.mat','EIGENCAR2','WAVECAR_disk');
+    plot(Y1,'-o');
+    
+    if norb_enforce <0
+        [norb,~] = size(orb_list);
+        xlim([norb/2-48 norb/2+48]);
+    else
+        norb = norb_enforce;
+    end           
+    WaveFunc1 = WAVECAR_disk(:,norb/2-2);
+    WaveFunc2 = WAVECAR_disk(:,norb/2-1);
+    WaveFunc3 = WAVECAR_disk(:,norb/2);
+    WaveFunc4 = WAVECAR_disk(:,norb/2+1);
+    WaveFunc5 = WAVECAR_disk(:,norb/2+2);
+    WaveFunc6 = WAVECAR_disk(:,norb/2+3);
+    WaveFunc = [WaveFunc3 WaveFunc4 WaveFunc1 WaveFunc2 WaveFunc5 WaveFunc6];
+    % [~ , ~]=PARCHG_gen(orb_list,WaveFunc2);
+    % [~ , ~]=PARCHG_gen(orb_list,WaveFunc3);
+    % [~ , ~]=PARCHG_gen(orb_list,WaveFunc4);
+    % [~ , ~]=PARCHG_gen(orb_list,WaveFunc5);
+    [~ , ~]=PARCHG_gen(orb_list,WaveFunc);   
+    toc
+end
+

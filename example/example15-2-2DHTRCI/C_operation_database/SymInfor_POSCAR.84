@@ -1,0 +1,109 @@
+phonopy_version: '2.4.2'
+space_group_type: 'Cmmm'
+space_group_number: 65
+point_group_type: 'mmm'
+space_group_operations:
+- rotation: # 1
+  - [ 1,  0 , 0]
+  - [ 0,  1 , 0]
+  - [ 0,  0 , 1]
+  translation: [ 0.00000,  0.00000,  0.00000 ]
+- rotation: # 2
+  - [-1,  0 , 0]
+  - [ 0, -1 , 0]
+  - [ 0,  0 ,-1]
+  translation: [ 0.00000,  0.00000,  0.00000 ]
+- rotation: # 3
+  - [-1,  0 , 0]
+  - [ 0, -1 , 0]
+  - [ 0,  0 , 1]
+  translation: [ 0.00000,  0.00000,  0.00000 ]
+- rotation: # 4
+  - [ 1,  0 , 0]
+  - [ 0,  1 , 0]
+  - [ 0,  0 ,-1]
+  translation: [ 0.00000,  0.00000,  0.00000 ]
+- rotation: # 5
+  - [ 0,  1 , 0]
+  - [ 1,  0 , 0]
+  - [ 0,  0 ,-1]
+  translation: [ 0.00000,  0.00000,  0.00000 ]
+- rotation: # 6
+  - [ 0, -1 , 0]
+  - [-1,  0 , 0]
+  - [ 0,  0 , 1]
+  translation: [ 0.00000,  0.00000,  0.00000 ]
+- rotation: # 7
+  - [ 0, -1 , 0]
+  - [-1,  0 , 0]
+  - [ 0,  0 ,-1]
+  translation: [ 0.00000,  0.00000,  0.00000 ]
+- rotation: # 8
+  - [ 0,  1 , 0]
+  - [ 1,  0 , 0]
+  - [ 0,  0 , 1]
+  translation: [ 0.00000,  0.00000,  0.00000 ]
+atom_mapping:
+  1: 1
+  2: 2
+  3: 3
+  4: 3
+  5: 2
+  6: 2
+  7: 3
+  8: 3
+  9: 1
+  10: 2
+  11: 1
+  12: 1
+site_symmetries:
+- atom: 1
+  Wyckoff: 'p'
+  site_point_group: 'm'
+  orientation:
+  - [ 0,  0,  1]
+  - [ 1,  0,  0]
+  - [ 0,  1,  0]
+  rotations:
+  - # 1
+    - [ 1,  0,  0]
+    - [ 0,  1,  0]
+    - [ 0,  0,  1]
+  - # 2
+    - [ 1,  0,  0]
+    - [ 0,  1,  0]
+    - [ 0,  0, -1]
+- atom: 2
+  Wyckoff: 'p'
+  site_point_group: 'm'
+  orientation:
+  - [ 0,  0,  1]
+  - [ 1,  0,  0]
+  - [ 0,  1,  0]
+  rotations:
+  - # 1
+    - [ 1,  0,  0]
+    - [ 0,  1,  0]
+    - [ 0,  0,  1]
+  - # 2
+    - [ 1,  0,  0]
+    - [ 0,  1,  0]
+    - [ 0,  0, -1]
+- atom: 3
+  Wyckoff: 'p'
+  site_point_group: 'm'
+  orientation:
+  - [ 0,  0,  1]
+  - [ 1,  0,  0]
+  - [ 0,  1,  0]
+  rotations:
+  - # 1
+    - [ 1,  0,  0]
+    - [ 0,  1,  0]
+    - [ 0,  0,  1]
+  - # 2
+    - [ 1,  0,  0]
+    - [ 0,  1,  0]
+    - [ 0,  0, -1]
+# Primitive cell was found. It is written into PPOSCAR.
+# Bravais lattice is written into BPOSCAR.

@@ -1,0 +1,325 @@
+phonopy_version: '2.4.2'
+space_group_type: 'Pm'
+space_group_number: 6
+point_group_type: 'm'
+space_group_operations:
+- rotation: # 1
+  - [ 1,  0 , 0]
+  - [ 0,  1 , 0]
+  - [ 0,  0 , 1]
+  translation: [ 0.00000,  0.00000,  0.00000 ]
+- rotation: # 2
+  - [ 1,  0 , 0]
+  - [ 0, -1 , 0]
+  - [ 0,  0 , 1]
+  translation: [ 0.00000,  0.00000,  0.00000 ]
+atom_mapping:
+  1: 1
+  2: 2
+  3: 3
+  4: 4
+  5: 5
+  6: 6
+  7: 7
+  8: 8
+  9: 9
+  10: 10
+  11: 11
+  12: 12
+  13: 13
+  14: 14
+  15: 15
+  16: 16
+  17: 17
+  18: 18
+site_symmetries:
+- atom: 1
+  Wyckoff: 'b'
+  site_point_group: 'm'
+  orientation:
+  - [ 1,  0,  0]
+  - [ 0,  1,  0]
+  - [ 0,  0,  1]
+  rotations:
+  - # 1
+    - [ 1,  0,  0]
+    - [ 0,  1,  0]
+    - [ 0,  0,  1]
+  - # 2
+    - [ 1,  0,  0]
+    - [ 0, -1,  0]
+    - [ 0,  0,  1]
+- atom: 2
+  Wyckoff: 'b'
+  site_point_group: 'm'
+  orientation:
+  - [ 1,  0,  0]
+  - [ 0,  1,  0]
+  - [ 0,  0,  1]
+  rotations:
+  - # 1
+    - [ 1,  0,  0]
+    - [ 0,  1,  0]
+    - [ 0,  0,  1]
+  - # 2
+    - [ 1,  0,  0]
+    - [ 0, -1,  0]
+    - [ 0,  0,  1]
+- atom: 3
+  Wyckoff: 'b'
+  site_point_group: 'm'
+  orientation:
+  - [ 1,  0,  0]
+  - [ 0,  1,  0]
+  - [ 0,  0,  1]
+  rotations:
+  - # 1
+    - [ 1,  0,  0]
+    - [ 0,  1,  0]
+    - [ 0,  0,  1]
+  - # 2
+    - [ 1,  0,  0]
+    - [ 0, -1,  0]
+    - [ 0,  0,  1]
+- atom: 4
+  Wyckoff: 'b'
+  site_point_group: 'm'
+  orientation:
+  - [ 1,  0,  0]
+  - [ 0,  1,  0]
+  - [ 0,  0,  1]
+  rotations:
+  - # 1
+    - [ 1,  0,  0]
+    - [ 0,  1,  0]
+    - [ 0,  0,  1]
+  - # 2
+    - [ 1,  0,  0]
+    - [ 0, -1,  0]
+    - [ 0,  0,  1]
+- atom: 5
+  Wyckoff: 'b'
+  site_point_group: 'm'
+  orientation:
+  - [ 1,  0,  0]
+  - [ 0,  1,  0]
+  - [ 0,  0,  1]
+  rotations:
+  - # 1
+    - [ 1,  0,  0]
+    - [ 0,  1,  0]
+    - [ 0,  0,  1]
+  - # 2
+    - [ 1,  0,  0]
+    - [ 0, -1,  0]
+    - [ 0,  0,  1]
+- atom: 6
+  Wyckoff: 'b'
+  site_point_group: 'm'
+  orientation:
+  - [ 1,  0,  0]
+  - [ 0,  1,  0]
+  - [ 0,  0,  1]
+  rotations:
+  - # 1
+    - [ 1,  0,  0]
+    - [ 0,  1,  0]
+    - [ 0,  0,  1]
+  - # 2
+    - [ 1,  0,  0]
+    - [ 0, -1,  0]
+    - [ 0,  0,  1]
+- atom: 7
+  Wyckoff: 'b'
+  site_point_group: 'm'
+  orientation:
+  - [ 1,  0,  0]
+  - [ 0,  1,  0]
+  - [ 0,  0,  1]
+  rotations:
+  - # 1
+    - [ 1,  0,  0]
+    - [ 0,  1,  0]
+    - [ 0,  0,  1]
+  - # 2
+    - [ 1,  0,  0]
+    - [ 0, -1,  0]
+    - [ 0,  0,  1]
+- atom: 8
+  Wyckoff: 'b'
+  site_point_group: 'm'
+  orientation:
+  - [ 1,  0,  0]
+  - [ 0,  1,  0]
+  - [ 0,  0,  1]
+  rotations:
+  - # 1
+    - [ 1,  0,  0]
+    - [ 0,  1,  0]
+    - [ 0,  0,  1]
+  - # 2
+    - [ 1,  0,  0]
+    - [ 0, -1,  0]
+    - [ 0,  0,  1]
+- atom: 9
+  Wyckoff: 'b'
+  site_point_group: 'm'
+  orientation:
+  - [ 1,  0,  0]
+  - [ 0,  1,  0]
+  - [ 0,  0,  1]
+  rotations:
+  - # 1
+    - [ 1,  0,  0]
+    - [ 0,  1,  0]
+    - [ 0,  0,  1]
+  - # 2
+    - [ 1,  0,  0]
+    - [ 0, -1,  0]
+    - [ 0,  0,  1]
+- atom: 10
+  Wyckoff: 'b'
+  site_point_group: 'm'
+  orientation:
+  - [ 1,  0,  0]
+  - [ 0,  1,  0]
+  - [ 0,  0,  1]
+  rotations:
+  - # 1
+    - [ 1,  0,  0]
+    - [ 0,  1,  0]
+    - [ 0,  0,  1]
+  - # 2
+    - [ 1,  0,  0]
+    - [ 0, -1,  0]
+    - [ 0,  0,  1]
+- atom: 11
+  Wyckoff: 'b'
+  site_point_group: 'm'
+  orientation:
+  - [ 1,  0,  0]
+  - [ 0,  1,  0]
+  - [ 0,  0,  1]
+  rotations:
+  - # 1
+    - [ 1,  0,  0]
+    - [ 0,  1,  0]
+    - [ 0,  0,  1]
+  - # 2
+    - [ 1,  0,  0]
+    - [ 0, -1,  0]
+    - [ 0,  0,  1]
+- atom: 12
+  Wyckoff: 'b'
+  site_point_group: 'm'
+  orientation:
+  - [ 1,  0,  0]
+  - [ 0,  1,  0]
+  - [ 0,  0,  1]
+  rotations:
+  - # 1
+    - [ 1,  0,  0]
+    - [ 0,  1,  0]
+    - [ 0,  0,  1]
+  - # 2
+    - [ 1,  0,  0]
+    - [ 0, -1,  0]
+    - [ 0,  0,  1]
+- atom: 13
+  Wyckoff: 'b'
+  site_point_group: 'm'
+  orientation:
+  - [ 1,  0,  0]
+  - [ 0,  1,  0]
+  - [ 0,  0,  1]
+  rotations:
+  - # 1
+    - [ 1,  0,  0]
+    - [ 0,  1,  0]
+    - [ 0,  0,  1]
+  - # 2
+    - [ 1,  0,  0]
+    - [ 0, -1,  0]
+    - [ 0,  0,  1]
+- atom: 14
+  Wyckoff: 'b'
+  site_point_group: 'm'
+  orientation:
+  - [ 1,  0,  0]
+  - [ 0,  1,  0]
+  - [ 0,  0,  1]
+  rotations:
+  - # 1
+    - [ 1,  0,  0]
+    - [ 0,  1,  0]
+    - [ 0,  0,  1]
+  - # 2
+    - [ 1,  0,  0]
+    - [ 0, -1,  0]
+    - [ 0,  0,  1]
+- atom: 15
+  Wyckoff: 'b'
+  site_point_group: 'm'
+  orientation:
+  - [ 1,  0,  0]
+  - [ 0,  1,  0]
+  - [ 0,  0,  1]
+  rotations:
+  - # 1
+    - [ 1,  0,  0]
+    - [ 0,  1,  0]
+    - [ 0,  0,  1]
+  - # 2
+    - [ 1,  0,  0]
+    - [ 0, -1,  0]
+    - [ 0,  0,  1]
+- atom: 16
+  Wyckoff: 'b'
+  site_point_group: 'm'
+  orientation:
+  - [ 1,  0,  0]
+  - [ 0,  1,  0]
+  - [ 0,  0,  1]
+  rotations:
+  - # 1
+    - [ 1,  0,  0]
+    - [ 0,  1,  0]
+    - [ 0,  0,  1]
+  - # 2
+    - [ 1,  0,  0]
+    - [ 0, -1,  0]
+    - [ 0,  0,  1]
+- atom: 17
+  Wyckoff: 'b'
+  site_point_group: 'm'
+  orientation:
+  - [ 1,  0,  0]
+  - [ 0,  1,  0]
+  - [ 0,  0,  1]
+  rotations:
+  - # 1
+    - [ 1,  0,  0]
+    - [ 0,  1,  0]
+    - [ 0,  0,  1]
+  - # 2
+    - [ 1,  0,  0]
+    - [ 0, -1,  0]
+    - [ 0,  0,  1]
+- atom: 18
+  Wyckoff: 'b'
+  site_point_group: 'm'
+  orientation:
+  - [ 1,  0,  0]
+  - [ 0,  1,  0]
+  - [ 0,  0,  1]
+  rotations:
+  - # 1
+    - [ 1,  0,  0]
+    - [ 0,  1,  0]
+    - [ 0,  0,  1]
+  - # 2
+    - [ 1,  0,  0]
+    - [ 0, -1,  0]
+    - [ 0,  0,  1]
+# Primitive cell was found. It is written into PPOSCAR.
+# Bravais lattice is written into BPOSCAR.
