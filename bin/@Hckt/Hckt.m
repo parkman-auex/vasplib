@@ -512,7 +512,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     for i = 1:size(VectorList,1)
                         ObservationsMat(i,:) = IsRealL(i) * simulation_result_Observations(i).val.' ;
                     end
-                    [VectorList,ObservationsMat] = HollowKnight.generalcontractrow(VectorList,ObservationsMat);
+                    [VectorList,ObservationsMat] = HollowKnight.generalcontractrow2(VectorList,ObservationsMat);
                 otherwise
 
             end
