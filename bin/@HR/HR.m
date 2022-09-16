@@ -62,7 +62,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
         NRPTS    ; % the total number of H(Rn)
         WAN_NUM  ; % the number of wannier like orbs
         Line_000 ; % the sequence of homecell
-        homecell ;
+        homecell ; 
     end
     properties(Dependent = true,Hidden = true)
         
@@ -3707,7 +3707,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                         orig_partL=ind_RL+cur_sc_vec-double(sc_partL*Ns);
                         [~,pair_indL] = ismember(orig_partL,sc_vec,'rows');
                         % Below line relies on the right sc_orbL with right
-                        % sequence. It is lucky, this procedure goes well
+                        % sequence.We are lucky, this procedure goes well
                         sc_hjL = hjL+(pair_indL-1)*WANNUM;
                         % ----- ******* --------
                         % ----- find Rvector --------
@@ -3732,6 +3732,119 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                     end
                     OUT_H_hr.vectorL = OutVectorList;
                     
+            end
+            H_hr = OUT_H_hr;
+            H_hr.Basis_num = OUT_WAN_NUM;
+            if options.force_list
+                if strcmp(H_hr.Type,'mat')
+                    H_hr = H_hr.rewrite();
+                end
+            else
+                if ~strcmp(H_hr.Type,'mat')
+                    H_hr = H_hr.rewind();
+                end
+                
+            end
+        end
+        function H_hr = unfold_hr(H_hr,Ns,options)
+            % Returns tight-binding model representing a primitive cell of a current object.
+            %
+            % * Label: play_hr
+            %
+            %--------  init  --------
+            %import vasplib_tool.*
+            arguments
+                H_hr HR;
+                Ns double = eye(3);
+                options.Accuracy double = 1e-6;
+                options.force_list = false;
+                options.orb_idL = [];
+            end
+            %--------  init  --------
+            V= 1/abs(round(det(Ns)));% intger forcely
+            OUT_WAN_NUM = H_hr.WAN_NUM*V;
+            if  rem(OUT_WAN_NUM,1)
+                error('The supercell matrix for primitive cell is not right.');
+            else
+                
+            end
+            WANNUM= H_hr.WAN_NUM;
+            Accuracy = options.Accuracy;
+            sc_orbL = H_hr.orbL;
+            %--------  check  --------
+            % checks on super-lattice Ns
+            [pc_orb,pc_orbL_full,pc_elementL,pc_quantumL,sc_orb_idL,~,pc_orb_selectL] = H_hr.unfold_orb(Ns,Accuracy,options.orb_idL);
+            %H_hr2 = H_hr.reseq(find(pc_orb_selectL));
+            % create super-cell tb_model object to be returned
+            %OUT_H_hr_ = struct('seq',[],'vector',[],'Degen',[],'key',[],'nokey',[],'Hstr',[],'Hsym',[],'Hcoe',[],'Hnum',[]);
+            % OUT_H_xyz = repmat(H_xyz_ ,[NRPTS,1]);    % Hamiltonian of every cell;
+            OUT_H_hr = H_hr;
+            OUT_H_hr = OUT_H_hr.clean(WANNUM);
+            OUT_H_hr.orbL = pc_orb; % update orbL
+            OUT_H_hr.quantumL = pc_quantumL; % update orbL
+            OUT_H_hr.elementL = pc_elementL; % update orbL
+            OUT_H_hr.Rm = Ns\OUT_H_hr.Rm;
+            NRPTS_  = H_hr.NRPTS;
+            if strcmp(H_hr.Type,'sparse')
+                H_hr = H_hr.full();
+            end
+            fprintf('Search done; begin set hoppings\n');
+            fprintf('We can improve the perfomance later\n');
+            %             t1=clock;
+            %num_pc = size(pc_vec,1);
+            %num_sc = size(sc_vec,1);
+            %set hopping terms
+            Accuracy_roundn = round(log(Accuracy)/log(10));
+            if (strcmp(H_hr.Type,'mat')) ||options.force_list
+                fprintf("Attention enforce list mode in the folding process !");
+                H_hr = H_hr.rewrite();
+                OUT_H_hr = OUT_H_hr.rewrite();
+                %options.force_list = true;
+            end
+            switch H_hr.Type
+                case 'list'
+                    VectorList = double(H_hr.vectorL);
+                    %OutVectorList = VectorList;
+                    pb = vasplib_tool_outer.CmdLineProgressBar(...
+                        'Generate process: UNFOLDING:');
+                    sc_hiL = VectorList(:,4);
+                    sc_hjL = VectorList(:,5);
+                    hjL_orb_id_in_primitiveL = sc_orb_idL(sc_hjL);
+                    hiL_orb_id_in_primitiveL = sc_orb_idL(sc_hiL);
+                    Npc_orb_selectL = find(pc_orb_selectL);
+                    % pc_orb_selectL(Npc_orb_selectL,:);
+                    SelectedL = ismember(sc_hiL,Npc_orb_selectL);
+                    if H_hr.num
+                        HnumList = H_hr.HnumL(SelectedL,:);
+                        %nHopping = length(H_hr.HnumL);
+                    end
+                    if H_hr.coe
+                        HcoeList = H_hr.HcoeL(SelectedL,:);
+                        %nHopping = length(H_hr.HcoeL);
+                    end
+                    hjL_orb_id_in_primitiveL = hjL_orb_id_in_primitiveL(SelectedL);
+                    hiL_orb_id_in_primitiveL = hiL_orb_id_in_primitiveL(SelectedL);
+                    Selected_vectorL = VectorList(SelectedL,:);
+                    ind_R_in_supercellL = double(Selected_vectorL(:,1:3));
+                    Selected_sc_hiL = Selected_vectorL(:,4);
+                    Selected_sc_hjL = Selected_vectorL(:,5);
+                    TijL_in_supercellL = ind_R_in_supercellL + ...
+                        sc_orbL(Selected_sc_hjL,:) - sc_orbL(Selected_sc_hiL,:);
+                    TijL_in_primitiveL = TijL_in_supercellL*Ns;
+                    hiL_orbL_in_primitiveL = pc_orbL_full(Selected_sc_hiL,:);
+                    hjL_plusR_orbL_in_primitiveL = hiL_orbL_in_primitiveL + TijL_in_primitiveL;
+                    RvectorL_in_primitiveL = floor(hjL_plusR_orbL_in_primitiveL);
+                    %hjL_orbL_in_primitiveL = hjL_plusR_orbL_in_primitiveL - RvectorL_in_primitiveL;
+                    OutVectorList = [RvectorL_in_primitiveL,hiL_orb_id_in_primitiveL.',hjL_orb_id_in_primitiveL.'];
+                    pb.delete();
+                    if H_hr.num
+                        OUT_H_hr.HnumL = HnumList;
+                    end
+                    if H_hr.coe
+                        OUT_H_hr.HcoeL = HcoeList;
+                    end
+                    OUT_H_hr.vectorL = OutVectorList;
+                otherwise
             end
             H_hr = OUT_H_hr;
             H_hr.Basis_num = OUT_WAN_NUM;
@@ -3930,6 +4043,91 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             end
             sc_vec = int32(sc_vec);
             sc_orb = mod(sc_orb,1);% attention this may wrongly set!
+        end
+        function [pc_orb,pc_orbL_full,pc_elementL,pc_quantumL,orb_id_L,pc_orb_id_L,pc_orb_selectL] = unfold_orb(H_hr,Ns,Accuracy,orb_id_L)
+            %--------  init  --------
+            %import vasplib_tool.*
+            arguments
+                H_hr HR;
+                Ns double = eye(3);
+                Accuracy double = 1e-6;
+                orb_id_L = [];
+            end
+            %--------  init  --------
+            %             use_sc_red_lat=Ns;
+            %--------  check  --------
+            % checks on super-lattice Ns
+            if ~(Ns == round(Ns))
+                error("sc_red_lat array elements must be integers");
+            end
+            if det(Ns) < Accuracy
+                error("Super-cell lattice vectors length/area/volume too close to zero, or zero.");
+            end
+            if det(Ns)<0.0
+                error("Super-cell lattice vectors need to form right handed system.");
+            end
+            nAccuracy = round(log10(Accuracy));
+            %--------  init  --------
+            % Ns = round(Ns);
+            orb_init = H_hr.orbL;
+            %OUT_WAN_NUM = H_hr.WAN_NUM*V ;
+            % -------- bug-fix ----------
+            % sym instead
+            % Ns = sym(Ns);
+            % sc_vec = sym(sc_vec);
+            WANNUM = H_hr.WAN_NUM;
+            % orbitals of the super-cell tight-binding model
+            pc_orb=zeros(WANNUM,3);
+            translation_vector=zeros(WANNUM,3);
+            % Suppose we know nothing about the supercell sequence
+
+            count_tmp = 1;
+            cur_sc_vec = [0 0 0];
+            for iorb = 1:WANNUM % go over all orbitals
+                % shift orbital and compute coordinates
+                % reduced coordinates of primitive-cell
+                pc_orb_tmp = roundn((orb_init(iorb,:)*Ns-cur_sc_vec),nAccuracy);
+                [pc_orb_incell,translation_vector(count_tmp,:)] = vasplib.translation_orb(pc_orb_tmp);
+                pc_orb(count_tmp,:) = pc_orb_incell;
+                count_tmp =  count_tmp +1;
+            end
+            pc_orbL_full = pc_orb;
+            %try
+            %    PTL = [pc_orb,H_hr.elementL,H_hr.quantumL];
+            %catch
+            PTL = [pc_orb,translation_vector];
+            %end
+            [uniquePTL,uniqueAll,TrackingLater] = unique(PTL,'rows','stable');
+            %
+            translation_vector_mini = translation_vector(uniqueAll,:);
+            pc_orb_mini = pc_orb(uniqueAll,:);
+            % [~,uniqueTV] = unique(translation_vector,'rows','stable');
+            [~,uniqueOrb] = uniquetol(pc_orb_mini,10^(nAccuracy+1),'ByRows',true);
+            % Unique_translation_vector = translation_vector_mini(uniqueOrb,:);
+            [pc_orb_selectL,~] = ismember(PTL,uniquePTL(uniqueOrb,:),'rows');
+            pc_orb = pc_orbL_full(pc_orb_selectL,:);
+            % pc_vec = int32(translation_vector(pc_orb_selectL,:));
+            % pc_orb = mod(pc_orb,1);% attention this may wrongly set!
+            pc_elementL = H_hr.elementL(pc_orb_selectL,:);
+            pc_quantumL = H_hr.quantumL(pc_orb_selectL,:);
+            pc_orb_id_L = 1:size(pc_orb,1);
+            if isempty(orb_id_L)
+                pc_peqL = [pc_orb,pc_elementL,pc_quantumL];
+                sc_peqL = [pc_orbL_full,H_hr.elementL,H_hr.quantumL];
+            else
+                pc_peqL = [pc_orb,orb_id_L(pc_orb_selectL).'];
+                sc_peqL = [pc_orbL_full,orb_id_L.'];
+            end
+            % change nan
+            pc_peqL(isnan(pc_peqL)) = 0;
+            sc_peqL(isnan(sc_peqL)) = 0;
+            %
+            if size(unique(pc_peqL,"rows"),1) == size(pc_peqL,1)
+            else
+                warning('check duplicate orbital in primitive cell, the unfolding process is unreliable')
+            end
+            [~,sc_orb_selectL] = ismembertol(sc_peqL,pc_peqL,10^(nAccuracy+1),'ByRows',true);
+            orb_id_L = pc_orb_id_L(sc_orb_selectL);
         end
         function H_hr = Hnanowire_gen(H_hr,Nslab,np,vacuum_mode,options)
             %---------------------------

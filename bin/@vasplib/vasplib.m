@@ -5014,6 +5014,22 @@ classdef vasplib < matlab.mixin.CustomDisplay
             To_red_sc=red_vec_orig/Ns;
             %To_red_sc= To_red_sc';
         end
+        function To_red_pc=to_red_pc(red_vec_sc ,Ns)
+            To_red_pc = red_vec_sc*Ns;
+        end
+        function [orb_one_incell,translation_vector]=translation_orb(orb_one)
+            orb_one_incell = mod(orb_one,1);
+            if orb_one_incell(1) ==1
+                orb_one_incell(1)=0;
+            end
+            if orb_one_incell(2) ==1
+                orb_one_incell(2)=0;
+            end
+            if orb_one_incell(3) ==1
+                orb_one_incell(3)=0;
+            end
+            translation_vector = round(orb_one_incell - orb_one);
+        end
         function [list_obj_unique,sorted_label,cut_slice] = cut_tools(list_obj)
             [list_obj_sorted,sorted_label] = sortrows(list_obj);
             [list_obj_unique,unique_label] = unique(list_obj_sorted,'rows');

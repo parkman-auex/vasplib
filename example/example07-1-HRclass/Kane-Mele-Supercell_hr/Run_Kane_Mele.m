@@ -4,7 +4,7 @@
 % 2021.05
 %% 
 % * Author: 杨帆曾旭涛
-% * Email：
+% * Email: parkman@buaa.edu.cn
 %% 
 
 clear
@@ -36,7 +36,22 @@ Graphene_semiarmchair_n = Graphene.Subsall.rewrite.supercell_hr(Ns);
 Graphene_semiarmchair_n = Graphene_semiarmchair_n < 'KPOINTS_rectangle';
 EIGENCAR = Graphene_semiarmchair_n.EIGENCAR_gen();
 bandplot(EIGENCAR ,[-3,3],'title','Graphene-semiArmchair','Color','b','KPOINTS','KPOINTS_rectangle');
-Graphene_semiarmchair_n.show();
+Graphene_semiarmchair_n.show('TwoD',true);axis equal
+% Ns = [1,0,0;1 2 0;0 0 1];
+Graphene_semiarmchair_n = [Graphene_semiarmchair_n;Graphene_semiarmchair_n];
+Graphene_semiarmchair_n.quantumL(:,end) = [0.5;0.5;.5;0.5;-0.5;-0.5;-0.5;-0.5];
+RANDPERM_GO = randperm(Graphene_semiarmchair_n.WAN_NUM);
+%RANDPERM_GO = 1:8
+Graphene_semiarmchair_n = Graphene_semiarmchair_n.reseq(RANDPERM_GO);
+%% fold hr
+%Graphene_fold_n = Graphene_semiarmchair_n.unfold_hr(Ns,"Accuracy",1e-4);
+ORB_IDL = [1,2,1,2,3,4,3,4];
+Graphene_unfold_n = Graphene_semiarmchair_n.unfold_hr(Ns,"Accuracy",1e-4,'orb_idL',ORB_IDL(RANDPERM_GO));
+Graphene_unfold_n = Graphene_unfold_n.input_Rm('POSCAR');
+Graphene_unfold_n = Graphene_unfold_n < 'KPOINTS';
+EIGENCAR = Graphene_unfold_n.EIGENCAR_gen();
+bandplot(EIGENCAR ,[-3,3],'title','Graphene-unfold','Color','b');
+Graphene_unfold_n.show('TwoD',true);axis equal
 %% Kane-Model model
 
 V_NNN = [1 0 0; 0 1 0; -1 -1 0];
