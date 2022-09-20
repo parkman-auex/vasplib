@@ -1,0 +1,2 @@
+*.pptx filter=lfs diff=lfs merge=lfs -text
+*_hr.da* filter=lfs diff=lfs merge=lfs -text
