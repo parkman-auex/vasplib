@@ -704,12 +704,61 @@ classdef Hckt < matlab.mixin.CustomDisplay
             ylabel(ax,options.ylabel);
             xlim(OmegaCut);
         end
-        function [fig,ax] = bandplot(EIGNECAR,OmegaCut,SpectrumL,options)
+        function ax = waveplot(ObservationsMat,VectorList,SpectrumL,orbL,options_select,options)
+            arguments
+                ObservationsMat = [];
+                VectorList = [];
+                SpectrumL = [];
+                orbL = [];
+                options_select.Frequency = -1;
+                options_select.Width = 0;
+                options_select.scale = 1;
+                options.ax =  handle([]);
+                options.Rm = [];
+                options.POSCAR = 'POSCAR';
+                options.WaveMin = 1e-3;
+                options.WaveColor = 'r';
+                options.WaveSize = 1;
+                options.OrbColor = 'k';
+                options.OrbSize = 1;
+            end
+            %
+            optionscell = namedargs2cell(options);
+            %
+            if options_select.Frequency == -1
+                options_select.Frequency = SpectrumL(end/2);
+            end
+            if options_select.Width == 0
+                Scale = round(log(options_select.Frequency)/log(10));
+                options_select.Width = 10^(Scale-3);
+            end
+            %
+            OmegaCut = [options_select.Frequency - options_select.Width,options_select.Frequency - options_select.Width];
+            ChooseL = SpectrumL >= OmegaCut(1) & SpectrumL <= OmegaCut(2);
+            % For ABS
+            [ObservationsMat,VectorList] = HollowKnight.generalcontractrow2(VectorList,ObservationsMat);
+            ObservationsMat = abs(ObservationsMat);
+            % Rvector enforce three
+            NVectorList = size(VectorList,1);
+            RvectorL = VectorList(:,1:end-1);
+            NodeL = VectorList(:,end);
+            Dim = size(RvectorL,2);
+            if Dim <3
+                RvectorL = [RvectorL;zeros(NVectorList,3-Dim)];
+            end
+            % True orbL
+            littleorbL = orbL(NodeL,:);
+            ORBL = RvectorL+littleorbL;
+            % WaveFunc
+            WaveFunc = normalize(sum(ObservationsMat(:,ChooseL),2),'range',[0,1])*options_select.scale;
+            % 
+            ax = vasplib_plot.waveplot(ORBL,WaveFunc,optionscell{:});
+        end
+        function [ax] = bandplot(EIGNECAR,OmegaCut,SpectrumL,options)
             arguments
                 EIGNECAR = [];
                 OmegaCut = [0 20000];
                 SpectrumL = [];
-                options.fig =  handle([]);
                 options.ax =  handle([]);
                 options.FontName = 'Helvetica';
                 options.FontSize = 24;
@@ -724,11 +773,10 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 options.POSCAR = 'POSCAR';
                 options.shift = false;
             end
-            if isempty(options.fig) && isempty(options.ax)
+            if isempty(options.ax)
                 Fig = vasplib_plot.create_figure('Position',options.Position);
                 ax = Fig.axes;
             else
-                fig = options.fig;
                 ax = options.ax;
             end
             %
