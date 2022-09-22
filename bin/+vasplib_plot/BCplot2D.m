@@ -12,6 +12,7 @@ arguments
     options.shading logical= false;
     options.scalefactor double= 100;
     options.method {mustBeMember(options.method,{'linear','nearest','natural','v4'})} = 'linear';
+    options.plotmode {mustBeMember(options.plotmode,{'surf','contour'})} = 'surf'
 end
 %
 if isempty(options.ax)
@@ -60,13 +61,17 @@ else
         %最后一个为插值方法，包linear cubic natural nearest和v4等方法
         %v4方法耗时长但较为准确
         meshU = griddata(X,Y,BCCAR,meshX,meshY,options.method);
-        h = surf(ax,meshX,meshY,meshZ,meshU,'EdgeColor','none');
     else
         % secondly, obtain the mesh by Xcoord and Ycoord
         [meshX,meshY,meshZ] = meshgrid(Grid1,Grid2,Grid3);
         % Finally, 利用griddata来插值，从xyz生成栅格数据
         meshU = griddata(X,Y,Z,BCCAR,meshX,meshY,meshZ,options.method);
-        h = surf(ax,meshX,meshY,meshZ,meshU,'EdgeColor','none');
+    end
+    switch options.plotmode
+        case 'surf'
+            h = surf(ax,meshX,meshY,meshZ,meshU,'EdgeColor','none');
+        case 'contour'
+            h = contourf(ax,meshX,meshY,meshU);
     end
 end
 % colormap(ax,redbluecmap);
