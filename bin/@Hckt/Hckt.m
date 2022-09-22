@@ -704,7 +704,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
             ylabel(ax,options.ylabel);
             xlim(OmegaCut);
         end
-        function ax = waveplot(ObservationsMat,VectorList,SpectrumL,orbL,options_select,options)
+        function [ax,WaveFunc] = waveplot(ObservationsMat,VectorList,SpectrumL,orbL,options_select,options)
             arguments
                 ObservationsMat = [];
                 VectorList = [];
@@ -733,10 +733,10 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 options_select.Width = 10^(Scale-3);
             end
             %
-            OmegaCut = [options_select.Frequency - options_select.Width,options_select.Frequency - options_select.Width];
+            OmegaCut = [options_select.Frequency - options_select.Width,options_select.Frequency + options_select.Width];
             ChooseL = SpectrumL >= OmegaCut(1) & SpectrumL <= OmegaCut(2);
             % For ABS
-            [ObservationsMat,VectorList] = HollowKnight.generalcontractrow2(VectorList,ObservationsMat);
+            [VectorList,ObservationsMat] = HollowKnight.generalcontractrow2(VectorList,ObservationsMat);
             ObservationsMat = abs(ObservationsMat);
             % Rvector enforce three
             NVectorList = size(VectorList,1);
@@ -744,7 +744,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
             NodeL = VectorList(:,end);
             Dim = size(RvectorL,2);
             if Dim <3
-                RvectorL = [RvectorL;zeros(NVectorList,3-Dim)];
+                RvectorL = [RvectorL,zeros(NVectorList,3-Dim)];
             end
             % True orbL
             littleorbL = orbL(NodeL,:);
@@ -967,11 +967,11 @@ classdef Hckt < matlab.mixin.CustomDisplay
             switch  HcktObj.magnitude
                 case 'p'
                     TRAN =".tran 1ns 10us";
-                    AC = ".AC LIN 10000 0 2e06";
+                    AC = ".AC LIN 10000 0 2e07";
                     DEFAULT_PARM = "%.PARAM InitV =0V CA = 100p C_hopping = 100p C_v = 100p";
                 case 'n'
                     TRAN =".tran 50ns 500us";
-                    AC = ".AC LIN 1000 0 2e05";
+                    AC = ".AC LIN 1000 0 1e06";
                     DEFAULT_PARM = "%.PARAM InitV =0V CA = 100n C_hopping = 100n C_v = 100n";
                 case 'u'
                     TRAN =".tran 1us 10ms";
