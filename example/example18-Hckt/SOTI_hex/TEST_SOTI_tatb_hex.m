@@ -130,7 +130,7 @@ for i = 1:size(para_list,1)
     %             i1 > 1-1/Nsuper-2*TRACK+efsmall |...
     %             i2 > 1-1/Nsuper-2*TRACK+efsmall |...
     %             i2-i1 > 0.5- 0.5/Nsuper-TRACK+efsmall | ...
-    %             i2-i1 < -0.5+0.5/Nsuper+TRACK-efsmall;
+    %             i2-i1 < -0.5+0.5/uper+TRACK-efsmall;
     %         n_disk_cut = n_disk.cut_orb('rmfunc',rmfunc);
     %n_disk_cut.show('NRPTS','vectorList',[0,0,0],'scale',5);
     %view(0,90)
@@ -148,7 +148,7 @@ for i = 1:size(para_list,1)
     %error('as');
     [EIGENCAR_disk,WAVECAR_disk,WEIGHTCAR] = n_disk_cut.EIGENCAR_gen('WEIGHTCAR',true,'klist',[0 0 0]);
     %%
-    figure = vasplib_tool.creat_figure();
+    figure = vasplib_plot.create_figure();
     Nocc = length(EIGENCAR_disk)/2;
     %plot(EIGENCAR_disk,'-o');
     F0CAR_disk = (EIGENCAR_disk*L_0*Cfactor).^(-1/2)./(2*pi);

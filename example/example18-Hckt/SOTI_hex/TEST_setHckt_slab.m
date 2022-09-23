@@ -4,7 +4,7 @@ HCKT_SOTIHEX = Hckt('title','SOTIHEX','Nports',6,'vectorAll',[0,0]);
 %% set Lib
 HCKT_SOTIHEX.Lib = [HCKT_SOTIHEX.Lib ;];
 %% set options
-HCKT_SOTIHEX.Options = [".ic v(n_01_01_1) = 1";...
+HCKT_SOTIHEX.Options = ["*.ic v(n_01_01_1) = 1";...
     ".tran 1ns 10us";...
     ".option post=2 probe";...
     ".option parhier=global";...
@@ -46,34 +46,83 @@ meshs = [10,10];
 basename = 'SOTIhex';
 meshname = ['_',num2str(meshs(1)),'_',num2str(meshs(2))];
 NAME = [basename,meshname];
-    HCKT_SOTIHEX.hspice_gen([NAME,'.sp'],...
-        "probenode",'Allnode',...
-        'mesh',meshs,'mode','general','fin_dir',[0,1]);
+Hckt.Genlib();
+HCKT_SOTIHEX.hspice_gen([NAME,'.sp'],...
+    "probenode",'Allnode',...
+    'mesh',meshs,'mode','general','fin_dir',[0,1],'node',2);
 % end
 
-if 1 ==2
+if isunix && ~ismac()
     %%
     %eval(['!hspice ',NAME,'.sp >log']);
     %eval(['!hspiceTR ',NAME,'.tr0']);
-    meshs = [30,30];
+    %ObservationsMat2 = ObservationsMat;
+    EvalStringRun = (['!hspice -mt 20 -i ',strcat(NAME,'.sp'),' |tee log']);
+    eval(EvalStringRun);
+    DATAname = [NAME,'.tr0'];
+    EvalStringDATA = (['!hspiceTR ',DATAname]);
+    eval(EvalStringDATA);
+    meshs = [10,10];
     basename = 'SOTIhex';
     meshname = ['_',num2str(meshs(1)),'_',num2str(meshs(2))];
     NAME = [basename,meshname]; 
     simulation_result = Hckt.read_hspice_tr([NAME,'.tr0']);
     [VectorList,ObservationsMat,~,OmgL,TimeL] = Hckt.extractObservations(simulation_result);
-%ObservationsMat2 = ObservationsMat;
+
 %% grid
 L_0 = 1e-6;
 Cfactor = 100*1E-12;% 100 pF
 OmegaFactor = (Cfactor*L_0*100)^(-1/2);
 OMEGACUTpre = [0,2];
 OmegaCut = OMEGACUTpre*OmegaFactor;
-SelectL = VectorList(:,3)== 2;
+ SelectL = VectorList(:,3)== 2 &VectorList(:,2)== meshs(2);
 % VectorList(:,2)== 30;
 ObservationsMat2 = ObservationsMat(SelectL,:);
-ObservationsMat2 = HollowKnight.generalcontractrow(VectorList(SelectL,2),ObservationsMat2);
 DOSCAR = Hckt.CollectVstruct1D(ObservationsMat2);
 %[DOSCAR_3D,klist1,klist2,OmgL] = Hckt.CollectVstruct2D(VectorList,ObservationsMat2,OmegaCut,SpectrumX);
-EIGENCAR = Hckt.ProjectDOSCAR(DOSCAR);
-Hckt.bandplot(EIGENCAR,OmegaCut,OmgL);
+EIGENCAR = Hckt.ProjectDOSCAR(DOSCAR,'KPOINTS','KPOINTS_slab');
+Hckt.bandplot(EIGENCAR,OmegaCut,OmgL,'KPOINTS','KPOINTS_slab');
+end
+
+%return;
+
+%%% AC
+%%
+
+HCKT_SOTIHEX.hspice_gen([NAME,'_AC.sp'],...
+    "probenode",'Allnode',...
+    'mesh',meshs,'mode','general','analysis','ac','fin_dir',[0,1],'node',2);
+% end
+
+if isunix && ~ismac()
+    %%
+    %eval(['!hspice ',NAME,'.sp >log']);
+    %eval(['!hspiceTR ',NAME,'.tr0']);
+    EvalStringRun = (['!hspice -mt 20 -i ',strcat(NAME,'_AC.sp'),' |tee log']);
+    eval(EvalStringRun);
+    DATAname = [NAME,'_AC.ac0'];
+    EvalStringDATA = (['!hspiceAC ',DATAname]);
+    eval(EvalStringDATA);
+    meshs = [10,10];
+    basename = 'SOTIhex';
+    meshname = ['_',num2str(meshs(1)),'_',num2str(meshs(2))];
+    NAME = [basename,meshname];
+    simulation_result = Hckt.read_hspice_ac([NAME,'_AC.ac0']);
+    [VectorList,ObservationsMat,~,OmgL,TimeL] = Hckt.extractObservations(simulation_result,'analysis','ac');
+    %ObservationsMat2 = ObservationsMat;
+    
+    %% grid
+    L_0 = 1e-6;
+    Cfactor = 100*1E-12;% 100 pF
+    OmegaFactor = (Cfactor*L_0*100)^(-1/2);
+    OMEGACUTpre = [0,2];
+    OmegaCut = OMEGACUTpre*OmegaFactor;
+    SelectL = VectorList(:,3)== 2 &VectorList(:,2)== meshs(2) ;
+    % VectorList(:,2)== 30;
+    ObservationsMat2 = ObservationsMat(SelectL,:);
+  
+    DOSCAR = Hckt.CollectVstruct1D(ObservationsMat2);
+    %[DOSCAR_3D,klist1,klist2,OmgL] = Hckt.CollectVstruct2D(VectorList,ObservationsMat2,OmegaCut,SpectrumX);
+    EIGENCAR = Hckt.ProjectDOSCAR(DOSCAR,'KPOINTS','KPOINTS_slab');
+    Hckt.bandplot(EIGENCAR,OmegaCut,OmgL,'KPOINTS','KPOINTS_slab');
 end

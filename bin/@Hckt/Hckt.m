@@ -572,6 +572,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
             end
         end
         function [EIGENCAR] = CollectVstruct1D(ObservationsMat)
+            % need fix
             %[VectorList,ObservationsMat]=HollowKnight.generalcontractrow2(VectorList(:,1:end-1),ObservationsMat);
             %DurationTime = max(TimeL);
             %redundancy = 1;
@@ -906,6 +907,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 options2.nodelist = [];
                 options3.fft = false;
                 options3.libmode = false;
+                options4.node = 1;
                 options4.mode {mustBeMember(options4.mode,{'general','vectorized','BinBin'})}= 'general';% finished -> general
                 options5.analysis {mustBeMember(options5.analysis,{'tran','ac'})} = 'tran';
             end
@@ -920,11 +922,18 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 NodeStr = [NodeStr,'_',num2str(options.mesh(i))];
                 Basename = [Basename,'_',num2str(options.mesh(i))];
             end
-            NodeStr = [NodeStr,'_1'];
+            NodeStr = [NodeStr,'_',num2str(options4.node )];
             % IC
-            ICSTRING = ['.ic v(',NodeStr,'_1) = 1'];
+            ICSTRING = ['.ic v(',NodeStr,') = 1'];
             % Ipulse
-            IpulseSTRING = ['Ipulse ',NodeStr,' GND PU 0 1 5u 5u 50u'];
+            switch HcktObj.magnitude
+                case 'p'
+                    IpulseSTRING = ['Ipulse ',NodeStr,' GND PU 0 1 5n 5n 50u'];
+                case 'u'
+                    IpulseSTRING = ['Ipulse ',NodeStr,' GND PU 0 1 5n 5n 50m'];
+                case 'm'
+                    IpulseSTRING = ['Ipulse ',NodeStr,' GND PU 0 1 5n 5n 50'];
+            end
             % Vac
             VacSTRING = "Vac source GND AC 1 0";
             VacSTRING = [VacSTRING;string(['R_for_ac ',NodeStr,' source 100'])]; 

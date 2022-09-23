@@ -5,7 +5,7 @@ Graphene = HR.from_POSCAR_SE('POSCAR','level_cut',1,'onsite',false,'per_dir',[1,
 Graphene = subs(Graphene,[v]);
 Graphene = Graphene<'POSCAR';
 %% prepare
-HexTaTb_Hcktpre = Graphene.HRforHckt();
+Hcktpre = Graphene.HRforHckt();
 % Add Unit
 L_0 = 1e-6;
 MU = 100;
@@ -36,8 +36,8 @@ C_0 = 1;
 bandplot(Graphene.Subsall().EIGENCAR_gen('convention','I'),...
     [-3,3],'title',"t = "+num2str(v),'Color','b','ax',FigTest.axes(1));
 %
-HexTaTb_Hcktpre_n = HexTaTb_Hcktpre.Subsall();
-EIGENCAR = HexTaTb_Hcktpre_n.EIGENCAR_gen();
+Hcktpre_n = Hcktpre.Subsall();
+EIGENCAR = Hcktpre_n.EIGENCAR_gen();
 F0CAR = (EIGENCAR*L_0*Cfactor).^(-1/2)./(2*pi);
 OMEGACUTpre = [0,2];
 OMEGACUT = OMEGACUTpre*OmegaFactor;

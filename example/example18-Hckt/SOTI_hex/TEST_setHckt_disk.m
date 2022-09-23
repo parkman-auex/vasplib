@@ -4,7 +4,7 @@ HCKT_SOTIHEX = Hckt('title','SOTIHEX','Nports',6,'vectorAll',[0,0]);
 %% set Lib
 HCKT_SOTIHEX.Lib = [HCKT_SOTIHEX.Lib ;];
 %% set options
-HCKT_SOTIHEX.Options = [".ic v(n_01_01_1) = 1";...
+HCKT_SOTIHEX.Options = ["*.ic v(n_01_01_1) = 1";...
     ".tran 1ns 10us";...
     ".option post=2 probe";...
     ".option parhier=global";...
@@ -51,11 +51,11 @@ NAME = [basename,meshname];
         'mesh',meshs,'mode','general','fin_dir',[1,1],'analysis','ac');
 % end
 
-if 1 ==2
+if isunix && ~ismac()
     %%
     %eval(['!hspice ',NAME,'.sp >log']);
     %eval(['!hspiceTR ',NAME,'.tr0']);
-    meshs = [30,30];
+    meshs = [10,10];
     basename = 'SOTIhex';
     meshname = ['_',num2str(meshs(1)),'_',num2str(meshs(2))];
     NAME = [basename,meshname]; 

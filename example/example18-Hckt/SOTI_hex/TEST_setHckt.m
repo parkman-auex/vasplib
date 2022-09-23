@@ -43,19 +43,26 @@ HCKT_SOTIHEX = HCKT_SOTIHEX.set_hop([-1,0],CW,4,1);
 HCKT_SOTIHEX = HCKT_SOTIHEX.set_hop([0,-1],CW,5,2);
 HCKT_SOTIHEX = HCKT_SOTIHEX.set_hop([-1,-1],CW,6,3);
 %% Gen_sp
-meshs = [30,30];
+meshs = [10,10];
 % for i = [10,20,50,100]
 %     meshs=i;
+Hckt.Genlib();
 meshname = ['_',num2str(meshs(1)),'_',num2str(meshs(2))];
-    HCKT_SOTIHEX.hspice_gen(['SOTIhex',meshname,'.sp'],...
+   [~,Basename] = HCKT_SOTIHEX.hspice_gen(...
         "probenode",'Allnode',...
         'mesh',meshs,'mode','vectorized');
+    DATAname = [char(Basename),'.tr0'];
 % end
 %% 
-if 1 ==2
-    meshs = [30,30];
+if isunix && ~ismac()
+    %% run; run it on linux system
+    EvalStringRun = (['!hspice -mt 20 -i ',strcat(Basename,'.sp'),' |tee log']);
+    eval(EvalStringRun);
+    EvalStringDATA = (['!hspiceTR ',DATAname]);
+    eval(EvalStringDATA);
+    meshs = [10,10];
     meshname = ['_',num2str(meshs(1)),'_',num2str(meshs(2))];
-    simulation_result = Hckt.read_hspice_tr(['SOTIhex',meshname,'.tr0']);
+    simulation_result = Hckt.read_hspice_tr(DATAname);
     [VectorList,ObservationsMat,~,SpectrumX,TimeL] = Hckt.extractObservations(simulation_result);
 %ObservationsMat2 = ObservationsMat;
 %% grid
@@ -70,3 +77,34 @@ ObservationsMat2 = ObservationsMat(SelectL,:);
 EIGENCAR = Hckt.ProjectDOSCAR(DOSCAR_3D);
 Hckt.bandplot(EIGENCAR,OmegaCut,OmgL);
 end
+return;
+
+%%% AC
+%%
+   [~,Basename] = HCKT_SOTIHEX.hspice_gen(...
+        "probenode",'Allnode',...
+        'analysis','ac','mesh',meshs);
+    DATAname = [char(Basename),'_AC.ac0'];
+ if isunix && ~ismac()
+    %% run; run it on linux system
+    EvalStringRun = (['!hspice -mt 20 -i ',strcat(Basename,'_AC.sp'),' |tee log']);
+    eval(EvalStringRun);
+    EvalStringDATA = (['!hspiceAC ',DATAname]);
+    eval(EvalStringDATA);
+    meshs = [10,10];
+    meshname = ['_',num2str(meshs(1)),'_',num2str(meshs(2))];
+    simulation_result = Hckt.read_hspice_ac(DATAname);
+    [VectorList,ObservationsMat,~,SpectrumX,TimeL] = Hckt.extractObservations(simulation_result,'analysis','ac');
+%ObservationsMat2 = ObservationsMat;
+%% grid
+L_0 = 1e-6;
+Cfactor = 100*1E-12;% 100 pF
+OmegaFactor = (Cfactor*L_0*100)^(-1/2);
+OMEGACUTpre = [0,2];
+OmegaCut = OMEGACUTpre*OmegaFactor;
+SelectL = VectorList(:,3)== 2;
+ObservationsMat2 = ObservationsMat(SelectL,:);
+[DOSCAR_3D,klist1,klist2,OmgL] = Hckt.CollectVstruct2D(VectorList,ObservationsMat2,OmegaCut,SpectrumX);
+EIGENCAR = Hckt.ProjectDOSCAR(DOSCAR_3D);
+Hckt.bandplot(EIGENCAR,OmegaCut,OmgL);
+end   

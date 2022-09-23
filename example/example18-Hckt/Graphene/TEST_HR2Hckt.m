@@ -1,7 +1,7 @@
 %% Declare the primitive of Graphene
 TITLE = 'Graphene';
 Dim = 2;
-meshs = [30 30];
+meshs = [10 10];
 workdir = pwd;
 %magnitude = 'p';
 magnitude = 'p';
@@ -46,13 +46,13 @@ simulation_result = Hckt.read_hspice_tr(DATAname);
 SelectL = VectorList(:,end) == 1;
 ObservationsMat2 = ObservationsMat(SelectL,:);
 SelectOmegaL = find(SpectrumX >= OmegaCut(1) & SpectrumX <= OmegaCut(2));
-[DOSCAR_3D,klist1,klist2,OmgL] = Hckt.CollectVstruct2D(VectorList,ObservationsMat2,OmegaCut,SpectrumX);
+[DOSCAR_3D,klist1,klist2,OmgL] = Hckt.CollectVstruct2D(VectorList(SelectL,:),ObservationsMat2,OmegaCut,SpectrumX);
 EIGENCAR = Hckt.ProjectDOSCAR(DOSCAR_3D);
 Hckt.bandplot(EIGENCAR,OmegaCut,OmgL);
 %%
 end
 
-return;
+%return;
 
 %% AC
 if 1 == 1
@@ -72,10 +72,10 @@ end
 %% 
 if isunix && ~ismac()
 %% data clean
-simulation_result = Hckt.read_hspice_ac([DATAname,'.ac0']);
+simulation_result = Hckt.read_hspice_ac([DATAname]);
 [VectorList,ObservationsMat,~,SpectrumX,TimeL] = Hckt.extractObservations(simulation_result,'analysis','ac');
 % grid
-SelectL = VectorList(:,2)==1;
+SelectL = VectorList(:,end)==1;
 ObservationsMat2 = ObservationsMat(SelectL,:);
 %% 
 [DOSCAR_3D,klist1,klist2,OmgL] = Hckt.CollectVstruct2D(VectorList,ObservationsMat2,OmegaCut,SpectrumX);
@@ -88,6 +88,7 @@ end
 %% slab
 mkdir('slab');
 copyfile("KPOINTS_slab",'slab/KPOINTS');
+copyfile("POSCAR",'slab/POSCAR');
 cd slab
 % Gen_sp
 Hckt.Genlib();
@@ -106,13 +107,20 @@ if isunix && ~ismac()
 DATAname = [Basename,'.tr0'];
 simulation_result = Hckt.read_hspice_tr(DATAname);
 [VectorList,ObservationsMat,~,SpectrumX,TimeL] = Hckt.extractObservations(simulation_result);
-%
+SelectL = VectorList(:,3)== 1 & VectorList(:,2)== meshs(2);
+ObservationsMat2 = ObservationsMat(SelectL,:);
+VectorList2 = VectorList(SelectL,:);
+DOSCAR = Hckt.CollectVstruct1D(ObservationsMat2);
+%[DOSCAR_3D,klist1,klist2,OmgL] = Hckt.CollectVstruct2D(VectorList,ObservationsMat2,OmegaCut,SpectrumX);
+EIGENCAR = Hckt.ProjectDOSCAR(DOSCAR);
+Hckt.bandplot(EIGENCAR,OmegaCut,OmgL);
 end
 cd(workdir);
 %%% OpenBoundary AC %%%%
 %% slab
 mkdir('slab');
 copyfile("KPOINTS_slab",'slab/KPOINTS');
+copyfile("POSCAR",'slab/POSCAR');
 cd slab
 % Gen_sp
 Hckt.Genlib();
@@ -131,4 +139,11 @@ if isunix && ~ismac()
 simulation_result = Hckt.read_hspice_tr(DATAname);
 [VectorList,ObservationsMat,~,SpectrumX,TimeL] = Hckt.extractObservations(simulation_result,'analysis','ac');
 %
+SelectL = VectorList(:,3)== 1 & VectorList(:,2)== meshs(2);
+ObservationsMat2 = ObservationsMat(SelectL,:);
+VectorList2 = VectorList(SelectL,:);
+DOSCAR = Hckt.CollectVstruct1D(ObservationsMat2);
+%[DOSCAR_3D,klist1,klist2,OmgL] = Hckt.CollectVstruct2D(VectorList,ObservationsMat2,OmegaCut,SpectrumX);
+EIGENCAR = Hckt.ProjectDOSCAR(DOSCAR);
+Hckt.bandplot(EIGENCAR,OmegaCut,OmgL);
 end

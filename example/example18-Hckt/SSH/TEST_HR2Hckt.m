@@ -29,7 +29,7 @@ Hckt.Genlib('magnitude',magnitude);
 [~,Basename] = HCKT_test.hspice_gen('mesh',meshs);
 DATAname = [char(Basename),'.tr0'];
 end
-if 1 == 2
+if isunix && ~ismac()
 %% run; run it on linux system
 EvalStringRun = (['!hspice ',strcat(Basename,'.sp'),' |tee log']);
 eval(EvalStringRun);
@@ -37,7 +37,7 @@ EvalStringDATA = (['!hspiceTR ',DATAname]);
 eval(EvalStringDATA);
 end
 %% 
-if 1 ==2
+if isunix && ~ismac()
 %% data clean
 DATAname = [Basename,'.tr0'];
 simulation_result = Hckt.read_hspice_tr(DATAname);
@@ -61,21 +61,19 @@ if 1 == 1
 Analysis = 'ac';
 Hckt.Genlib('magnitude',magnitude);
 [~,Basename] = HCKT_test.hspice_gen('mesh',meshs,'analysis',Analysis);
-DATAname = [char(Basename),'.ac0'];
+DATAname = [char(Basename),'_AC.ac0'];
 end
-if 1 == 2
+if isunix && ~ismac()
 %% run; run it on linux system
-EvalStringRun = (['!hspice ',strcat(Basename,'.sp'),' |tee log']);
+EvalStringRun = (['!hspice ',strcat(Basename,'_AC.sp'),' |tee log']);
 eval(EvalStringRun);
 EvalStringDATA = (['!hspiceAC ',DATAname]);
 eval(EvalStringDATA);
 end
 %% 
-if 1 ==2
+if isunix && ~ismac()
 %% data clean
-Basename = 'SSH_10';
-DATAname = [Basename,'.ac0'];
-simulation_result = Hckt.read_hspice_ac([Basename,'.ac0']);
+simulation_result = Hckt.read_hspice_ac(DATAname);
 [VectorList,ObservationsMat,~,SpectrumX,TimeL] = Hckt.extractObservations(simulation_result,'analysis','ac');
 % grid
 SelectL = VectorList(:,2)==1;
@@ -96,7 +94,7 @@ Hckt.Genlib();
 [~,Basename] = HCKT_test.hspice_gen('mesh',meshs,'fin_dir',[1]);
 DATAname = [char(Basename),'.tr0'];
 %
-if 1 == 2
+if isunix && ~ismac()
 % run; run it on linux system
 EvalStringRun = (['!hspice ',strcat(Basename,'.sp'),' |tee log']);
 eval(EvalStringRun);
@@ -104,13 +102,13 @@ EvalStringDATA = (['!hspiceTR ',DATAname]);
 eval(EvalStringDATA);
 end
 %
-if 1==2
+if  isunix && ~ismac()
 DATAname = [Basename,'.tr0'];
 simulation_result = Hckt.read_hspice_tr(DATAname);
 [VectorList,ObservationsMat,~,SpectrumX,TimeL] = Hckt.extractObservations(simulation_result);
 %
 end
-cd ..;
+cd(workdir);
 %%% OpenBoundary AC %%%%
 %% slab
 mkdir('slab');
@@ -118,19 +116,20 @@ cd slab
 % Gen_sp
 Hckt.Genlib();
 [~,Basename] = HCKT_test.hspice_gen('mesh',meshs,'fin_dir',[1],'analysis','ac');
-DATAname = [char(Basename),'.ac0'];
+DATAname = [char(Basename),'_AC.ac0'];
 %
-if 1 == 2
+if  isunix && ~ismac()
 % run; run it on linux system
-EvalStringRun = (['!hspice ',strcat(Basename,'.sp'),' |tee log']);
+EvalStringRun = (['!hspice ',strcat(Basename,'_AC.sp'),' |tee log']);
 eval(EvalStringRun);
 EvalStringDATA = (['!hspiceTR ',DATAname]);
 eval(EvalStringDATA);
 end
 %
-if 1==2
-DATAname = [Basename,'.ac0'];
+if  isunix && ~ismac()
+DATAname = [Basename,'_AC.ac0'];
 simulation_result = Hckt.read_hspice_tr(DATAname);
 [VectorList,ObservationsMat,~,SpectrumX,TimeL] = Hckt.extractObservations(simulation_result);
 %
 end
+cd(workdir);
