@@ -934,7 +934,12 @@ classdef Hckt < matlab.mixin.CustomDisplay
             HcktObj.Ipulse = string(IpulseSTRING);
             % filename
             if strcmp(filename,"")
-                filename = strcat(Basename,'.sp');
+                switch options5.analysis
+                    case 'ac'
+                        filename = strcat(Basename,'_AC.sp');
+                    otherwise
+                        filename = strcat(Basename,'.sp');
+                end
             end
             %
             switch options4.mode 
