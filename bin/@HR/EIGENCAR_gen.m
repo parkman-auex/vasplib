@@ -17,9 +17,11 @@ arguments
     options.Umat = [];
     options.subband = [];
     options.returnH = [];
+    options.Hermite = true;
 end
 % -------------- define ------------------
 norb_enforce  = options.norb;
+Hermite = options.Hermite;
 NRPTS_tmp = H_hr.NRPTS;
 % -------------- plot ------------------
 if options.show
@@ -194,7 +196,11 @@ if strcmp(options.convention,'II')
                 Htemp = Htemp + (HnumList{i}*FactorListki(i));
             end
             %Hout = Htemp;
-            Hout = (Htemp+Htemp')/2;
+            if Hermite
+                Hout = (Htemp+Htemp')/2;
+            else
+                Hout = Htemp;
+            end
             %Hout = sparse(Hout);
         elseif strcmp(H_hr.Type,'list')
             Hout = zeros(WANNUM ,WANNUM);
@@ -202,7 +208,9 @@ if strcmp(options.convention,'II')
             for i=1:H_hr.N_Sparse_vector
                 Hout(H_hr.Sparse_vector(i,1),H_hr.Sparse_vector(i,2)) = sum(Hnum_list_k(H_hr.CutList(i,1):H_hr.CutList(i,2)));
             end
-            Hout = (Hout+Hout')/2;
+            if Hermite
+                Hout = (Hout+Hout')/2;
+            end
             %
             if H_hr.overlap
                 Snum_list_k = Snum_list.*FactorListS(:,ki);
@@ -215,7 +223,9 @@ if strcmp(options.convention,'II')
             end
         else
             Hout = sum(pagemtimes(HnumList,reshape(FactorListki,[1 1 NRPTS_tmp])),3);
-            Hout = (Hout+Hout')/2;
+            if Hermite
+                Hout = (Hout+Hout')/2;
+            end
             if H_hr.overlap
                 Sout = sum(pagemtimes(SnumList,reshape(FactorListS(:,ki),[1 1 NRPTS_tmp_S])),3);
                 Sout = (Sout+Sout')/2;
@@ -224,7 +234,9 @@ if strcmp(options.convention,'II')
         if UmatMode
             Hout = Umat\Hout*Umat;
             Hout = Hout(subband,subband);
-            Hout = (Hout+Hout')/2;
+            if Hermite
+                Hout = (Hout+Hout')/2;
+            end
         end
         if norb_enforce <0
             if H_hr.overlap
@@ -285,7 +297,11 @@ elseif strcmp(options.convention,'I')
                     )...
                     );
             end
-            Hout = (Htemp+Htemp')/2;
+            if Hermite
+                Hout = (Htemp+Htemp')/2;
+            else
+                Hout = Htemp;
+            end
             %Hout = sparse(Hout);
         elseif strcmp(H_hr.Type,'list')
             Hout = zeros(WANNUM ,WANNUM);
@@ -294,7 +310,9 @@ elseif strcmp(options.convention,'I')
                 Hout(H_hr.Sparse_vector(i,1),H_hr.Sparse_vector(i,2)) = sum(Hnum_list_k(H_hr.CutList(i,1):H_hr.CutList(i,2)));
             end
             Hout = Hout.*Hmat_tji;
-            Hout = (Hout+Hout')/2;
+            if Hermite
+                Hout = (Hout+Hout')/2;
+            end
             %
             if H_hr.overlap
                 Snum_list_k = Snum_list.*FactorListS(:,ki);
@@ -307,7 +325,9 @@ elseif strcmp(options.convention,'I')
             end
         else
             Hout = sum(pagemtimes(HnumList,reshape(FactorListki,[1 1 NRPTS_tmp])),3).*Hmat_tji;
-            Hout = (Hout+Hout')/2;
+            if Hermite
+                Hout = (Hout+Hout')/2;
+            end
             if H_hr.overlap
                 Sout = sum(pagemtimes(SnumList,reshape(FactorListS(:,ki),[1 1 NRPTS_tmp_S])),3).*Hmat_tji;% ?
                 Sout = (Sout+Sout')/2;
@@ -322,7 +342,9 @@ elseif strcmp(options.convention,'I')
             % debug
             % max(max(abs(Hout((length(subband)+1):end,subband))))
             Hout = Hout(subband,subband);
-            Hout = (Hout+Hout')/2;
+            if Hermite
+                Hout = (Hout+Hout')/2;
+            end
         end
         if norb_enforce <0
             if H_hr.overlap

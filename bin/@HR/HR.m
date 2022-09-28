@@ -2348,7 +2348,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             if options.cartesian
                 tij_mat_k = H_hr.tjmti{3};
                 syms k_x k_y k_z real;
-                exp_pre = exp(-1i... % 1i possible
+                exp_pre = exp(1i... % 1i possible
                     *[k_x k_y k_z]*(...
                     vectorList*H_hr.Rm)');
                 for i = 1:H_hr.NRPTS
@@ -2361,7 +2361,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             else
                 tij_mat_s = H_hr.tjmti{4};
                 syms k_1 k_2 k_3 real;
-                exp_pre = exp(-1i*2*pi... % 1i possible
+                exp_pre = exp(1i*2*pi... % 1i possible
                     *[k_1 k_2 k_3]*(...
                     vectorList)');
                 for i = 1:H_hr.NRPTS

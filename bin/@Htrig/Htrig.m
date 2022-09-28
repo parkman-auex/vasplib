@@ -2025,7 +2025,7 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
                 H_hr = H_hr < options.POSCAR;
             end
             H_hr = H_hr.tjmti_gen();
-            tij_mat_r = H_hr.tjmti{1};
+            tji_mat_r = H_hr.tjmti{1};
             %%
             syms k_x k_y k_z real
             hsym = Htrig_exp.HsymL_trig;
@@ -2047,10 +2047,10 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
                         if isequal(Hexp(i,j,n), sym(0))
                             continue               
                         end
-                        kij_num = reshape(tij_mat_r(i,j,:),[1,3]);
-                        kr = - kij_num + kd_num;
+                        kji_num = reshape(tji_mat_r(i,j,:),[1,3]);
+                        kr =  kji_num + kd_num;
                         vector = round(kr/rm);
-                        H_hr = H_hr.set_hop(Hexp(i,j,n)',i,j,vector,'symadd');
+                        H_hr = H_hr.set_hop(conj(Hexp(i,j,n)),j,i,vector,'symadd');
                     end
                 end
             end
