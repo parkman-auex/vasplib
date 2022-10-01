@@ -23,6 +23,10 @@ classdef HK < vasplib & matlab.mixin.CustomDisplay
         num = [];        % num(numeric).
         coe = [];        % coe(symbolic).
         Type = 'empty';
+        %PlaneWave = false;
+        %pqoL_G =[];
+        %PlaneWaveN = 0;
+        %PlaneWaveExpandDirection = [0 0 0];
     end
     properties (Dependent=true)
         HsymL_k;
@@ -43,7 +47,7 @@ classdef HK < vasplib & matlab.mixin.CustomDisplay
                 case 1
                     if isnumeric(BASIS_NUM)
                         H_hk.Degree = 1;
-                        H_hk =H_hk.Degree2Kinds();
+                        H_hk = H_hk.Degree2Kinds();
                         H_hk.Basis_num = BASIS_NUM;
                         H_hk.HcoeL = sym(zeros(BASIS_NUM,BASIS_NUM,H_hk.Kinds));
                         H_hk.HnumL = (zeros(BASIS_NUM,BASIS_NUM,H_hk.Kinds));
@@ -180,7 +184,10 @@ classdef HK < vasplib & matlab.mixin.CustomDisplay
             for i =1:H_hk.Kinds
                 Hk_sym = Hk_sym + H_hk.HcoeL(:,:,i)*H_hk.HsymL_k(i);
             end
-            Hk_sym = Hk_sym + H_hk.Trig_to_save; %temp
+            try
+                Hk_sym = Hk_sym + H_hk.Trig_to_save; %temp
+            catch
+            end
         end
         function Hk_latex = get.Hk_latex(H_hk)
             Hk_latex = latex(H_hk.Hk_sym);
@@ -219,6 +226,93 @@ classdef HK < vasplib & matlab.mixin.CustomDisplay
     end
     %% modify
     methods
+        function H_hk_out = PlaneWaveExpand(H_hk,N,ExpandDirection)
+            % The Hamiltonian is written in componenets of <mnl|H|pqo>,
+            % where |mnl> corresponds to state with wave vector
+            % k + m*G_1 + n*G_2 +l*G_3 (G^M_i is Moire reciprocal vectors)
+            % m,n,l, p,q,o changes in the range [-N,N]
+            arguments
+                H_hk HK;
+                N double{mustBeInteger} = 5; %integernum for plane wave expanding
+                ExpandDirection = [1 1 0];
+            end
+            % check
+            if H_hk.num
+                H_hk.HcoeL = sym(H_hk.HnumL);
+                H_hk.num = false; H_hk.coe = true;
+            else
+
+            end
+            %if strcmp(H_hk.Type,'kp')
+            %else
+            %    error('!!!');
+            %end
+            %
+            ExpandNum =(2*N+1)^sum(ExpandDirection) ;
+            BasisNum = ExpandNum * H_hk.Basis_num;
+            NL = (-N:N).';
+            if ExpandDirection(1)
+                mL = NL;
+            else
+                mL = 0;
+            end
+            if ExpandDirection(2)
+                nL = NL;
+            else
+                nL = 0;
+            end
+            if ExpandDirection(3)
+                lL = NL;
+            else
+                lL = 0;
+            end
+            mnlL = [repmat(mL,[length(nL)*length(lL),1]),...
+                repmat(kron(nL,ones(length(mL),1)),[length(lL),1]),...
+                kron(lL,ones(length(mL)*length(nL),1))];
+            pqoL = mnlL;
+            syms G_0_0_0 k_x k_y k_z real;
+            H_hk.HcoeL = H_hk.HcoeL*G_0_0_0;
+            HcoeListpre = H_hk.HcoeL;
+            pqoL_G = kron(ones(H_hk.Basis_num ,1 ),pqoL * H_hk.Gk);
+            Symvarlist = symvar(HcoeListpre);
+            SymvarlistStrL = string(Symvarlist);
+            G_Symvarlist = Symvarlist(contains(SymvarlistStrL,"G_"));
+            nG_Symvarlist = length(G_Symvarlist);
+            G_SymvarCell{nG_Symvarlist} = sym('0','real');
+            G_SymvarCellSubs{nG_Symvarlist} = zeros(ExpandNum);
+            for i = 1:nG_Symvarlist
+                G_SymvarCell{i} = G_Symvarlist(i);
+                VectorTmp = park.Variable2Vector(G_Symvarlist(i));
+                G_SymvarCellSubs{i} = park.DeltaList(mnlL-VectorTmp,pqoL);
+            end
+            HcoeList = subs(HcoeListpre,G_SymvarCell,G_SymvarCellSubs);
+            %Hksym = sym(zeros(BasisNum,BasisNum));
+            %H_hk_HsymL_k = H_hk.HsymL_k;
+            %for i =1:H_hk.Kinds
+            %    Hksym = Hksym + HcoeList(:,:,i) * expand(subs(H_hk_HsymL_k(i),...
+            %        {k_x,k_y,k_z},{k_x + diag(pqoL_G(:,1)),k_y + + diag(pqoL_G(:,2)),k_z + diag(pqoL_G(:,3)) }));
+            %end
+            H_hk_out = H_hk;
+            H_hk_out.HcoeL = HcoeList;
+            H_hk_out.Basis_num = BasisNum;
+            %H_hk_out.PlaneWave = true;
+            H_hk_symL = H_hk.HsymL;
+            H_hk_symL_2 = sym([ones(BasisNum,H_hk.Kinds)]);
+            %syms Kx Ky Kz real;
+            for i = 2:H_hk.Kinds
+                for j = 1:BasisNum
+                    H_hk_symL_2(j,i) = subs(H_hk_symL(i),[k_x,k_y,k_z],[...
+                        k_x+pqoL_G(j,1),...
+                        k_y+pqoL_G(j,2),...
+                        k_z+pqoL_G(j,3)...
+                        ]);
+                end
+            end
+            H_hk_out.HsymL = H_hk_symL_2;
+            %H_hk_out.PlaneWaveN = N;
+            %H_hk_out.PlaneWaveExpandDirection = ExpandDirection;
+            %H_hk_out.pqoL_G = H_hk.pqoL_G;
+        end
         function H_hk = reseq(H_hk,basis_list)
             if isempty(H_hk.coe)||isempty(H_hk.num)
                 [~,~,H_hk] = H_hk.NumOrCoe();
@@ -1307,30 +1401,25 @@ classdef HK < vasplib & matlab.mixin.CustomDisplay
             end
             WAVECAR  = zeros(H_hk.Basis_num,NBANDS,kn);
             EIGENCAR = zeros(NBANDS,kn);
-            
             syms k_x k_y k_z real;
-            HsymL_fun = matlabFunction(H_hk.HsymL,'Vars',[k_x k_y k_z]);
-            numL = reshape(H_hk.HnumL, NBANDS^2, []);
+            HsymL_fun = (matlabFunction( H_hk.HsymL,'Vars',[k_x k_y k_z]));
+            %numL = reshape(H_hk.HnumL, NBANDS^2, []);
             for ki =1:kn
                 x=klist_r_tmp(ki,1);
                 y=klist_r_tmp(ki,2);
                 z=klist_r_tmp(ki,3);
-                               
-                symL = HsymL_fun(x,y,z).';
-                Hout = reshape(numL*symL, NBANDS, NBANDS);
-%                 if strcmp(H_hk.Type,'sparse')
-%                     Htemp=sparse(H_hk.Basis_num ,H_hk.Basis_num);
-%                     for i=1:H_hk.Kinds
-%                         Htemp = Htemp +Hnum_list{i}*subs(H_hk.HsymL(i));
-%                     end
-%                     Hout = Htemp;
-%                 else
-%                     Hout = H_hk.Hfun(x,y,z);
-%                     Hout = (Hout+Hout')/2;
-%                 end
+                kL = HsymL_fun(x,y,z);
+                Hout = H_hk.HnumL;
+                %Hout = reshape(numL*kL, NBANDS, NBANDS);
+                for i =1:H_hk.Kinds
+                    Hout(:,:,i) = Hout(:,:,i).*kL(:,i);
+                end
+                Hout = sum(Hout,3);
+                %                 end
+                Hout = (Hout+Hout')/2;
                 if norb_enforce <0
                     try
-                    [A, U]=eig(full(Hout));
+                        [A, U]=eig(full(Hout));
                     catch
                         disp([ki,x,y,z] );
                         disp(Hout);
