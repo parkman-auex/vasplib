@@ -1358,6 +1358,7 @@ classdef HK < vasplib & matlab.mixin.CustomDisplay
                 options.para  = [];
                 options.paraname ;
                 options.show = false;
+                options.OriginGk = [0 0 0];
                 options.fig = handle([]);
                 options.ax = handle([]);
                 options.printmode = false;
@@ -1371,6 +1372,7 @@ classdef HK < vasplib & matlab.mixin.CustomDisplay
             else
                 klist_r_tmp = options.klist;
             end
+            klist_r_tmp = klist_r_tmp + options.OriginGk;
             if options.show
                 if isempty(options.fig) && isempty(options.ax)
                     %[fig,ax] = create_figure();
