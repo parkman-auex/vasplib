@@ -11,6 +11,7 @@ arguments
     options.BZlabel logical = true; 
     options.shading logical= false;
     options.scalefactor double= 100;
+    options.GkOrigin = [0 0 0];
     options.method {mustBeMember(options.method,{'linear','nearest','natural','v4'})} = 'linear';
     options.plotmode {mustBeMember(options.plotmode,{'surf','contour'})} = 'surf'
 end
@@ -103,7 +104,7 @@ if options.shading
     shading(ax,'interp');
 end
 if options.BZ
-    ax =vasplib_plot.BZplot(Rm,'color','none','ax',ax,'blackwhite',true,'mode',options.BZmode,'label',options.BZlabel) ;
+    ax =vasplib_plot.BZplot(Rm,'color','none','ax',ax,'blackwhite',true,'mode',options.BZmode,'label',options.BZlabel,'OriginPoint',options.GkOrigin) ;
     view(ax,2);
 end
 

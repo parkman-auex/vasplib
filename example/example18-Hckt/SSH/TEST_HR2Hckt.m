@@ -1,4 +1,4 @@
-%% Declare the primitive of Octagraphene
+%% Declare the primitive of SSH
 TITLE = 'SSH';
 Dim = 1;
 meshs = [10];
