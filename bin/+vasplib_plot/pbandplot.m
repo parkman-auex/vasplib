@@ -170,7 +170,7 @@ else
     ax = optionsplot.ax;
 end
 %--------  norm  --------
-cmap = options.cmap;
+
 if isa(WEIGHTCAR_struct,'double')
     pbandmode = 'patch'         ;
     WEIGHTCAR = WEIGHTCAR_struct;
@@ -191,6 +191,7 @@ if isa(WEIGHTCAR_struct,'double')
 
     %cmap = cmap_function();
 elseif isa(WEIGHTCAR_struct,'cell')
+    cmap = options.cmap;
     if length(WEIGHTCAR_struct) > 1
         pbandmode = 'bubble_rough' ;
         WEIGHTCAR_cell = WEIGHTCAR_struct;

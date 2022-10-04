@@ -55,7 +55,7 @@ end
     cmap = options.cmap;
 %--------  narg  --------
     if isempty(options.ax)
-        ax= creat_figure();
+        ax= create_figure();
     else
         ax = options.ax;
     end
@@ -65,7 +65,7 @@ end
         %hold on
     end
 %--------  post  --------
-    colormap(ax,cmap());
+    colormap(ax,cmap);
     %--------  save  --------
     %-------- return --------
     if nargout  == 2

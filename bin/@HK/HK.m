@@ -7,9 +7,7 @@ classdef HK < vasplib & matlab.mixin.CustomDisplay
         HnumL;
         HstrL;
         HsymL = sym([]);
-        Hk_sym   ;
         Hk_num   ;
-        Hk_latex ;
     end
     properties %(Hidden = true)
         % for spacegroup
@@ -28,8 +26,10 @@ classdef HK < vasplib & matlab.mixin.CustomDisplay
         %PlaneWaveN = 0;
         %PlaneWaveExpandDirection = [0 0 0];
     end
-    properties (Dependent=true)
+    properties (Dependent=true,Transient = true)
         HsymL_k;
+        Hk_sym ;
+        Hk_latex ;
     end
     %% Define which properties show
     methods (Access = protected)
@@ -193,10 +193,10 @@ classdef HK < vasplib & matlab.mixin.CustomDisplay
             Hk_latex = latex(H_hk.Hk_sym);
         end
         function Type = get.Type(H_hk)
-            if issame(H_hk.Trig_to_save,sym(zeros(H_hk.Basis_num)))
+            if isequal(H_hk.Trig_to_save,sym(zeros(H_hk.Trig_to_save)))
                 TB = 0;
             else
-                TB =1;
+                TB = 1;
             end
             if strcmp(class(H_hk.Term_to_save), class(sym(zeros(H_hk.Basis_num))))
                 KP = 0 ;
