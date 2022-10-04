@@ -981,15 +981,15 @@ classdef Hckt < matlab.mixin.CustomDisplay
             switch  HcktObj.magnitude
                 case 'p'
                     TRAN =".tran 1ns 10us";
-                    AC = ".AC LIN 10000 0 2e07";
+                    AC = ".AC LIN 1000 0.5e04 2e07";
                     DEFAULT_PARM = "%.PARAM InitV =0V CA = 100p C_hopping = 100p C_v = 100p";
                 case 'n'
                     TRAN =".tran 50ns 500us";
-                    AC = ".AC LIN 1000 0 1e06";
+                    AC = ".AC LIN 1000 0.5e04 1e06";
                     DEFAULT_PARM = "%.PARAM InitV =0V CA = 100n C_hopping = 100n C_v = 100n";
                 case 'u'
                     TRAN =".tran 1us 10ms";
-                    AC = ".AC LIN 100 0 2e04";
+                    AC = ".AC LIN 1000 0.5e04 2e04";
                     DEFAULT_PARM = "%.PARAM InitV =0V CA = 100u C_hopping = 100u C_v = 100u";
             end
             switch options5.analysis
