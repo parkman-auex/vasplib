@@ -266,12 +266,13 @@ classdef HK < vasplib & matlab.mixin.CustomDisplay
             else
                 lL = 0;
             end
-            mnlL = [repmat(mL,[length(nL)*length(lL),1]),...
-                repmat(kron(nL,ones(length(mL),1)),[length(lL),1]),...
-                kron(lL,ones(length(mL)*length(nL),1))];
+            mnlL = [...
+                kron(mL,ones(length(nL)*length(lL),1)),...
+                kron(ones(length(mL),1),kron(nL,ones(length(lL),1))),...
+                kron(ones(length(mL)*length(nL),1),lL)];
             pqoL = mnlL;
             syms G_0_0_0 k_x k_y k_z real;
-            H_hk.HcoeL = H_hk.HcoeL*G_0_0_0;
+            H_hk.HcoeL = H_hk.HcoeL;
             HcoeListpre = H_hk.HcoeL;
             pqoL_G = kron(ones(H_hk.Basis_num ,1 ),pqoL * H_hk.Gk);
             Symvarlist = symvar(HcoeListpre);
@@ -283,9 +284,29 @@ classdef HK < vasplib & matlab.mixin.CustomDisplay
             for i = 1:nG_Symvarlist
                 G_SymvarCell{i} = G_Symvarlist(i);
                 VectorTmp = park.Variable2Vector(G_Symvarlist(i));
-                G_SymvarCellSubs{i} = park.DeltaList(mnlL-VectorTmp,pqoL);
+                G_SymvarCellSubs{i} = park.DeltaList(mnlL,VectorTmp+pqoL);
             end
-            HcoeList = subs(HcoeListpre,G_SymvarCell,G_SymvarCellSubs);
+            G_SymvarCell{nG_Symvarlist+1} = G_0_0_0;
+            G_SymvarCellSubs{nG_Symvarlist+1} = eye(ExpandNum);
+            %
+            HcoeListpre = expand(simplify(HcoeListpre*G_0_0_0));
+            % 
+            HcoeListpreStr = string(HcoeListpre);
+            HcoeListpreStr = strrep(HcoeListpreStr,"G_0_0_0*G","G");
+            HcoeListpreModify = str2sym(HcoeListpreStr);
+            %for i = 1:numel(HcoeListpreStr)
+            %    HcoeListpreModify(i) = sym(0);
+            %    iHcoeListStr = strrep(HcoeListpreStr(i),'-',' + -');
+            %    iHcoeListStrSplit = split(iHcoeListStr,{' + '});
+            %    for j = 1:length(iHcoeListStrSplit)
+            %        if contains(iHcoeListStrSplit{j},"G_")
+            %            iHcoeListStrSplit{j} = strcat("G_0_0_0 * ",iHcoeListStrSplit{j});
+            %        end
+            %        HcoeListpreModify(i) = HcoeListpreModify(i)+str2sym(iHcoeListStrSplit{j});
+            %    end
+            %end
+            %
+            HcoeList = subs(HcoeListpreModify,G_SymvarCell,G_SymvarCellSubs);
             %Hksym = sym(zeros(BasisNum,BasisNum));
             %H_hk_HsymL_k = H_hk.HsymL_k;
             %for i =1:H_hk.Kinds
