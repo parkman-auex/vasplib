@@ -193,7 +193,7 @@ classdef HK < vasplib & matlab.mixin.CustomDisplay
             Hk_latex = latex(H_hk.Hk_sym);
         end
         function Type = get.Type(H_hk)
-            if H_hk.Trig_to_save == sym(zeros(H_hk.Basis_num))
+            if issame(H_hk.Trig_to_save,sym(zeros(H_hk.Basis_num)))
                 TB = 0;
             else
                 TB =1;
