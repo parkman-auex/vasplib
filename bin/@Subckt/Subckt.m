@@ -76,6 +76,7 @@ classdef Subckt < matlab.mixin.CustomDisplay
                 netlist cell = {["X1","+","-","Sckt"]};
                 options.pinned = true;
                 options.enforce_pinned = false;
+                options.magicnumber = 4;
             end
             if isempty(device)
                 ScktObj.hollow= true;
@@ -129,8 +130,13 @@ classdef Subckt < matlab.mixin.CustomDisplay
                         else
                             device = tmpchar(1);
                             ScktObj.type = device;
-                            magicnumber =4;
+                            magicnumber =options.magicnumber;
                             name = StrMtmp(magicnumber:end);
+                            portname = StrMtmp(2:magicnumber-1);
+                            portin = 1:floor(length(portname)/2);
+                            portout = floor(length(portname)/2)+1:length(portname);
+                            ScktObj.portin = portin;
+                            ScktObj.portout = portout;
                         end
                         if size(StrMtmp,2) > 1
                             for i = 1:size(StrMtmp,1)
@@ -177,7 +183,7 @@ classdef Subckt < matlab.mixin.CustomDisplay
                         else
                             device = tmpchar(1);
                             ScktObj.type = device;
-                            magicnumber =4;
+                            magicnumber =options.magicnumber;
                             name = StrMtmp(magicnumber:end);
                         end
                         if size(StrMtmp,2) > 1

@@ -5641,9 +5641,9 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                 options.dim = 2;
                 options.autominus = false;
                 options.magnitude = 'p';
+                options.mode {mustBeMember(options.mode,{'real','sigma'})}= 'real';
             end
             %
-            fprintf('Limitations: Only Numerical HR, real hopping support.\n');
             switch H_hr.type
                 case 'sparse'
                     H_hr =H_hr.full();
@@ -5670,29 +5670,60 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             %  declare a Hckt
             HomeVector = zeros(1,Dim);
             NBAND= double(H_hr.WAN_NUM);
-            HcktObj = Hckt('title',TITLE,'Nports',NBAND,'vectorL',HomeVector,'magnitude',options.magnitude);
-            %% set_homecell
-            HomeCell = Subckt.FromHomecellList(H_hr,'magnitude',options.magnitude);
-            HcktObj = HcktObj.set_home(HomeCell,1:round(NBAND/2),round(NBAND/2)+1:H_hr.WAN_NUM);
-            %% set_hop
-            Cplus  = Subckt('Xplus 1 2  C') ;
-            Cminus  = Subckt('Xplus 1 2  minusC') ;
-            vectorList = double(H_hr.vectorL);
-            for n = 1:H_hr.NRPTS
-                Rvector = vectorList(n,1:Dim);
-                if isequal(Rvector,HomeVector)
-                    continue;
-                end
-                i = vectorList(n,4);
-                j = vectorList(n,5);
-                % vector,Subcktobj,PortInL,PortOutL,DescriptionL
-                if H_hr.HnumL(n) > 0
-                    HoppingSckt = Cminus;
-                elseif H_hr.HnumL(n) < 0
-                    HoppingSckt = Cplus;
-                end
-                HcktObj = HcktObj.set_hop(Rvector,HoppingSckt,i,j,['C_hopping = ',num2str(abs(H_hr.HnumL(n)*100)),options.magnitude]);
+            switch options.mode
+                case 'real'
+                    HcktObj = Hckt('title',TITLE,'Nports',NBAND,'vectorL',HomeVector,'magnitude',options.magnitude);
+                    fprintf('Limitations: Only Numerical HR, real hopping support.\n');
+                    %% set_homecell
+                    HomeCell = Subckt.FromHomecellList(H_hr,'magnitude',options.magnitude);
+                    HcktObj = HcktObj.set_home(HomeCell,1:round(NBAND/2),round(NBAND/2)+1:H_hr.WAN_NUM);
+                    %% set_hop
+                    Cplus  = Subckt('Xplus 1 2  C') ;
+                    Cminus  = Subckt('Xminus 1 2  minusC') ;
+                    vectorList = double(H_hr.vectorL);
+                    for n = 1:H_hr.NRPTS
+                        Rvector = vectorList(n,1:Dim);
+                        if isequal(Rvector,HomeVector)
+                            continue;
+                        end
+                        i = vectorList(n,4);
+                        j = vectorList(n,5);
+                        % vector,Subcktobj,PortInL,PortOutL,DescriptionL
+                        if H_hr.HnumL(n) > 0
+                            HoppingSckt = Cminus;
+                        elseif H_hr.HnumL(n) < 0
+                            HoppingSckt = Cplus;
+                        end
+                        HcktObj = HcktObj.set_hop(Rvector,HoppingSckt,i,j,['C_hopping = ',num2str(abs(H_hr.HnumL(n)*100)),options.magnitude]);
+                    end
+                case 'sigma'
+                    % check
+                    BasisC3_origin   =Subckt('XBasisC3_origin   l1 l2 l3 r1 r2 r3 TOGND BasisC3_origin  ','magicnumber',8);
+                    PlusSigma0       =Subckt('XPlusSigma0       l1 l2 l3 r1 r2 r3 TOGND PlusSigma0      ','magicnumber',8);
+                    MinusSigma0      =Subckt('XMinusSigma0      l1 l2 l3 r1 r2 r3 TOGND MinusSigma0     ','magicnumber',8);
+                    PlusiSigma0      =Subckt('XPlusiSigma0      l1 l2 l3 r1 r2 r3 TOGND PlusiSigma0     ','magicnumber',8);
+                    MinusiSigma0     =Subckt('XMinusiSigma0     l1 l2 l3 r1 r2 r3 TOGND MinusiSigma0    ','magicnumber',8);
+                    PlusSigma1       =Subckt('XPlusSigma1       l1 l2 l3 r1 r2 r3 TOGND PlusSigma1      ','magicnumber',8);
+                    MinusSigam1      =Subckt('XMinusSigam1      l1 l2 l3 r1 r2 r3 TOGND MinusSigam1     ','magicnumber',8);
+                    PlusiSigma1      =Subckt('XPlusiSigma1      l1 l2 l3 r1 r2 r3 TOGND PlusiSigma1     ','magicnumber',8);
+                    MinusiSigma1     =Subckt('XMinusiSigma1     l1 l2 l3 r1 r2 r3 TOGND MinusiSigma1    ','magicnumber',8);
+                    PlusGen3Sigma2   =Subckt('XPlusGen3Sigma2   l1 l2 l3 r1 r2 r3 TOGND PlusGen3Sigma2  ','magicnumber',8);
+                    MinusGen3Sigma2  =Subckt('XMinusGen3Sigma2  l1 l2 l3 r1 r2 r3 TOGND MinusGen3Sigma2 ','magicnumber',8);
+                    PlusiGen3Sigma2  =Subckt('XPlusiGen3Sigma2  l1 l2 l3 r1 r2 r3 TOGND PlusiGen3Sigma2 ','magicnumber',8);
+                    MinusiGen3Sigma2 =Subckt('XMinusiGen3Sigma2 l1 l2 l3 r1 r2 r3 TOGND MinusiGen3Sigma2','magicnumber',8);
+                    PlusGen3Sigma3   =Subckt('XPlusGen3Sigma3   l1 l2 l3 r1 r2 r3 TOGND PlusGen3Sigma3  ','magicnumber',8);
+                    MinusGen3Sigma3  =Subckt('XMinusGen3Sigma3  l1 l2 l3 r1 r2 r3 TOGND MinusGen3Sigma3 ','magicnumber',8);
+                    PlusiGen3Sigma3  =Subckt('XPlusiGen3Sigma3  l1 l2 l3 r1 r2 r3 TOGND PlusiGen3Sigma3 ','magicnumber',8);
+                    MinusiGen3Sigma3 =Subckt('XMinusiGen3Sigma3 l1 l2 l3 r1 r2 r3 TOGND MinusiGen3Sigma3','magicnumber',8);
+                    if NBAND ~= 2
+                        fprintf('Choosing wrong mode!\n');
+                        error('Nband ~= 2!!!!!');
+                    end
+                    HcktObj = Hckt('title',TITLE,'Nports',NBAND+1,'vectorL',HomeVector,'magnitude',options.magnitude);
+                    fprintf('Limitations: Only Numerical HR, Two band model support.\n');
+                    
             end
+
         end
         function H_hr_forHckt = HRforHckt(H_hr,options)
             arguments
