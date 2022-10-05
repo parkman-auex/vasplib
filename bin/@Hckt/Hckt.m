@@ -1567,6 +1567,59 @@ classdef Hckt < matlab.mixin.CustomDisplay
         end
     end
     methods(Static)
+        function WriteModules(Modules,fid,magnitude)
+            arguments
+                Modules char;
+                fid;
+                magnitude = 'p';
+            end
+            switch magnitude
+                case 'p'
+                    Cmagnitude = 'p';
+                    Lmagnitude = 'u';
+                    Rmagnitude = 'k';
+                case 'u'
+                    Cmagnitude = 'p';
+                    Lmagnitude = 'u';
+                    Rmagnitude = 'k';
+                case 'm'
+                    Cmagnitude = 'p';
+                    Lmagnitude = 'u';
+                    Rmagnitude = 'k';
+            end
+            fprintf(fid,"* ---------------\n");
+            switch Modules
+                case 'Basis'
+                    fprintf(fid,"* BasisC3_origin \n");
+                    fprintf(fid,"*\n");
+                    fprintf(fid,".SubCkt BasisC3_origin PHI0 PHIs1 PHIs2 TOGND VarC0=100%s InitV=0V \n",Cmagnitude);
+                    fprintf(fid,"C1 PHI0  PHIs1 VarC0 IC=InitV\n");
+                    fprintf(fid,"C2 PHIs1 PHIs2 VarC0 IC=InitV\n");
+                    fprintf(fid,"C3 PHIs2 PHIs1 VarC0 IC=InitV\n");
+                    fprintf(fid,".ends BasisC3_origin\n");
+                case '+sigma_0'
+                    fprintf(fid,"* +sigma_0 \n");
+                    fprintf(fid,"*\n");
+                    fprintf(fid,".SubCkt PlusSigma0 L_PHI0 L_PHIs1 L_PHIs2 R_PHI0 R_PHIs1 R_PHIs2 TOGND InitV=0V" + ...
+                        "VarC0=100%s Var2C0=100%s VarR0=100%s VarR0_2=100%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
+                    fprintf(fid,"C1 L_PHI0  R_PHI0  VarC0 IC=InitV\n");
+                    fprintf(fid,"C2 L_PHIs1 R_PHIs1 VarC0 IC=InitV\n");
+                    fprintf(fid,"C3 L_PHIs2 R_PHIs2 VarC0 IC=InitV\n");
+                    fprintf(fid,".ends PlusSigma0\n");
+                case '+gen3sigma_3'
+                    fprintf(fid,"* +gen3sigma_3 \n");
+                    fprintf(fid,"*\n");
+                    fprintf(fid,".SubCkt PlusGen3Sigma3 L_PHI0 L_PHIs1 L_PHIs2 R_PHI0 R_PHIs1 R_PHIs2 TOGND InitV=0V" + ...
+                        "VarC0=100%s Var2C0=100%s VarR0=100%s VarR0_2=100%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
+                    fprintf(fid,"R1 L_PHI0  R_PHI0  VarR0  \n");
+                    fprintf(fid,"R2 L_PHIs1 R_PHIs1 VarR0  \n");
+                    fprintf(fid,"R3 L_PHIs2 R_PHIs2 VarR0  \n");
+                    fprintf(fid,"C1 L_PHI0  R_PHIs1 VarR0_2\n");
+                    fprintf(fid,"C2 L_PHIs1 R_PHIs2 VarR0_2\n");
+                    fprintf(fid,"C3 L_PHIs2 R_PHI0  VarR0_2\n");
+                    fprintf(fid,".ends PlusGen3Sigma3\n");
+            end
+        end
         function WriteComponent(Component,fid,magnitude)
             arguments
                 Component char;
