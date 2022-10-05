@@ -4129,7 +4129,7 @@ classdef vasplib < matlab.mixin.CustomDisplay
                     H_sym_Gamma = H_sym_Gamma + H_sym_Gamma_L(i)*Gamma_L(i);
                     str1 = latex(H_sym_Gamma_L(i));
                     str2 = latex(Gamma_L(i));
-                    if count >1
+                    if count > 1
                         H_latex_Gamma = [H_latex_Gamma,'+','\left(',str1,'\right)',str2];
                     else
                         H_latex_Gamma = ['\left(',str1,'\right)',str2];
@@ -4137,6 +4137,49 @@ classdef vasplib < matlab.mixin.CustomDisplay
                 end
             end
             %
+        end
+        function [CoeForPauli] = pauliDecompositionNumerial(H_double)
+            if ~isequal(   size(H_double) , [2,2])
+                error('Pauli Decomposition requires 2*2 Ham!');
+            end
+            if isa(H_double,'double')
+                Smat_inv = pauli_matric.S();
+                tmp_mat_r = real(H_double);
+                tmp_mat_i = imag(H_double);
+                H_sym_L = (zeros(1,4));
+                H_sym_Gamma_L = (zeros(1,4));
+            else
+                Gamma_L = pauli_matric.L();
+                H_sym_L = sym(zeros(1,16));
+                H_sym_Gamma_L = sym(zeros(1,16));
+            end
+            tmp_mat_r = real(H_sym);
+            tmp_mat_i = imag(H_sym);
+            H_sym_L(1:2) = diag(tmp_mat_r);
+            H_sym_L(3) = diag(tmp_mat_r,1);
+            H_sym_L(4) = diag(tmp_mat_r,2);
+            for i = 1:4
+                Label_tmp = find(Smat_inv(i,:));
+                H_sym_Gamma_L(Label_tmp) = H_sym_Gamma_L(Label_tmp)+H_sym_L(i)*Smat_inv(i,Label_tmp);
+            end
+            count = 0;
+            if isa(H_double,'double')
+                CoeForPauli = H_sym_Gamma_L;
+            else
+                for i = 1:4
+                    if H_sym_Gamma_L(i)~=(0)
+                        count = count+1;
+                        H_sym_Gamma = H_sym_Gamma + H_sym_Gamma_L(i)*Gamma_L(i);
+                        str1 = latex(H_sym_Gamma_L(i));
+                        str2 = latex(Gamma_L(i));
+                        if count > 1
+                            H_latex_Gamma = [H_latex_Gamma,'+','\left(',str1,'\right)',str2];
+                        else
+                            H_latex_Gamma = ['\left(',str1,'\right)',str2];
+                        end
+                    end
+                end
+            end
         end
         function [H_sym_pauli,H_sym_pauli_L,H_latex_pauli] = pauliDecomposition(H_sym)
             if ~isa(H_sym,'sym')

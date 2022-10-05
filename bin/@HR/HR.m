@@ -2612,6 +2612,43 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                 end
             end
         end
+        function H_hr = ForceToMat(H_hr)
+            switch H_hr.type
+                case 'sparse'
+                    H_hr =H_hr.full();
+                case 'mat'
+
+                case 'list'
+                    H_hr = H_hr.rewind;
+                otherwise
+                    error('Not support yet.');
+            end
+        end
+        function H_hr = ForceTosparse(H_hr)
+            switch H_hr.type
+                case 'sparse'
+                case 'mat'
+                    H_hr = H_hr.sparse;
+                case 'list'
+                    H_hr = H_hr.rewind;
+                    H_hr = H_hr.rewind;
+                otherwise
+                    error('Not support yet.');
+            end
+        end
+        function H_hr = ForceTolist(H_hr)
+            switch H_hr.type
+                case 'sparse'
+                    H_hr =H_hr.full();
+                    H_hr = H_hr.rewrite;
+                case 'mat'
+                    H_hr = H_hr.rewrite;
+                case 'list'
+
+                otherwise
+                    error('Not support yet.');
+            end
+        end
     end
     % ----------------  add something --------------------
     methods
@@ -5634,7 +5671,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
     end
     %% ChangeClass
     methods
-        function HcktObj = HR2Hckt(H_hr,options)
+        function HcktObj = HR2Hckt(H_hr,options,options_homecell)
             arguments
                 H_hr
                 options.title = 'HcktFromHR';
@@ -5642,23 +5679,31 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                 options.autominus = false;
                 options.magnitude = 'p';
                 options.mode {mustBeMember(options.mode,{'real','sigma'})}= 'real';
+                options_homecell.homecell = "normal";
             end
             %
-            switch H_hr.type
-                case 'sparse'
-                    H_hr =H_hr.full();
-                    H_hr = H_hr.rewrite;
-                case 'mat'
-                    H_hr = H_hr.rewrite;
-                case 'list'
-                    
-                otherwise
-                    error('Not support yet.');
+            VarC0=1;
+            Var2C0=2;
+            VarR0=1;
+            VarR0_2=0.5;
+            switch options.magnitude
+                case 'p'
+                    Cmagnitude = 'p';
+                    Lmagnitude = 'u';
+                    Rmagnitude = 'k';
+                case 'u'
+                    Cmagnitude = 'p';
+                    Lmagnitude = 'u';
+                    Rmagnitude = 'k';
+                case 'm'
+                    Cmagnitude = 'p';
+                    Lmagnitude = 'u';
+                    Rmagnitude = 'k';
             end
             % Declare the primitive of Octagraphene
             TITLE = options.title;
             Dim = options.dim;
-            %
+            % 
             if options.autominus
                 warning off;
                 for i = 1:H_hr.WAN_NUM
@@ -5672,6 +5717,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             NBAND= double(H_hr.WAN_NUM);
             switch options.mode
                 case 'real'
+                    H_hr = H_hr.ForceTolist();
                     HcktObj = Hckt('title',TITLE,'Nports',NBAND,'vectorL',HomeVector,'magnitude',options.magnitude);
                     fprintf('Limitations: Only Numerical HR, real hopping support.\n');
                     %% set_homecell
@@ -5697,31 +5743,74 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                         HcktObj = HcktObj.set_hop(Rvector,HoppingSckt,i,j,['C_hopping = ',num2str(abs(H_hr.HnumL(n)*100)),options.magnitude]);
                     end
                 case 'sigma'
+                    H_hr = H_hr.ForceToMat();
                     % check
+                    VarC0 = 1;Var
                     BasisC3_origin   =Subckt('XBasisC3_origin   l1 l2 l3 r1 r2 r3 TOGND BasisC3_origin  ','magicnumber',8);
-                    PlusSigma0       =Subckt('XPlusSigma0       l1 l2 l3 r1 r2 r3 TOGND PlusSigma0      ','magicnumber',8);
-                    MinusSigma0      =Subckt('XMinusSigma0      l1 l2 l3 r1 r2 r3 TOGND MinusSigma0     ','magicnumber',8);
-                    PlusiSigma0      =Subckt('XPlusiSigma0      l1 l2 l3 r1 r2 r3 TOGND PlusiSigma0     ','magicnumber',8);
-                    MinusiSigma0     =Subckt('XMinusiSigma0     l1 l2 l3 r1 r2 r3 TOGND MinusiSigma0    ','magicnumber',8);
-                    PlusSigma1       =Subckt('XPlusSigma1       l1 l2 l3 r1 r2 r3 TOGND PlusSigma1      ','magicnumber',8);
-                    MinusSigam1      =Subckt('XMinusSigam1      l1 l2 l3 r1 r2 r3 TOGND MinusSigam1     ','magicnumber',8);
-                    PlusiSigma1      =Subckt('XPlusiSigma1      l1 l2 l3 r1 r2 r3 TOGND PlusiSigma1     ','magicnumber',8);
-                    MinusiSigma1     =Subckt('XMinusiSigma1     l1 l2 l3 r1 r2 r3 TOGND MinusiSigma1    ','magicnumber',8);
-                    PlusGen3Sigma2   =Subckt('XPlusGen3Sigma2   l1 l2 l3 r1 r2 r3 TOGND PlusGen3Sigma2  ','magicnumber',8);
-                    MinusGen3Sigma2  =Subckt('XMinusGen3Sigma2  l1 l2 l3 r1 r2 r3 TOGND MinusGen3Sigma2 ','magicnumber',8);
-                    PlusiGen3Sigma2  =Subckt('XPlusiGen3Sigma2  l1 l2 l3 r1 r2 r3 TOGND PlusiGen3Sigma2 ','magicnumber',8);
-                    MinusiGen3Sigma2 =Subckt('XMinusiGen3Sigma2 l1 l2 l3 r1 r2 r3 TOGND MinusiGen3Sigma2','magicnumber',8);
-                    PlusGen3Sigma3   =Subckt('XPlusGen3Sigma3   l1 l2 l3 r1 r2 r3 TOGND PlusGen3Sigma3  ','magicnumber',8);
-                    MinusGen3Sigma3  =Subckt('XMinusGen3Sigma3  l1 l2 l3 r1 r2 r3 TOGND MinusGen3Sigma3 ','magicnumber',8);
-                    PlusiGen3Sigma3  =Subckt('XPlusiGen3Sigma3  l1 l2 l3 r1 r2 r3 TOGND PlusiGen3Sigma3 ','magicnumber',8);
-                    MinusiGen3Sigma3 =Subckt('XMinusiGen3Sigma3 l1 l2 l3 r1 r2 r3 TOGND MinusiGen3Sigma3','magicnumber',8);
+                    HoppingDist{1}   =Subckt('XPlusSigma0       l1 l2 l3 r1 r2 r3 TOGND PlusSigma0      ','magicnumber',8);
+                    HoppingDist{2}   =Subckt('XMinusSigma0      l1 l2 l3 r1 r2 r3 TOGND MinusSigma0     ','magicnumber',8);
+                    HoppingDist{3}   =Subckt('XPlusiSigma0      l1 l2 l3 r1 r2 r3 TOGND PlusiSigma0     ','magicnumber',8);
+                    HoppingDist{4}   =Subckt('XMinusiSigma0     l1 l2 l3 r1 r2 r3 TOGND MinusiSigma0    ','magicnumber',8);
+                    HoppingDist{5}   =Subckt('XPlusSigma1       l1 l2 l3 r1 r2 r3 TOGND PlusSigma1      ','magicnumber',8);
+                    HoppingDist{6}   =Subckt('XMinusSigam1      l1 l2 l3 r1 r2 r3 TOGND MinusSigam1     ','magicnumber',8);
+                    HoppingDist{7}   =Subckt('XPlusiSigma1      l1 l2 l3 r1 r2 r3 TOGND PlusiSigma1     ','magicnumber',8);
+                    HoppingDist{8}   =Subckt('XMinusiSigma1     l1 l2 l3 r1 r2 r3 TOGND MinusiSigma1    ','magicnumber',8);
+                    HoppingDist{9}   =Subckt('XPlusGen3Sigma2   l1 l2 l3 r1 r2 r3 TOGND PlusGen3Sigma2  ','magicnumber',8);
+                    HoppingDist{10}  =Subckt('XMinusGen3Sigma2  l1 l2 l3 r1 r2 r3 TOGND MinusGen3Sigma2 ','magicnumber',8);
+                    HoppingDist{11}  =Subckt('XPlusiGen3Sigma2  l1 l2 l3 r1 r2 r3 TOGND PlusiGen3Sigma2 ','magicnumber',8);
+                    HoppingDist{12}  =Subckt('XMinusiGen3Sigma2 l1 l2 l3 r1 r2 r3 TOGND MinusiGen3Sigma2','magicnumber',8);
+                    HoppingDist{13}  =Subckt('XPlusGen3Sigma3   l1 l2 l3 r1 r2 r3 TOGND PlusGen3Sigma3  ','magicnumber',8);
+                    HoppingDist{14}  =Subckt('XMinusGen3Sigma3  l1 l2 l3 r1 r2 r3 TOGND MinusGen3Sigma3 ','magicnumber',8);
+                    HoppingDist{15}  =Subckt('XPlusiGen3Sigma3  l1 l2 l3 r1 r2 r3 TOGND PlusiGen3Sigma3 ','magicnumber',8);
+                    HoppingDist{16}  =Subckt('XMinusiGen3Sigma3 l1 l2 l3 r1 r2 r3 TOGND MinusiGen3Sigma3','magicnumber',8);
                     if NBAND ~= 2
                         fprintf('Choosing wrong mode!\n');
                         error('Nband ~= 2!!!!!');
                     end
                     HcktObj = Hckt('title',TITLE,'Nports',NBAND+1,'vectorL',HomeVector,'magnitude',options.magnitude);
                     fprintf('Limitations: Only Numerical HR, Two band model support.\n');
-                    
+                    %% set_homecell
+                    switch options_homecell.homecell
+                        case 'normal'
+                            HomeCell = BasisC3_origin;
+                        otherwise
+                            HomeCell = BasisC3_origin;
+                    end
+                    HcktObj = HcktObj.set_home(HomeCell,1:3,4:6);
+                    %% set_hop
+                    vectorList = double(H_hr.vectorL);
+                    HnumList = double(H_hr.HnumL);
+                    for n = 1:H_hr.NRPTS
+                        Rvector = vectorList(n,1:Dim);
+                        if isequal(Rvector,HomeVector)
+                            continue;
+                        end
+                        [CoeForPauli] = pauliDecompositionNumerial(HnumList(:,:,n));
+                        reaLCoeForPauli = real(CoeForPauli);
+                        imagCoeForPauli = imag(CoeForPauli);
+                        Coe16 = zeros(ones(1,16));
+                        PlusReal  = [1,5,9,13];
+                        MinusReal = [2,6,10,14];
+                        PlusImag  = [3,7,11,15];
+                        MinusImag = [4,8,12,16];
+                        Coe16( PlusReal(reaLCoeForPauli>0)) =    reaLCoeForPauli(reaLCoeForPauli>0);
+                        Coe16(MinusReal(reaLCoeForPauli<0)) =   -reaLCoeForPauli(reaLCoeForPauli<0);
+                        Coe16( PlusImag(imagCoeForPauli>0)) =    imagCoeForPauli(imagCoeForPauli>0);
+                        Coe16(MinusImag(imagCoeForPauli<0)) =   -imagCoeForPauli(imagCoeForPauli<0);
+                        % vector,Subcktobj,PortInL,PortOutL,DescriptionL
+                        for i = 1:16
+                            if Coe16(i) == 0
+                            else
+                                HcktObj = HcktObj.set_hop(Rvector,HoppingDist{i},[1 2 3],[4 5 6],...
+                                    [' VarC0 = ',num2str(abs(Coe16(i)*VarC0)),Cmagnitude,...
+                                     ' Var2C0 = ',num2str(abs(Coe16(i)*Var2C0)),Cmagnitude,...
+                                     ' VarR0 = ',num2str(abs(Coe16(i)*VarR0)),Rmagnitude,...
+                                     ' VarR0_2 = ',num2str(abs(Coe16(i)*VarR0_2)),Rmagnitude ...
+                                        ]);
+                            end
+                            
+                        end
+                    end
             end
 
         end

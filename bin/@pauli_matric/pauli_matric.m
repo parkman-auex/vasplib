@@ -260,9 +260,34 @@ classdef pauli_matric
                   result = nan;
                   disp('error')
           end
-      
-          
+
+
       end
+    end
+    %%
+    methods(Static)
+        function Smat_inv = S()
+            Smat = zeros(4);
+            Pauli_L = sym(pauli_matric);
+            for i = 1:4
+                tmp_mat = Pauli_L(:,:,i);
+                tmp_mat_r = real(tmp_mat);
+                tmp_mat_i = imag(tmp_mat);
+                Smat(i,1:2) = diag(tmp_mat_r);
+                Smat(i,3) = diag(tmp_mat_r,1);
+                Smat(i,4) = diag(tmp_mat_i,1);
+            end
+            Smat_inv = inv(Smat);
+        end
+        function Pauli_L = L()
+            count = 0;
+            Pauli_L = sym(zeros(1,4));
+            for i = 0:3
+                count = count +1;
+                Pauli_L(count)=sym(['Pauli_',num2str(i)]);
+            end
+
+        end
     end
 end
 
