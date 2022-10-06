@@ -924,8 +924,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
             end
             if size(options4.ExciteNodes,2) == 1
                 for i = 1:size(options4.ExciteNodes,1)
-                    NodeStr = [NodeStr,'_',num2str(options4.ExciteNodes(i))];
-                    NodeStrList{i} = NodeStr;
+                    NodeStrList{i} = [NodeStr,'_',num2str(options4.ExciteNodes(i))];
                 end
             elseif size(options4.ExciteNodes,2) >1
                 for i = 1:size(options4.ExciteNodes,1)
@@ -1603,6 +1602,54 @@ classdef Hckt < matlab.mixin.CustomDisplay
         end
     end
     methods(Static)
+        function WriteVendorComponentLibrary
+
+        end
+        function WritePlugIns(PlugIns,fid,magnitude)
+            arguments
+                PlugIns char;
+                fid;
+                magnitude = 'p';
+            end
+            switch magnitude
+                case 'p'
+                    Cmagnitude = 'p';
+                    Lmagnitude = 'u';
+                    Rmagnitude = '';
+                case 'u'
+                    Cmagnitude = 'p';
+                    Lmagnitude = 'u';
+                    Rmagnitude = '';
+                case 'm'
+                    Cmagnitude = 'p';
+                    Lmagnitude = 'u';
+                    Rmagnitude = '';
+            end
+            fprintf(fid,"* ---------------\n");
+            switch PlugIns
+                case 'Na-(Mb+Lc)' % checked
+                    fprintf(fid,"* Na-(Mb+Lc) \n");
+                    fprintf(fid,"*\n");
+                    fprintf(fid,"*Rb = Rf/M; Rc = Rf/L Ra = (2+M+L-N)Rf RNf = N Rf \n");
+                    fprintf(fid,".SubCkt AdderSubtractor va vb vc vo TOGND" + ...
+                        "VarRf=100%s VarRa=100%s VarRb=100%s VarRc=100%s VarRNf=300%s\n", ...
+                        Rmagnitude,Rmagnitude,Rmagnitude,Rmagnitude,Rmagnitude);
+                    fprintf(fid,"Ra va v_plus VarRa \n");
+                    fprintf(fid,"Rb vb v_minus VarRb \n");
+                    fprintf(fid,"Rc vc v_minus VarRc \n");
+                    fprintf(fid,"Rf1 TOGND v_minus VarRf \n");
+                    fprintf(fid,"Rf2 vo v_minus VarRf \n");
+                    fprintf(fid,"RNf TOGND v_plus VarRNf \n");
+                    fprintf(fid,"E_opamp vo TOGND v_plus v_minus  level=1\n");
+                    fprintf(fid,".ends AdderSubtractor\n");
+                case 'VoltageFollower'
+                    fprintf(fid,"* VoltageFollower \n");
+                    fprintf(fid,"*\n");
+                    fprintf(fid,".SubCkt VoltageFollower ui uo TOGND\n");
+                    fprintf(fid,"E_opamp uo TOGND ui uo  level=1\n");
+                    fprintf(fid,".ends VoltageFollower\n");
+            end
+        end
         function WriteModules(Modules,fid,magnitude)
             arguments
                 Modules char;
@@ -1628,199 +1675,299 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 case 'Basis' % checked
                     fprintf(fid,"* BasisC3_origin \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt BasisC3_origin PHI0 PHIs1 PHIs2 TOGND VarC0=100%s InitV=0V \n",Cmagnitude);
-                    fprintf(fid,"C1 PHI0  PHIs1 VarC0 IC=InitV\n");
-                    fprintf(fid,"C2 PHIs1 PHIs2 VarC0 IC=InitV\n");
-                    fprintf(fid,"C3 PHIs2 PHIs1 VarC0 IC=InitV\n");
+                    fprintf(fid,".SubCkt BasisC3_origin n1 n2 n3 TOGND VarL0=100%s InitV=0V R_L=1u \n",Lmagnitude);
+                    fprintf(fid,"L1 n1 n2 VarL0 \n");
+                    fprintf(fid,"L2 n2 n3 VarL0 \n");
+                    fprintf(fid,"L3 n3 n2 VarL0 \n");
                     fprintf(fid,".ends BasisC3_origin\n");
                 case 'Basis_SOI' % checked
                     fprintf(fid,"* BasisC3_origin \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt BasisC3_origin PHI0 PHIs1 PHIs2 TOGND " + ...
-                        "VarCg=100%s VarRh=1 InitV=0V \n",Cmagnitude,Rmagnitude);
-                    fprintf(fid,"C1 PHI0  PHIs1 VarC0 IC=InitV\n");
-                    fprintf(fid,"C2 PHIs1 PHIs2 VarC0 IC=InitV\n");
-                    fprintf(fid,"C3 PHIs2 PHIs1 VarC0 IC=InitV\n");
+                    fprintf(fid,"* n1 n2 n3 n1_prime n2_prime n3_prime nR1_prime nR2_prime nR3_prime  \n");
+                    fprintf(fid,".SubCkt BasisC3_origin n1 n2 n3 TOGND " + ...
+                        "VarCg=100%s VarRh=1 R_L=1u InitV=0V \n",Cmagnitude,Rmagnitude);
+                    fprintf(fid,"L1 n1 n2 VarL0 R=R_L \n");
+                    fprintf(fid,"L2 n2 n3 VarL0 R=R_L \n");
+                    fprintf(fid,"L3 n3 n2 VarL0 R=R_L \n");
+                    fprintf(fid,"X1_1prime n1 n1_prime TOGND VoltageFollower \n");
+                    fprintf(fid,"X2_2prime n2 n2_prime TOGND VoltageFollower \n");
+                    fprintf(fid,"X3_3prime n3 n3_prime TOGND VoltageFollower \n");
+                    fprintf(fid,"X1prime n2_prime n1_prime n3_prime NR1_prime TOGND AdderSubtractor \n");
+                    fprintf(fid,"X2prime n3_prime n2_prime n1_prime NR2_prime TOGND AdderSubtractor \n");
+                    fprintf(fid,"X3prime n1_prime n3_prime n2_prime NR3_prime TOGND AdderSubtractor \n");
+                    fprintf(fid,"R1prime n2 NR1_prime VarRh \n");
+                    fprintf(fid,"R2prime n3 NR2_prime VarRh \n");
+                    fprintf(fid,"R3prime n1 NR3_prime VarRh \n");
+                    fprintf(fid,"C1 n1 TOGND  VarCg \n");
+                    fprintf(fid,"C2 n2 TOGND  VarCg \n");
+                    fprintf(fid,"C3 n3 TOGND  VarCg \n");
                     fprintf(fid,".ends BasisC3_origin\n");
                 case '+sigma_0' % checked
                     fprintf(fid,"* +sigma_0 \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt PlusSigma0 L_PHI0 L_PHIs1 L_PHIs2 R_PHI0 R_PHIs1 R_PHIs2 TOGND InitV=0V" + ...
+                    fprintf(fid,".SubCkt PlusSigma0 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V" + ...
                         "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
-                    fprintf(fid,"C1 L_PHI0  R_PHI0  VarC0 IC=InitV\n");
-                    fprintf(fid,"C2 L_PHIs1 R_PHIs1 VarC0 IC=InitV\n");
-                    fprintf(fid,"C3 L_PHIs2 R_PHIs2 VarC0 IC=InitV\n");
+                    fprintf(fid,"C1 L_n1 R_n1  VarC0 IC=InitV\n");
+                    fprintf(fid,"C2 L_n2 R_n2 VarC0 IC=InitV\n");
+                    fprintf(fid,"C3 L_n3 R_n3 VarC0 IC=InitV\n");
                     fprintf(fid,".ends PlusSigma0\n");
                 case '-sigma_0' % checked
                     fprintf(fid,"* -sigma_0 \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt MinusSigma0 L_PHI0 L_PHIs1 L_PHIs2 R_PHI0 R_PHIs1 R_PHIs2 TOGND InitV=0V" + ...
+                    fprintf(fid,".SubCkt MinusSigma0 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V" + ...
                         "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
-                    fprintf(fid,"C1 L_PHI0  R_PHIs1 VarC0 IC=InitV\n");
-                    fprintf(fid,"C2 L_PHIs1 R_PHI0  VarC0 IC=InitV\n");
-                    fprintf(fid,"C3 L_PHIs2 R_PHI0  VarC0 IC=InitV\n");
-                    fprintf(fid,"C4 L_PHI0  R_PHIs2 VarC0 IC=InitV\n");
-                    fprintf(fid,"C5 L_PHIs1 R_PHIs2 VarC0 IC=InitV\n");
-                    fprintf(fid,"C6 L_PHIs2 R_PHIs1 VarC0 IC=InitV\n");
+                    fprintf(fid,"C1 L_n1  R_n2 VarC0 IC=InitV\n");
+                    fprintf(fid,"C2 L_n2 R_n1  VarC0 IC=InitV\n");
+                    fprintf(fid,"C3 L_n3 R_n1  VarC0 IC=InitV\n");
+                    fprintf(fid,"C4 L_n1  R_n3 VarC0 IC=InitV\n");
+                    fprintf(fid,"C5 L_n2 R_n3 VarC0 IC=InitV\n");
+                    fprintf(fid,"C6 L_n3 R_n2 VarC0 IC=InitV\n");
                     fprintf(fid,".ends MinusSigma0\n");
                 case '+isigma_0' % checked
                     fprintf(fid,"* +isigma_0 \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt PlusiSigma0 L_PHI0 L_PHIs1 L_PHIs2 R_PHI0 R_PHIs1 R_PHIs2 TOGND InitV=0V" + ...
+                    fprintf(fid,".SubCkt PlusiSigma0 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V" + ...
                         "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
-                    fprintf(fid,"R1 L_PHI0  R_PHIs1 VarR0\n");
-                    fprintf(fid,"R2 L_PHIs1 R_PHI0  VarR0\n");
-                    fprintf(fid,"R3 L_PHIs2 R_PHI0  VarR0\n");
-                    fprintf(fid,"R4 L_PHI0  R_PHIs2 VarR0\n");
-                    fprintf(fid,"R5 L_PHIs1 R_PHIs2 VarR0\n");
-                    fprintf(fid,"R6 L_PHIs2 R_PHIs1 VarR0\n");
+                    fprintf(fid,"R1 L_n1  R_n2 VarR0\n");
+                    fprintf(fid,"R2 L_n2 R_n1  VarR0\n");
+                    fprintf(fid,"R3 L_n3 R_n1  VarR0\n");
+                    fprintf(fid,"R4 L_n1  R_n3 VarR0\n");
+                    fprintf(fid,"R5 L_n2 R_n3 VarR0\n");
+                    fprintf(fid,"R6 L_n3 R_n2 VarR0\n");
                     fprintf(fid,".ends PlusiSigma0\n");
                 case '-isigma_0' % checked
                     fprintf(fid,"* -isigma_0 \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt MinusiSigma0 L_PHI0 L_PHIs1 L_PHIs2 R_PHI0 R_PHIs1 R_PHIs2 TOGND InitV=0V" + ...
+                    fprintf(fid,".SubCkt MinusiSigma0 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V" + ...
                         "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
-                    fprintf(fid,"R1 L_PHI0  R_PHI0  VarR0\n");
-                    fprintf(fid,"R2 L_PHIs1 R_PHIs1 VarR0\n");
-                    fprintf(fid,"R3 L_PHIs2 R_PHIs2 VarR0\n");
+                    fprintf(fid,"R1 L_n1  R_n1  VarR0\n");
+                    fprintf(fid,"R2 L_n2 R_n2 VarR0\n");
+                    fprintf(fid,"R3 L_n3 R_n3 VarR0\n");
                     fprintf(fid,".ends MinusiSigma0\n");
                 case '+sigma_1' % checked
                     fprintf(fid,"* +sigma_1 \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,"SubCkt PlusSigma1 L_PHI0 L_PHIs1 L_PHIs2 R_PHI0 R_PHIs1 R_PHIs2 TOGND InitV=0V" + ...
+                    fprintf(fid,"SubCkt PlusSigma1 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V" + ...
                         "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
-                    fprintf(fid,"C1 L_PHI0  R_PHIs1 VarC0 IC=InitV\n");
-                    fprintf(fid,"C2 L_PHIs1 R_PHI0  VarC0 IC=InitV\n");
-                    fprintf(fid,"C3 L_PHIs2 R_PHIs2 VarC0 IC=InitV\n");
+                    fprintf(fid,"C1 L_n1  R_n2 VarC0 IC=InitV\n");
+                    fprintf(fid,"C2 L_n2 R_n1  VarC0 IC=InitV\n");
+                    fprintf(fid,"C3 L_n3 R_n3 VarC0 IC=InitV\n");
                     fprintf(fid,".ends PlusSigma1\n");
                 case '-sigma_1' % checked
                     fprintf(fid,"* -sigma_1 \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt MinusSigma1 L_PHI0 L_PHIs1 L_PHIs2 R_PHI0 R_PHIs1 R_PHIs2 TOGND InitV=0V" + ...
+                    fprintf(fid,".SubCkt MinusSigma1 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V" + ...
                         "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
-                    fprintf(fid,"C1 L_PHI0  R_PHI0  VarC0 IC=InitV\n");
-                    fprintf(fid,"C2 L_PHIs1 R_PHIs1 VarC0 IC=InitV\n");
-                    fprintf(fid,"C3 L_PHIs2 R_PHI0  VarC0 IC=InitV\n");
-                    fprintf(fid,"C4 L_PHI0  R_PHIs2 VarC0 IC=InitV\n");
-                    fprintf(fid,"C5 L_PHIs1 R_PHIs2 VarC0 IC=InitV\n");
-                    fprintf(fid,"C6 L_PHIs2 R_PHIs1  VarC0 IC=InitV\n");
+                    fprintf(fid,"C1 L_n1  R_n1  VarC0 IC=InitV\n");
+                    fprintf(fid,"C2 L_n2 R_n2 VarC0 IC=InitV\n");
+                    fprintf(fid,"C3 L_n3 R_n1  VarC0 IC=InitV\n");
+                    fprintf(fid,"C4 L_n1  R_n3 VarC0 IC=InitV\n");
+                    fprintf(fid,"C5 L_n2 R_n3 VarC0 IC=InitV\n");
+                    fprintf(fid,"C6 L_n3 R_n2  VarC0 IC=InitV\n");
                     fprintf(fid,".ends MinusSigam1\n");
                 case '+isigma_1' % checked
                     fprintf(fid,"* +isigma_1 \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt PlusiSigma1 L_PHI0 L_PHIs1 L_PHIs2 R_PHI0 R_PHIs1 R_PHIs2 TOGND InitV=0V" + ...
+                    fprintf(fid,".SubCkt PlusiSigma1 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V" + ...
                         "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
-                    fprintf(fid,"R1 L_PHI0  R_PHI0  VarR0\n");
-                    fprintf(fid,"R2 L_PHIs1 R_PHIs1 VarR0\n");
-                    fprintf(fid,"R3 L_PHIs2 R_PHI0  VarR0\n");
-                    fprintf(fid,"R4 L_PHI0  R_PHIs2 VarR0\n");
-                    fprintf(fid,"R5 L_PHIs1 R_PHIs2 VarR0\n");
-                    fprintf(fid,"R6 L_PHIs2 R_PHIs1 VarR0\n");
+                    fprintf(fid,"R1 L_n1  R_n1  VarR0\n");
+                    fprintf(fid,"R2 L_n2 R_n2 VarR0\n");
+                    fprintf(fid,"R3 L_n3 R_n1  VarR0\n");
+                    fprintf(fid,"R4 L_n1  R_n3 VarR0\n");
+                    fprintf(fid,"R5 L_n2 R_n3 VarR0\n");
+                    fprintf(fid,"R6 L_n3 R_n2 VarR0\n");
                     fprintf(fid,".ends PlusiSigma1\n");
                 case '-isigma_1' % checked
                     fprintf(fid,"* -isigma_1 \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,"SubCkt MinusiSigma1 L_PHI0 L_PHIs1 L_PHIs2 R_PHI0 R_PHIs1 R_PHIs2 TOGND InitV=0V" + ...
+                    fprintf(fid,"SubCkt MinusiSigma1 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V" + ...
                         "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
-                    fprintf(fid,"R1 L_PHI0  R_PHIs1 VarR0\n");
-                    fprintf(fid,"R2 L_PHIs1 R_PHI0  VarR0\n");
-                    fprintf(fid,"R3 L_PHIs2 R_PHIs2 VarR0\n");
+                    fprintf(fid,"R1 L_n1  R_n2 VarR0\n");
+                    fprintf(fid,"R2 L_n2 R_n1  VarR0\n");
+                    fprintf(fid,"R3 L_n3 R_n3 VarR0\n");
                     fprintf(fid,".ends MinusiSigma1\n");
                 case '+gen3sigma_2' % checked
                     fprintf(fid,"* +gen3sigma_2 \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt PlusGen3Sigma2 L_PHI0 L_PHIs1 L_PHIs2 R_PHI0 R_PHIs1 R_PHIs2 TOGND InitV=0V" + ...
+                    fprintf(fid,".SubCkt PlusGen3Sigma2 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V" + ...
                         "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
-                    fprintf(fid,"C1 L_PHI0  R_PHIs1 VarC0  IC=InitV\n");
-                    fprintf(fid,"C2 L_PHIs1 R_PHI0  VarC0  IC=InitV\n");
-                    fprintf(fid,"C3 L_PHIs2 R_PHIs2 VarC0  IC=InitV\n");
-                    fprintf(fid,"C4 L_PHI0  R_PHIs2 Var2C0 IC=InitV\n");
-                    fprintf(fid,"C5 L_PHIs1 R_PHIs1 Var2C0 IC=InitV\n");
-                    fprintf(fid,"C6 L_PHIs2 R_PHI0  Var2C0 IC=InitV\n");
+                    fprintf(fid,"C1 L_n1  R_n2 VarC0  IC=InitV\n");
+                    fprintf(fid,"C2 L_n2 R_n1  VarC0  IC=InitV\n");
+                    fprintf(fid,"C3 L_n3 R_n3 VarC0  IC=InitV\n");
+                    fprintf(fid,"C4 L_n1  R_n3 Var2C0 IC=InitV\n");
+                    fprintf(fid,"C5 L_n2 R_n2 Var2C0 IC=InitV\n");
+                    fprintf(fid,"C6 L_n3 R_n1  Var2C0 IC=InitV\n");
                     fprintf(fid,".ends PlusGen3Sigma2\n");
                 case '-gen3sigma_2' % checked
                     fprintf(fid,"* -gen3sigma_2 \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt MinusGen3Sigma2 L_PHI0 L_PHIs1 L_PHIs2 R_PHI0 R_PHIs1 R_PHIs2 TOGND InitV=0V" + ...
+                    fprintf(fid,".SubCkt MinusGen3Sigma2 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V" + ...
                         "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
-                    fprintf(fid,"C1 L_PHI0  R_PHIs1 VarC0  IC=InitV\n");
-                    fprintf(fid,"C2 L_PHIs1 R_PHI0  VarC0  IC=InitV\n");
-                    fprintf(fid,"C3 L_PHIs2 R_PHIs2 VarC0  IC=InitV\n");
-                    fprintf(fid,"C4 L_PHI0  R_PHI0  Var2C0 IC=InitV\n");
-                    fprintf(fid,"C5 L_PHIs1 R_PHIs2 Var2C0 IC=InitV\n");
-                    fprintf(fid,"C6 L_PHIs2 R_PHIs1 Var2C0 IC=InitV\n");
+                    fprintf(fid,"C1 L_n1  R_n2 VarC0  IC=InitV\n");
+                    fprintf(fid,"C2 L_n2 R_n1  VarC0  IC=InitV\n");
+                    fprintf(fid,"C3 L_n3 R_n3 VarC0  IC=InitV\n");
+                    fprintf(fid,"C4 L_n1  R_n1  Var2C0 IC=InitV\n");
+                    fprintf(fid,"C5 L_n2 R_n3 Var2C0 IC=InitV\n");
+                    fprintf(fid,"C6 L_n3 R_n2 Var2C0 IC=InitV\n");
                     fprintf(fid,".ends MinusGen3Sigma2\n");
                 case '+igen3sigma_2' % checked
                     fprintf(fid,"* +igen3sigma_2 \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt PlusiGen3Sigma2 L_PHI0 L_PHIs1 L_PHIs2 R_PHI0 R_PHIs1 R_PHIs2 TOGND InitV=0V" + ...
+                    fprintf(fid,".SubCkt PlusiGen3Sigma2 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V" + ...
                         "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
-                    fprintf(fid,"R1 L_PHI0 R_PHIs1  VarR0  \n");
-                    fprintf(fid,"R2 L_PHIs1 R_PHI0  VarR0  \n");
-                    fprintf(fid,"R3 L_PHIs2 R_PHIs2 VarR0  \n");
-                    fprintf(fid,"R4 L_PHI0 R_PHI0   VarR0_2\n");
-                    fprintf(fid,"R5 L_PHIs1 R_PHIs2 VarR0_2\n");
-                    fprintf(fid,"R6 L_PHIs2 R_PHIs1 VarR0_2\n");
+                    fprintf(fid,"R1 L_n1 R_n2  VarR0  \n");
+                    fprintf(fid,"R2 L_n2 R_n1  VarR0  \n");
+                    fprintf(fid,"R3 L_n3 R_n3 VarR0  \n");
+                    fprintf(fid,"R4 L_n1 R_n1   VarR0_2\n");
+                    fprintf(fid,"R5 L_n2 R_n3 VarR0_2\n");
+                    fprintf(fid,"R6 L_n3 R_n2 VarR0_2\n");
                     fprintf(fid,".ends PlusiGen3Sigma2\n");
                 case '-igen3sigma_2'
                     fprintf(fid,"* -igen3sigma_2 \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt MinusiGen3Sigma2 L_PHI0 L_PHIs1 L_PHIs2 R_PHI0 R_PHIs1 R_PHIs2 TOGND InitV=0V" + ...
+                    fprintf(fid,".SubCkt MinusiGen3Sigma2 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V" + ...
                         "VarC0=100%s Var2C0=100%s   VarR0=100%s VarR0_2=100%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
-                    fprintf(fid,"R1 L_PHI0 R_PHIs1  VarR0  \n");
-                    fprintf(fid,"R2 L_PHIs1 R_PHI0  VarR0  \n");
-                    fprintf(fid,"R3 L_PHIs2 R_PHIs2 VarR0  \n");
-                    fprintf(fid,"R4 L_PHI0 R_PHIs2  VarR0_2\n");
-                    fprintf(fid,"R5 L_PHIs1 R_PHIs1 VarR0_2\n");
-                    fprintf(fid,"R6 L_PHIs2 R_PHI0  VarR0_2\n");
+                    fprintf(fid,"R1 L_n1 R_n2  VarR0  \n");
+                    fprintf(fid,"R2 L_n2 R_n1  VarR0  \n");
+                    fprintf(fid,"R3 L_n3 R_n3 VarR0  \n");
+                    fprintf(fid,"R4 L_n1 R_n3  VarR0_2\n");
+                    fprintf(fid,"R5 L_n2 R_n2 VarR0_2\n");
+                    fprintf(fid,"R6 L_n3 R_n1  VarR0_2\n");
                     fprintf(fid,".ends MinusiGen3Sigma2\n");
                 case '+gen3sigma_3'
                     fprintf(fid,"* +gen3sigma_3 \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt PlusGen3Sigma3 L_PHI0 L_PHIs1 L_PHIs2 R_PHI0 R_PHIs1 R_PHIs2 TOGND InitV=0V" + ...
+                    fprintf(fid,".SubCkt PlusGen3Sigma3 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V" + ...
                         "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
-                    fprintf(fid,"R1 L_PHI0  R_PHI0  VarR0  \n");
-                    fprintf(fid,"R2 L_PHIs1 R_PHIs1 VarR0  \n");
-                    fprintf(fid,"R3 L_PHIs2 R_PHIs2 VarR0  \n");
-                    fprintf(fid,"R4 L_PHI0  R_PHIs1 VarR0_2\n");
-                    fprintf(fid,"R5 L_PHIs1 R_PHIs2 VarR0_2\n");
-                    fprintf(fid,"R6 L_PHIs2 R_PHI0  VarR0_2\n");
+                    fprintf(fid,"R1 L_n1  R_n1  VarR0  \n");
+                    fprintf(fid,"R2 L_n2 R_n2 VarR0  \n");
+                    fprintf(fid,"R3 L_n3 R_n3 VarR0  \n");
+                    fprintf(fid,"R4 L_n1  R_n2 VarR0_2\n");
+                    fprintf(fid,"R5 L_n2 R_n3 VarR0_2\n");
+                    fprintf(fid,"R6 L_n3 R_n1  VarR0_2\n");
                     fprintf(fid,".ends PlusGen3Sigma3\n");
                 case '-gen3sigma_3'
                     fprintf(fid,"* -gen3sigma_3 \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt MinusGen3Sigma3 L_PHI0 L_PHIs1 L_PHIs2 R_PHI0 R_PHIs1 R_PHIs2 TOGND InitV=0V" + ...
+                    fprintf(fid,".SubCkt MinusGen3Sigma3 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V" + ...
                         "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
-                    fprintf(fid,"R1 L_PHI0 R_PHI0   VarR0  \n");
-                    fprintf(fid,"R2 L_PHIs1 R_PHIs1 VarR0  \n");
-                    fprintf(fid,"R3 L_PHIs2 R_PHIs2 VarR0  \n");
-                    fprintf(fid,"R4 L_PHI0 R_PHIs2  VarR0_2\n");
-                    fprintf(fid,"R5 L_PHIs1 R_PHI0  VarR0_2\n");
-                    fprintf(fid,"R6 L_PHIs2 R_PHIs1 VarR0_2\n");
+                    fprintf(fid,"R1 L_n1 R_n1   VarR0  \n");
+                    fprintf(fid,"R2 L_n2 R_n2 VarR0  \n");
+                    fprintf(fid,"R3 L_n3 R_n3 VarR0  \n");
+                    fprintf(fid,"R4 L_n1 R_n3  VarR0_2\n");
+                    fprintf(fid,"R5 L_n2 R_n1  VarR0_2\n");
+                    fprintf(fid,"R6 L_n3 R_n2 VarR0_2\n");
                     fprintf(fid,".ends MinusGen3Sigma3\n");
                 case '+igen3sigma_3'
                     fprintf(fid,"* +igen3sigma_3 \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt PlusiGen3Sigma3 L_PHI0 L_PHIs1 L_PHIs2 R_PHI0 R_PHIs1 R_PHIs2 TOGND InitV=0V" + ...
+                    fprintf(fid,".SubCkt PlusiGen3Sigma3 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V" + ...
                         "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
-                    fprintf(fid,"C1 L_PHI0  R_PHI0  VarC0 \n");
-                    fprintf(fid,"C2 L_PHIs1 R_PHIs1 VarC0 \n");
-                    fprintf(fid,"C3 L_PHIs2 R_PHIs2 VarC0 \n");
-                    fprintf(fid,"C4 L_PHI0  R_PHIs1 Var2C0\n");
-                    fprintf(fid,"C5 L_PHIs1 R_PHIs2 Var2C0\n");
-                    fprintf(fid,"C6 L_PHIs2 R_PHI0  Var2C0\n");
+                    fprintf(fid,"C1 L_n1 R_n1 VarC0 \n");
+                    fprintf(fid,"C2 L_n2 R_n2 VarC0 \n");
+                    fprintf(fid,"C3 L_n3 R_n3 VarC0 \n");
+                    fprintf(fid,"C4 L_n1 R_n2 Var2C0\n");
+                    fprintf(fid,"C5 L_n2 R_n3 Var2C0\n");
+                    fprintf(fid,"C6 L_n3 R_n1 Var2C0\n");
                     fprintf(fid,".ends PlusiGen3Sigma3\n");
                 case '-igen3sigma_3'
                     fprintf(fid,"* -igen3sigma_3 \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt MinusiGen3Sigma3 L_PHI0 L_PHIs1 L_PHIs2 R_PHI0 R_PHIs1 R_PHIs2 TOGND InitV=0V" + ...
+                    fprintf(fid,".SubCkt MinusiGen3Sigma3 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V" + ...
                         "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
-                    fprintf(fid,"C1 L_PHI0 R_PHI0   VarC0 \n");
-                    fprintf(fid,"C2 L_PHIs1 R_PHIs1 VarC0 \n");
-                    fprintf(fid,"C3 L_PHIs2 R_PHIs2 VarC0 \n");
-                    fprintf(fid,"C4 L_PHI0 R_PHIs2  Var2C0\n");
-                    fprintf(fid,"C5 L_PHIs1 R_PHI0  Var2C0\n");
-                    fprintf(fid,"C6 L_PHIs2 R_PHIs1 Var2C0\n");
+                    fprintf(fid,"C1 L_n1 R_n1 VarC0 \n");
+                    fprintf(fid,"C2 L_n2 R_n2 VarC0 \n");
+                    fprintf(fid,"C3 L_n3 R_n3 VarC0 \n");
+                    fprintf(fid,"C4 L_n1 R_n3 Var2C0\n");
+                    fprintf(fid,"C5 L_n2 R_n1 Var2C0\n");
+                    fprintf(fid,"C6 L_n3 R_n2 Var2C0\n");
+                    fprintf(fid,".ends MinusiGen3Sigma3\n");
+                case '+isigma_1_SOI' % checked
+                    fprintf(fid,"* +isigma_1_SOI \n");
+                    fprintf(fid,"*\n");
+                    fprintf(fid,".SubCkt PlusiSigma1 L_n1_prime L_n2_prime L_n3_prime R_n1 R_n2 R_n3 TOGND InitV=0V" + ...
+                        "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
+                    fprintf(fid,"R1 L_n1 R_n1  VarR0\n");
+                    fprintf(fid,"R2 L_n2 R_n2 VarR0\n");
+                    fprintf(fid,"R3 L_n3 R_n1  VarR0\n");
+                    fprintf(fid,"R4 L_n1 R_n3 VarR0\n");
+                    fprintf(fid,"R5 L_n2 R_n3 VarR0\n");
+                    fprintf(fid,"R6 L_n3 R_n2 VarR0\n");
+                    fprintf(fid,"X1_1prime L_n1_prime L_n1 TOGND VoltageFollower \n");
+                    fprintf(fid,"X2_2prime L_n2_prime L_n1 TOGND VoltageFollower \n");
+                    fprintf(fid,"X3_3prime L_n3_prime L_n1 TOGND VoltageFollower \n");
+                    fprintf(fid,".ends PlusiSigma1\n");
+                case '-isigma_1_SOI' % checked
+                    fprintf(fid,"* -isigma_1_SOI \n");
+                    fprintf(fid,"*\n");
+                    fprintf(fid,"SubCkt MinusiSigma1 L_n1 L_n2 L_n3 R_n1_prime R_n2_prime R_n3_prime TOGND InitV=0V" + ...
+                        "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
+                    fprintf(fid,"R1 L_n1 R_n2 VarR0\n");
+                    fprintf(fid,"R2 L_n2 R_n1 VarR0\n");
+                    fprintf(fid,"R3 L_n3 R_n3 VarR0\n");
+                    fprintf(fid,"X1_1prime R_n1_prime R_n1 TOGND VoltageFollower \n");
+                    fprintf(fid,"X2_2prime R_n2_prime R_n1 TOGND VoltageFollower \n");
+                    fprintf(fid,"X3_3prime R_n3_prime R_n1 TOGND VoltageFollower \n");
+                    fprintf(fid,".ends MinusiSigma1\n");
+                case '+igen3sigma_2_SOI' % checked
+                    fprintf(fid,"* +igen3sigma_2_SOI \n");
+                    fprintf(fid,"*\n");
+                    fprintf(fid,".SubCkt PlusiSigma1 L_n1_prime L_n2_prime L_n3_prime R_n1 R_n2 R_n3 TOGND InitV=0V" + ...
+                        "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
+                    fprintf(fid,"R1 L_n1 R_n2  VarR0  \n");
+                    fprintf(fid,"R2 L_n2 R_n1  VarR0  \n");
+                    fprintf(fid,"R3 L_n3 R_n3 VarR0  \n");
+                    fprintf(fid,"R4 L_n1 R_n1   VarR0_2\n");
+                    fprintf(fid,"R5 L_n2 R_n3 VarR0_2\n");
+                    fprintf(fid,"R6 L_n3 R_n2 VarR0_2\n");
+                    fprintf(fid,"X1_1prime L_n1_prime L_n1 TOGND VoltageFollower \n");
+                    fprintf(fid,"X2_2prime L_n2_prime L_n1 TOGND VoltageFollower \n");
+                    fprintf(fid,"X3_3prime L_n3_prime L_n1 TOGND VoltageFollower \n");
+                    fprintf(fid,".ends PlusiGen3Sigma2\n");
+                case '-igen3sigma_2_SOI'
+                    fprintf(fid,"* -igen3sigma_2_SOI \n");
+                    fprintf(fid,"*\n");
+                    fprintf(fid,".SubCkt MinusiGen3Sigma2 L_n1 L_n2 L_n3 R_n1_prime R_n2_prime R_n3_prime TOGND InitV=0V" + ...
+                        "VarC0=100%s Var2C0=100%s   VarR0=100%s VarR0_2=100%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
+                    fprintf(fid,"R1 L_n1 R_n2  VarR0  \n");
+                    fprintf(fid,"R2 L_n2 R_n1  VarR0  \n");
+                    fprintf(fid,"R3 L_n3 R_n3 VarR0  \n");
+                    fprintf(fid,"R4 L_n1 R_n3  VarR0_2\n");
+                    fprintf(fid,"R5 L_n2 R_n2 VarR0_2\n");
+                    fprintf(fid,"R6 L_n3 R_n1  VarR0_2\n");
+                    fprintf(fid,"X1_1prime R_n1_prime R_n1 TOGND VoltageFollower \n");
+                    fprintf(fid,"X2_2prime R_n2_prime R_n1 TOGND VoltageFollower \n");
+                    fprintf(fid,"X3_3prime R_n3_prime R_n1 TOGND VoltageFollower \n");
+                    fprintf(fid,".ends MinusiGen3Sigma2\n");
+                case '+igen3sigma_3_SOI'
+                    fprintf(fid,"* +igen3sigma_3_SOI \n");
+                    fprintf(fid,"*\n");
+                    fprintf(fid,".SubCkt PlusiSigma1 L_n1_prime L_n2_prime L_n3_prime R_n1 R_n2 R_n3 TOGND InitV=0V" + ...
+                        "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
+                    fprintf(fid,"C1 L_n1 R_n1 VarC0 \n");
+                    fprintf(fid,"C2 L_n2 R_n2 VarC0 \n");
+                    fprintf(fid,"C3 L_n3 R_n3 VarC0 \n");
+                    fprintf(fid,"C4 L_n1 R_n2 Var2C0\n");
+                    fprintf(fid,"C5 L_n2 R_n3 Var2C0\n");
+                    fprintf(fid,"C6 L_n3 R_n1 Var2C0\n");
+                    fprintf(fid,"X1_1prime L_n1_prime L_n1 TOGND VoltageFollower \n");
+                    fprintf(fid,"X2_2prime L_n2_prime L_n1 TOGND VoltageFollower \n");
+                    fprintf(fid,"X3_3prime L_n3_prime L_n1 TOGND VoltageFollower \n");
+                    fprintf(fid,".ends PlusiGen3Sigma3\n");
+                case '-igen3sigma_3_SOI'
+                    fprintf(fid,"* -igen3sigma_3_SOI \n");
+                    fprintf(fid,"*\n");
+                    fprintf(fid,".SubCkt MinusiGen3Sigma3 L_n1 L_n2 L_n3 R_n1_prime R_n2_prime R_n3_prime TOGND InitV=0V" + ...
+                        "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
+                    fprintf(fid,"C1 L_n1 R_n1 VarC0 \n");
+                    fprintf(fid,"C2 L_n2 R_n2 VarC0 \n");
+                    fprintf(fid,"C3 L_n3 R_n3 VarC0 \n");
+                    fprintf(fid,"C4 L_n1 R_n3 Var2C0\n");
+                    fprintf(fid,"C5 L_n2 R_n1 Var2C0\n");
+                    fprintf(fid,"C6 L_n3 R_n2 Var2C0\n");
+                    fprintf(fid,"X1_1prime R_n1_prime R_n1 TOGND VoltageFollower \n");
+                    fprintf(fid,"X2_2prime R_n2_prime R_n1 TOGND VoltageFollower \n");
+                    fprintf(fid,"X3_3prime R_n3_prime R_n1 TOGND VoltageFollower \n");
                     fprintf(fid,".ends MinusiGen3Sigma3\n");
             end
         end
@@ -1918,18 +2065,54 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 filename = 'Hckt.lib';
                 options.magnitude = 'p';
                 options.ComponentLib = ["E_A_LC","hopping_C","hopping_minusC","hopping_minusC_DM"];
-                options.WorkingArea = 'realTB';
+                options.ModulesLib = [];
+                options.PlugIns = [];
+                options.WorkingArea {mustBeMember(options.WorkingArea,{'realTB','nonH','Sigma_SOI'})}= 'realTB';
             end
             magnitude = options.magnitude;
             switch  options.WorkingArea
                 case 'realTB'
                     ComponentLib  = ["E_A_LC","hopping_C","hopping_minusC","hopping_minusC_DM"];
+                    ModulesLib = options.ModulesLib ;
+                    PlugIns = options.PlugIns ;
                 case 'nonH'
                     ComponentLib  = ["E_A_RC","hopping_L","hopping_AL","hopping_LA","Port_L3","Port_L1"];
+                    ModulesLib = options.ModulesLib ;
+                    PlugIns = options.PlugIns ;
+                case 'Sigma_SOI'
+                    ComponentLib  = [];
+                    PlugIns = ["Na-(Mb+Lc)","VoltageFollower"];
+                    ModulesLib = [
+                        "Basis_SOI",...
+                        "+sigma_0" ,...
+                        "-sigma_0" ,...
+                        "+isigma_0",...
+                        "-isigma_0",...
+                        "+sigma_1" ,...
+                        "-sigma_1" ,...
+                        "+gen3sigma_2" ,...
+                        "-gen3sigma_2" ,...
+                        "+gen3sigma_3",...
+                        "-gen3sigma_3",...
+                        "+isigma_1_SOI" ,...
+                        "-isigma_1_SOI" ,...
+                        "+igen3sigma_2_SOI" ,...
+                        "-igen3sigma_2_SOI",...
+                        "+igen3sigma_3_SOI",...
+                        "-igen3sigma_3_SOI" ...
+                        ];
                 otherwise
                     ComponentLib = options.ComponentLib;
+                    ModulesLib = options.ModulesLib ;
+                    PlugIns = options.PlugIns ;
             end
             fid = fopen(filename,'w');
+            for PlugIn = PlugIns
+                Hckt.WritePlugIns(char(PlugIn),fid,magnitude);
+            end
+            for Modules = ModulesLib
+                Hckt.WriteModulesLib(char(Modules),fid,magnitude);
+            end
             for Component = ComponentLib
                 Hckt.WriteComponent(char(Component),fid,magnitude);
             end

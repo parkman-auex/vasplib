@@ -5682,8 +5682,8 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                 options_homecell.homecell = "normal";
             end
             %
-            VarC0=1;
-            Var2C0=2;
+            VarC0=100;
+            Var2C0=200;
             VarR0=1;
             VarR0_2=0.5;
             switch options.magnitude
@@ -5704,20 +5704,20 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             TITLE = options.title;
             Dim = options.dim;
             % 
-            if options.autominus
-                warning off;
-                for i = 1:H_hr.WAN_NUM
-                    BaseOnsite = sum(H_hr.HnumL(H_hr.vectorL(:,4)==i));%H_hr.HnumL(ismember(H_hr.vectorL,[0,0,0,i,i],'rows')) +
-                    H_hr = H_hr.set_hop(BaseOnsite,...
-                        i,i,[0,0,0],'set');
-                end
-            end
             %  declare a Hckt
             HomeVector = zeros(1,Dim);
             NBAND= double(H_hr.WAN_NUM);
             switch options.mode
                 case 'real'
                     H_hr = H_hr.ForceTolist();
+                    if options.autominus
+                        warning off;
+                        for i = 1:H_hr.WAN_NUM
+                            BaseOnsite = sum(H_hr.HnumL(H_hr.vectorL(:,4)==i));%H_hr.HnumL(ismember(H_hr.vectorL,[0,0,0,i,i],'rows')) +
+                            H_hr = H_hr.set_hop(BaseOnsite,...
+                                i,i,[0,0,0],'set');
+                        end
+                    end
                     HcktObj = Hckt('title',TITLE,'Nports',NBAND,'vectorL',HomeVector,'magnitude',options.magnitude);
                     fprintf('Limitations: Only Numerical HR, real hopping support.\n');
                     %% set_homecell
@@ -5745,7 +5745,6 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                 case 'sigma'
                     H_hr = H_hr.ForceToMat();
                     % check
-                    VarC0 = 1;Var
                     BasisC3_origin   =Subckt('XBasisC3_origin   l1 l2 l3 r1 r2 r3 TOGND BasisC3_origin  ','magicnumber',8);
                     HoppingDist{1}   =Subckt('XPlusSigma0       l1 l2 l3 r1 r2 r3 TOGND PlusSigma0      ','magicnumber',8);
                     HoppingDist{2}   =Subckt('XMinusSigma0      l1 l2 l3 r1 r2 r3 TOGND MinusSigma0     ','magicnumber',8);
@@ -5776,6 +5775,9 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                         otherwise
                             HomeCell = BasisC3_origin;
                     end
+                    OnsiteMat       = H_hr.HnumL(:,:,H_hr.Line000);
+                    OnsitePotencial = OnsiteMat(1,1);
+                    HomeCell.Description = ['VarCg = ',num2str(abs(OnsitePotencial*VarC0)),Cmagnitude];
                     HcktObj = HcktObj.set_home(HomeCell,1:3,4:6);
                     %% set_hop
                     vectorList = double(H_hr.vectorL);
@@ -5793,10 +5795,11 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                         MinusReal = [2,6,10,14];
                         PlusImag  = [3,7,11,15];
                         MinusImag = [4,8,12,16];
-                        Coe16( PlusReal(reaLCoeForPauli>0)) =    reaLCoeForPauli(reaLCoeForPauli>0);
-                        Coe16(MinusReal(reaLCoeForPauli<0)) =   -reaLCoeForPauli(reaLCoeForPauli<0);
-                        Coe16( PlusImag(imagCoeForPauli>0)) =    imagCoeForPauli(imagCoeForPauli>0);
-                        Coe16(MinusImag(imagCoeForPauli<0)) =   -imagCoeForPauli(imagCoeForPauli<0);
+                        % opposite < > need to be tested
+                        Coe16( PlusReal(reaLCoeForPauli<0)) =    reaLCoeForPauli(reaLCoeForPauli<0);
+                        Coe16(MinusReal(reaLCoeForPauli>0)) =   -reaLCoeForPauli(reaLCoeForPauli>0);
+                        Coe16( PlusImag(imagCoeForPauli<0)) =    imagCoeForPauli(imagCoeForPauli<0);
+                        Coe16(MinusImag(imagCoeForPauli>0)) =   -imagCoeForPauli(imagCoeForPauli>0);
                         % vector,Subcktobj,PortInL,PortOutL,DescriptionL
                         for i = 1:16
                             if Coe16(i) == 0
@@ -5826,13 +5829,14 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                 options.direct = false;
                 options.Accuracy = 1e-6;
                 options.C_0 = 1;
+                options.coefficient = -1;
             end
             if strcmp(H_hr.Type,'mat')
                 H_hr = H_hr.rewrite();
             end
             H_hr_forHckt = H_hr;
             if H_hr.coe
-                H_hr_forHckt.HcoeL = -H_hr_forHckt.HcoeL;
+                H_hr_forHckt.HcoeL = options.coefficient * H_hr_forHckt.HcoeL;
                 % make symbolic term > 0
                 %SYMVAR = H_hr.symvar_list;
                 %for i = 1:length(SYMVAR)
@@ -5852,7 +5856,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                         i,i,[0,0,0],'symadd');
                 end
             else
-                H_hr_forHckt.HnumL = -H_hr_forHckt.HnumL;
+                H_hr_forHckt.HnumL = options.coefficient * H_hr_forHckt.HnumL;
                 % make symbolic term > 0
                 C_0 = options.C_0 ;
                 BaseOnsiteL = repmat(C_0,[H_hr_forHckt.WAN_NUM,1]);
