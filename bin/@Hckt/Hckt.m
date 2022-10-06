@@ -907,7 +907,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 options2.nodelist = [];
                 options3.fft = false;
                 options3.libmode = false;
-                options4.node = 1;
+                options4.ExciteNodes = 1;
                 options4.mode {mustBeMember(options4.mode,{'general','vectorized','BinBin'})}= 'general';% finished -> general
                 options5.analysis {mustBeMember(options5.analysis,{'tran','ac'})} = 'tran';
             end
@@ -922,25 +922,61 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 NodeStr = [NodeStr,'_',num2str(options.mesh(i))];
                 Basename = [Basename,'_',num2str(options.mesh(i))];
             end
-            NodeStr = [NodeStr,'_',num2str(options4.node )];
+            if size(options4.ExciteNodes,2) == 1
+                for i = 1:size(options4.ExciteNodes,1)
+                    NodeStr = [NodeStr,'_',num2str(options4.ExciteNodes(i))];
+                    NodeStrList{i} = NodeStr;
+                end
+            elseif size(options4.ExciteNodes,2) >1
+                for i = 1:size(options4.ExciteNodes,1)
+                    NodeStr  = 'n';
+                    for j = 1: size(options4.ExciteNodes,2)-1
+                        NodeStr = [NodeStr,'_',num2str(options4.ExciteNodes(i,j))];
+                    end
+                    NodeStr = [NodeStr,'_',num2str(options4.ExciteNodes(i,j+1))];
+                    NodeStrList{i} = NodeStr;
+                end
+            end
             % IC
-            ICSTRING = ['.ic v(',NodeStr,') = 1'];
+            ICSTRING = ['.ic v(',NodeStrList{1},') = 1'];
             % Ipulse
             switch HcktObj.magnitude
                 case 'p'
-                    IpulseSTRING = ['Ipulse ',NodeStr,' GND PU 0 1 5n 5n 50u'];
+                    IpulseSTRING = ['Ipulse ',NodeStrList{1},' GND PU 0 1 5n 5n 50u'];
                 case 'u'
-                    IpulseSTRING = ['Ipulse ',NodeStr,' GND PU 0 1 5n 5n 50m'];
+                    IpulseSTRING = ['Ipulse ',NodeStrList{1},' GND PU 0 1 5n 5n 50m'];
                 case 'm'
-                    IpulseSTRING = ['Ipulse ',NodeStr,' GND PU 0 1 5n 5n 50'];
+                    IpulseSTRING = ['Ipulse ',NodeStrList{1},' GND PU 0 1 5n 5n 500m'];
             end
             % Vac
             VacSTRING = "Vac source GND AC 1 0";
-            VacSTRING = [VacSTRING;string(['R_for_ac ',NodeStr,' source 100'])]; 
+            VacSTRING = [VacSTRING;string(['R_for_ac ',NodeStrList{1},' source 100'])];
+            for i = 2:length(NodeStrList)
+                % IC
+                ICSTRING = [ICSTRING;string(['.ic v(',NodeStrList{i},') = 1'])];
+                % Ipulse
+                switch HcktObj.magnitude
+                    case 'p'
+                        IpulseSTRING = [IpulseSTRING;string(['Ipulse ',NodeStrList{i},' GND PU 0 1 5n 5n 50u'])];
+                    case 'u'
+                        IpulseSTRING = [IpulseSTRING;string(['Ipulse ',NodeStrList{i},' GND PU 0 1 5n 5n 50m'])];
+                    case 'm'
+                        IpulseSTRING = [IpulseSTRING;string(['Ipulse ',NodeStrList{i},' GND PU 0 1 5n 5n 500m'])];
+                end
+                % Vac
+                VacSTRING = "Vac source GND AC 1 0";
+                VacSTRING = [VacSTRING;string(['R_for_ac ',NodeStrList{i},' source 100'])];
+            end
             % 
-            HcktObj.Vac = VacSTRING;
-            HcktObj.IC = string(ICSTRING);
-            HcktObj.Ipulse = string(IpulseSTRING);
+            if strcmp(HcktObj.Vac,"")
+                HcktObj.Vac = VacSTRING;
+            end
+            if strcmp(HcktObj.IC,"")
+                HcktObj.IC = string(ICSTRING);
+            end
+            if strcmp(HcktObj.Ipulse,"")
+                HcktObj.Ipulse = string(IpulseSTRING);
+            end
             % filename
             if strcmp(filename,"")
                 switch options5.analysis
@@ -1593,6 +1629,15 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     fprintf(fid,"* BasisC3_origin \n");
                     fprintf(fid,"*\n");
                     fprintf(fid,".SubCkt BasisC3_origin PHI0 PHIs1 PHIs2 TOGND VarC0=100%s InitV=0V \n",Cmagnitude);
+                    fprintf(fid,"C1 PHI0  PHIs1 VarC0 IC=InitV\n");
+                    fprintf(fid,"C2 PHIs1 PHIs2 VarC0 IC=InitV\n");
+                    fprintf(fid,"C3 PHIs2 PHIs1 VarC0 IC=InitV\n");
+                    fprintf(fid,".ends BasisC3_origin\n");
+                case 'Basis_SOI' % checked
+                    fprintf(fid,"* BasisC3_origin \n");
+                    fprintf(fid,"*\n");
+                    fprintf(fid,".SubCkt BasisC3_origin PHI0 PHIs1 PHIs2 TOGND " + ...
+                        "VarCg=100%s VarRh=1 InitV=0V \n",Cmagnitude,Rmagnitude);
                     fprintf(fid,"C1 PHI0  PHIs1 VarC0 IC=InitV\n");
                     fprintf(fid,"C2 PHIs1 PHIs2 VarC0 IC=InitV\n");
                     fprintf(fid,"C3 PHIs2 PHIs1 VarC0 IC=InitV\n");
