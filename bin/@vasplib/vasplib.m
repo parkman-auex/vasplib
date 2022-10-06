@@ -4142,26 +4142,25 @@ classdef vasplib < matlab.mixin.CustomDisplay
             if ~isequal(   size(H_double) , [2,2])
                 error('Pauli Decomposition requires 2*2 Ham!');
             end
-            if isa(H_double,'double')
-                Smat_inv = pauli_matric.S();
-                tmp_mat_r = real(H_double);
-                tmp_mat_i = imag(H_double);
-                H_sym_L = (zeros(1,4));
-                H_sym_Gamma_L = (zeros(1,4));
-            else
-                Gamma_L = pauli_matric.L();
-                H_sym_L = sym(zeros(1,16));
-                H_sym_Gamma_L = sym(zeros(1,16));
-            end
+            % sigma_0+z sigma_0-z sigma_+ sigma_-
+            % 1/2*(sigma_0+sigma_z)
+            % 1/2*(sigma_0-sigma_z)
+            % 1/2*(sigma_x+1i*sigma_y)
+            % 1/2*(sigma_x-1i*sigma_y)
             tmp_mat_r = real(H_double);
             tmp_mat_i = imag(H_double);
-            H_sym_L(1:2) = diag(tmp_mat_r);
-            H_sym_L(3) = diag(tmp_mat_r,1);
-            H_sym_L(4) = diag(tmp_mat_i,1);
-            for i = 1:4
-                Label_tmp = find(Smat_inv(i,:));
-                H_sym_Gamma_L(Label_tmp) = H_sym_Gamma_L(Label_tmp)+H_sym_L(i)*Smat_inv(i,Label_tmp);
-            end
+            S = 1/2 * [[1;0;0;1],[1;0;0;-1],[0;1;1i;0],[0;1;-1i;0]];
+            S = [S,S*1i];
+            Phi_8 = (zeros(8,1));
+            Phi_8(1) = tmp_mat_r(1,1);
+            Phi_8(2) = tmp_mat_r(2,2);
+            Phi_8(3) = tmp_mat_r(1,2);
+            Phi_8(4) = tmp_mat_r(2,1);
+            Phi_8(5) = tmp_mat_i(1,1);
+            Phi_8(6) = tmp_mat_i(2,2);
+            Phi_8(7) = tmp_mat_i(1,2);
+            Phi_8(8) = tmp_mat_i(2,1);
+            H_sym_Gamma_L = S * Phi_8;
             count = 0;
             if isa(H_double,'double')
                 CoeForPauli = H_sym_Gamma_L;

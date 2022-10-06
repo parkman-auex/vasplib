@@ -902,6 +902,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 HcktObj Hckt;
                 filename = "";
                 ops.checking = true;
+                ops.commute = true;
                 options.mesh = repmat(10,[HcktObj.dim,1]);
                 options.fin_dir = zeros(HcktObj.dim,1);
                 options2.probenode {mustBeMember(options2.probenode,{'Allnode','Selectnode'})}= 'Allnode';
@@ -998,7 +999,11 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     if ops.checking
                         HcktObj = HcktObj.autohermi();
                     end
-                    HcktObj = HcktObj.half();
+                    if ops.commute
+                        HcktObj = HcktObj.half(ops.commute);
+                    else
+                        HcktObj = HcktObj.half();
+                    end
                     HcktObj = hspice_gen_general(HcktObj,filename,optionscell{:},options2cell{:},options3cell{:},options5cell{:});
             end
         end
@@ -1019,11 +1024,11 @@ classdef Hckt < matlab.mixin.CustomDisplay
             switch  HcktObj.magnitude
                 case 'p'
                     TRAN =".tran 1ns 10us";
-                    AC = ".AC LIN 1000 0.5e04 2e07";
+                    AC = ".AC LIN 1000 0.5e07 2e07";
                     DEFAULT_PARM = "%.PARAM InitV =0V CA = 100p C_hopping = 100p C_v = 100p";
                 case 'n'
                     TRAN =".tran 50ns 500us";
-                    AC = ".AC LIN 1000 0.5e04 1e06";
+                    AC = ".AC LIN 1000 0.5e06 1e06";
                     DEFAULT_PARM = "%.PARAM InitV =0V CA = 100n C_hopping = 100n C_v = 100n";
                 case 'u'
                     TRAN =".tran 1us 10ms";
@@ -2209,11 +2214,19 @@ classdef Hckt < matlab.mixin.CustomDisplay
             end
             HcktObj = HcktObj_tmp;
         end
-        function HcktObj = half(HcktObj)
+        function HcktObj = half(HcktObj,checkcommute)
+            if nargin < 2
+                checkcommute = false;
+            end
+            
             vectorLcheck = HcktObj.dim2vectorL(HcktObj.dim);
             [whichexist,~] = ismember(HcktObj.vectorAll ,vectorLcheck,'rows') ;
             ToKeepRef = find(whichexist);
             ToKeepL = ismember(HcktObj.vectorL,ToKeepRef);
+            if checkcommute
+                commuteL = [HcktObj.ScktL.commute];
+                ToKeepL = logical(ToKeepL + ~commuteL);
+            end
             HcktObj = HcktObj.reseq(ToKeepL);
         end
         function HcktObj = reseq(HcktObj,seqL)

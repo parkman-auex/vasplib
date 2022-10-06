@@ -13,6 +13,7 @@ classdef Subckt < matlab.mixin.CustomDisplay
     properties
         pinned = false;
         hollow = false;
+        commute = true;
     end
     properties
         deviceL {mustBeMember(deviceL,{'C','L','R','X','K','D','Q','M','V','I','G',''})} = '';% 
