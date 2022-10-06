@@ -65,7 +65,7 @@ classdef Subckt < matlab.mixin.CustomDisplay
             propgrp = matlab.mixin.util.PropertyGroup(proplist);
         end
     end
-    %%
+    %% Construction
     methods
         function ScktObj = Subckt(device,name,portname,description,netlist,options)
             arguments

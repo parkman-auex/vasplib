@@ -121,7 +121,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
             end
             Hcktobj = Hcktobj.set_hop(zeros(1,Hcktobj.dim),Subcktobj,PortInL,PortOutL,DescriptionL);
         end
-        function Hcktobj = set_hop(Hcktobj,vector,Subcktobj,PortInL,PortOutL,DescriptionL)
+        function Hcktobj = set_hop(Hcktobj,vector,Subcktobj,PortInL,PortOutL,DescriptionL,options)
             arguments
                 Hcktobj Hckt;
                 vector;
@@ -129,6 +129,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 PortInL = 1;
                 PortOutL = 2;
                 DescriptionL = Subcktobj.Description;
+                options.Port2PortMode = false;
             end
             [~,vectorlabel] = ismember(vector,Hcktobj.vectorAll,'rows');
             if vectorlabel == 0
@@ -150,26 +151,28 @@ classdef Hckt < matlab.mixin.CustomDisplay
             % temp list mode
             % temp one port 2 another
             % bugs here!
-            checkvectorL = Hckt.dim2vectorL(Hcktobj.dim);
-            if ~all(vector==0)
-                if ismember(vector,checkvectorL,'rows')
-                    %
-                    Hcktobj.ScktL(seq,1).ReverseConnection = false;
-                    %
-                    Hcktobj.Port2VectorDist(PortInL) = vector;
-                    Hcktobj.Port2PortDist(PortInL) = PortOutL;
-                    Hcktobj.Port2PortDistForVectorise(PortInL) = PortOutL;
-                    % BinBin convention
-                    Hcktobj.Port2PortDist_BinBin(PortInL) = PortInL;
-                else
-                    %
-                    Hcktobj.ScktL(seq,1).ReverseConnection = true;
-                    %
-                    Hcktobj.Port2VectorDist(PortInL) =  zeros(1,Hcktobj.dim);
-                    Hcktobj.Port2PortDist(PortInL) = PortInL;
-                    Hcktobj.Port2PortDistForVectorise(PortInL) = PortOutL;
-                    % BinBin convention
-                    Hcktobj.Port2PortDist_BinBin(PortInL) = PortOutL;
+            if options.Port2PortMode
+                checkvectorL = Hckt.dim2vectorL(Hcktobj.dim);
+                if ~all(vector==0)
+                    if ismember(vector,checkvectorL,'rows')
+                        %
+                        Hcktobj.ScktL(seq,1).ReverseConnection = false;
+                        %
+                        Hcktobj.Port2VectorDist(PortInL) = vector;
+                        Hcktobj.Port2PortDist(PortInL) = PortOutL;
+                        Hcktobj.Port2PortDistForVectorise(PortInL) = PortOutL;
+                        % BinBin convention
+                        Hcktobj.Port2PortDist_BinBin(PortInL) = PortInL;
+                    else
+                        %
+                        Hcktobj.ScktL(seq,1).ReverseConnection = true;
+                        %
+                        Hcktobj.Port2VectorDist(PortInL) =  zeros(1,Hcktobj.dim);
+                        Hcktobj.Port2PortDist(PortInL) = PortInL;
+                        Hcktobj.Port2PortDistForVectorise(PortInL) = PortOutL;
+                        % BinBin convention
+                        Hcktobj.Port2PortDist_BinBin(PortInL) = PortOutL;
+                    end
                 end
             end
         end
@@ -1198,7 +1201,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     mat2str(HcktObj.vectorAll(HcktObj.vectorL(i),:)),...
                     mat2str(HcktObj.PortOutCell{i,:}),...
                     mat2str(HcktObj.PortInCell{i,:}),...
-                    HcktObj.ScktL(i).name ...
+                    HcktObj.ScktL(i).name(1) ...
                     );
                 hoppinglist_gen(HcktObj,fid,i,ijkL,ScktnameL,optionscell{:});
             end
@@ -1631,7 +1634,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     fprintf(fid,"* Na-(Mb+Lc) \n");
                     fprintf(fid,"*\n");
                     fprintf(fid,"*Rb = Rf/M; Rc = Rf/L Ra = (2+M+L-N)Rf RNf = N Rf \n");
-                    fprintf(fid,".SubCkt AdderSubtractor va vb vc vo TOGND" + ...
+                    fprintf(fid,".SubCkt AdderSubtractor va vb vc vo TOGND " + ...
                         "VarRf=100%s VarRa=100%s VarRb=100%s VarRc=100%s VarRNf=300%s\n", ...
                         Rmagnitude,Rmagnitude,Rmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"Ra va v_plus VarRa \n");
@@ -1675,17 +1678,17 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 case 'Basis' % checked
                     fprintf(fid,"* BasisC3_origin \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt BasisC3_origin n1 n2 n3 TOGND VarL0=100%s InitV=0V R_L=1u \n",Lmagnitude);
-                    fprintf(fid,"L1 n1 n2 VarL0 \n");
-                    fprintf(fid,"L2 n2 n3 VarL0 \n");
-                    fprintf(fid,"L3 n3 n2 VarL0 \n");
+                    fprintf(fid,".SubCkt BasisC3_origin n1 n2 n3 TOGND VarL0=1%s InitV=0V R_L=1u \n",Lmagnitude);
+                    fprintf(fid,"L1 n1 n2 VarL0 R=R_L \n");
+                    fprintf(fid,"L2 n2 n3 VarL0 R=R_L \n");
+                    fprintf(fid,"L3 n3 n2 VarL0 R=R_L \n");
                     fprintf(fid,".ends BasisC3_origin\n");
                 case 'Basis_SOI' % checked
                     fprintf(fid,"* BasisC3_origin \n");
                     fprintf(fid,"*\n");
                     fprintf(fid,"* n1 n2 n3 n1_prime n2_prime n3_prime nR1_prime nR2_prime nR3_prime  \n");
                     fprintf(fid,".SubCkt BasisC3_origin n1 n2 n3 TOGND " + ...
-                        "VarCg=100%s VarRh=1 R_L=1u InitV=0V \n",Cmagnitude,Rmagnitude);
+                        "VarL0=1%s VarCg=100%s VarRh=0.1%s R_L=1u InitV=0V \n",Lmagnitude,Cmagnitude,Rmagnitude);
                     fprintf(fid,"L1 n1 n2 VarL0 R=R_L \n");
                     fprintf(fid,"L2 n2 n3 VarL0 R=R_L \n");
                     fprintf(fid,"L3 n3 n2 VarL0 R=R_L \n");
@@ -1705,7 +1708,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 case '+sigma_0' % checked
                     fprintf(fid,"* +sigma_0 \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt PlusSigma0 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V" + ...
+                    fprintf(fid,".SubCkt PlusSigma0 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
                         "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"C1 L_n1 R_n1  VarC0 IC=InitV\n");
                     fprintf(fid,"C2 L_n2 R_n2 VarC0 IC=InitV\n");
@@ -1714,7 +1717,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 case '-sigma_0' % checked
                     fprintf(fid,"* -sigma_0 \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt MinusSigma0 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V" + ...
+                    fprintf(fid,".SubCkt MinusSigma0 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
                         "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"C1 L_n1  R_n2 VarC0 IC=InitV\n");
                     fprintf(fid,"C2 L_n2 R_n1  VarC0 IC=InitV\n");
@@ -1726,7 +1729,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 case '+isigma_0' % checked
                     fprintf(fid,"* +isigma_0 \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt PlusiSigma0 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V" + ...
+                    fprintf(fid,".SubCkt PlusiSigma0 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
                         "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"R1 L_n1  R_n2 VarR0\n");
                     fprintf(fid,"R2 L_n2 R_n1  VarR0\n");
@@ -1738,7 +1741,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 case '-isigma_0' % checked
                     fprintf(fid,"* -isigma_0 \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt MinusiSigma0 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V" + ...
+                    fprintf(fid,".SubCkt MinusiSigma0 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
                         "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"R1 L_n1  R_n1  VarR0\n");
                     fprintf(fid,"R2 L_n2 R_n2 VarR0\n");
@@ -1747,7 +1750,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 case '+sigma_1' % checked
                     fprintf(fid,"* +sigma_1 \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,"SubCkt PlusSigma1 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V" + ...
+                    fprintf(fid,".SubCkt PlusSigma1 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
                         "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"C1 L_n1  R_n2 VarC0 IC=InitV\n");
                     fprintf(fid,"C2 L_n2 R_n1  VarC0 IC=InitV\n");
@@ -1756,7 +1759,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 case '-sigma_1' % checked
                     fprintf(fid,"* -sigma_1 \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt MinusSigma1 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V" + ...
+                    fprintf(fid,".SubCkt MinusSigma1 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
                         "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"C1 L_n1  R_n1  VarC0 IC=InitV\n");
                     fprintf(fid,"C2 L_n2 R_n2 VarC0 IC=InitV\n");
@@ -1768,7 +1771,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 case '+isigma_1' % checked
                     fprintf(fid,"* +isigma_1 \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt PlusiSigma1 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V" + ...
+                    fprintf(fid,".SubCkt PlusiSigma1 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
                         "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"R1 L_n1  R_n1  VarR0\n");
                     fprintf(fid,"R2 L_n2 R_n2 VarR0\n");
@@ -1780,7 +1783,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 case '-isigma_1' % checked
                     fprintf(fid,"* -isigma_1 \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,"SubCkt MinusiSigma1 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V" + ...
+                    fprintf(fid,"SubCkt MinusiSigma1 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
                         "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"R1 L_n1  R_n2 VarR0\n");
                     fprintf(fid,"R2 L_n2 R_n1  VarR0\n");
@@ -1789,7 +1792,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 case '+gen3sigma_2' % checked
                     fprintf(fid,"* +gen3sigma_2 \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt PlusGen3Sigma2 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V" + ...
+                    fprintf(fid,".SubCkt PlusGen3Sigma2 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
                         "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"C1 L_n1  R_n2 VarC0  IC=InitV\n");
                     fprintf(fid,"C2 L_n2 R_n1  VarC0  IC=InitV\n");
@@ -1801,7 +1804,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 case '-gen3sigma_2' % checked
                     fprintf(fid,"* -gen3sigma_2 \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt MinusGen3Sigma2 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V" + ...
+                    fprintf(fid,".SubCkt MinusGen3Sigma2 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
                         "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"C1 L_n1  R_n2 VarC0  IC=InitV\n");
                     fprintf(fid,"C2 L_n2 R_n1  VarC0  IC=InitV\n");
@@ -1813,7 +1816,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 case '+igen3sigma_2' % checked
                     fprintf(fid,"* +igen3sigma_2 \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt PlusiGen3Sigma2 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V" + ...
+                    fprintf(fid,".SubCkt PlusiGen3Sigma2 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
                         "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"R1 L_n1 R_n2  VarR0  \n");
                     fprintf(fid,"R2 L_n2 R_n1  VarR0  \n");
@@ -1825,7 +1828,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 case '-igen3sigma_2'
                     fprintf(fid,"* -igen3sigma_2 \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt MinusiGen3Sigma2 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V" + ...
+                    fprintf(fid,".SubCkt MinusiGen3Sigma2 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
                         "VarC0=100%s Var2C0=100%s   VarR0=100%s VarR0_2=100%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"R1 L_n1 R_n2  VarR0  \n");
                     fprintf(fid,"R2 L_n2 R_n1  VarR0  \n");
@@ -1837,7 +1840,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 case '+gen3sigma_3'
                     fprintf(fid,"* +gen3sigma_3 \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt PlusGen3Sigma3 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V" + ...
+                    fprintf(fid,".SubCkt PlusGen3Sigma3 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
                         "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"R1 L_n1  R_n1  VarR0  \n");
                     fprintf(fid,"R2 L_n2 R_n2 VarR0  \n");
@@ -1849,7 +1852,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 case '-gen3sigma_3'
                     fprintf(fid,"* -gen3sigma_3 \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt MinusGen3Sigma3 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V" + ...
+                    fprintf(fid,".SubCkt MinusGen3Sigma3 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
                         "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"R1 L_n1 R_n1   VarR0  \n");
                     fprintf(fid,"R2 L_n2 R_n2 VarR0  \n");
@@ -1861,7 +1864,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 case '+igen3sigma_3'
                     fprintf(fid,"* +igen3sigma_3 \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt PlusiGen3Sigma3 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V" + ...
+                    fprintf(fid,".SubCkt PlusiGen3Sigma3 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
                         "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"C1 L_n1 R_n1 VarC0 \n");
                     fprintf(fid,"C2 L_n2 R_n2 VarC0 \n");
@@ -1873,7 +1876,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 case '-igen3sigma_3'
                     fprintf(fid,"* -igen3sigma_3 \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt MinusiGen3Sigma3 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V" + ...
+                    fprintf(fid,".SubCkt MinusiGen3Sigma3 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
                         "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"C1 L_n1 R_n1 VarC0 \n");
                     fprintf(fid,"C2 L_n2 R_n2 VarC0 \n");
@@ -1885,7 +1888,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 case '+isigma_1_SOI' % checked
                     fprintf(fid,"* +isigma_1_SOI \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt PlusiSigma1 L_n1_prime L_n2_prime L_n3_prime R_n1 R_n2 R_n3 TOGND InitV=0V" + ...
+                    fprintf(fid,".SubCkt PlusiSigma1 L_n1_prime L_n2_prime L_n3_prime R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
                         "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"R1 L_n1 R_n1  VarR0\n");
                     fprintf(fid,"R2 L_n2 R_n2 VarR0\n");
@@ -1900,7 +1903,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 case '-isigma_1_SOI' % checked
                     fprintf(fid,"* -isigma_1_SOI \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,"SubCkt MinusiSigma1 L_n1 L_n2 L_n3 R_n1_prime R_n2_prime R_n3_prime TOGND InitV=0V" + ...
+                    fprintf(fid,".SubCkt MinusiSigma1 L_n1 L_n2 L_n3 R_n1_prime R_n2_prime R_n3_prime TOGND InitV=0V " + ...
                         "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"R1 L_n1 R_n2 VarR0\n");
                     fprintf(fid,"R2 L_n2 R_n1 VarR0\n");
@@ -1912,12 +1915,12 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 case '+igen3sigma_2_SOI' % checked
                     fprintf(fid,"* +igen3sigma_2_SOI \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt PlusiSigma1 L_n1_prime L_n2_prime L_n3_prime R_n1 R_n2 R_n3 TOGND InitV=0V" + ...
+                    fprintf(fid,".SubCkt PlusiGen3Sigma2 L_n1_prime L_n2_prime L_n3_prime R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
                         "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
-                    fprintf(fid,"R1 L_n1 R_n2  VarR0  \n");
-                    fprintf(fid,"R2 L_n2 R_n1  VarR0  \n");
+                    fprintf(fid,"R1 L_n1 R_n2 VarR0  \n");
+                    fprintf(fid,"R2 L_n2 R_n1 VarR0  \n");
                     fprintf(fid,"R3 L_n3 R_n3 VarR0  \n");
-                    fprintf(fid,"R4 L_n1 R_n1   VarR0_2\n");
+                    fprintf(fid,"R4 L_n1 R_n1 VarR0_2\n");
                     fprintf(fid,"R5 L_n2 R_n3 VarR0_2\n");
                     fprintf(fid,"R6 L_n3 R_n2 VarR0_2\n");
                     fprintf(fid,"X1_1prime L_n1_prime L_n1 TOGND VoltageFollower \n");
@@ -1927,7 +1930,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 case '-igen3sigma_2_SOI'
                     fprintf(fid,"* -igen3sigma_2_SOI \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt MinusiGen3Sigma2 L_n1 L_n2 L_n3 R_n1_prime R_n2_prime R_n3_prime TOGND InitV=0V" + ...
+                    fprintf(fid,".SubCkt MinusiGen3Sigma2 L_n1 L_n2 L_n3 R_n1_prime R_n2_prime R_n3_prime TOGND InitV=0V " + ...
                         "VarC0=100%s Var2C0=100%s   VarR0=100%s VarR0_2=100%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"R1 L_n1 R_n2  VarR0  \n");
                     fprintf(fid,"R2 L_n2 R_n1  VarR0  \n");
@@ -1942,7 +1945,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 case '+igen3sigma_3_SOI'
                     fprintf(fid,"* +igen3sigma_3_SOI \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt PlusiSigma1 L_n1_prime L_n2_prime L_n3_prime R_n1 R_n2 R_n3 TOGND InitV=0V" + ...
+                    fprintf(fid,".SubCkt PlusiGen3Sigma3 L_n1_prime L_n2_prime L_n3_prime R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
                         "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"C1 L_n1 R_n1 VarC0 \n");
                     fprintf(fid,"C2 L_n2 R_n2 VarC0 \n");
@@ -1957,7 +1960,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 case '-igen3sigma_3_SOI'
                     fprintf(fid,"* -igen3sigma_3_SOI \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt MinusiGen3Sigma3 L_n1 L_n2 L_n3 R_n1_prime R_n2_prime R_n3_prime TOGND InitV=0V" + ...
+                    fprintf(fid,".SubCkt MinusiGen3Sigma3 L_n1 L_n2 L_n3 R_n1_prime R_n2_prime R_n3_prime TOGND InitV=0V " + ...
                         "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"C1 L_n1 R_n1 VarC0 \n");
                     fprintf(fid,"C2 L_n2 R_n2 VarC0 \n");
@@ -1970,6 +1973,8 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     fprintf(fid,"X3_3prime R_n3_prime R_n1 TOGND VoltageFollower \n");
                     fprintf(fid,".ends MinusiGen3Sigma3\n");
             end
+            fprintf(fid,"* ---------------\n");
+            fprintf(fid,"\n");
         end
         function WriteComponent(Component,fid,magnitude)
             arguments
@@ -2111,7 +2116,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 Hckt.WritePlugIns(char(PlugIn),fid,magnitude);
             end
             for Modules = ModulesLib
-                Hckt.WriteModulesLib(char(Modules),fid,magnitude);
+                Hckt.WriteModules(char(Modules),fid,magnitude);
             end
             for Component = ComponentLib
                 Hckt.WriteComponent(char(Component),fid,magnitude);

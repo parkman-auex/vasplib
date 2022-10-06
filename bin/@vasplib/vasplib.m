@@ -4153,11 +4153,11 @@ classdef vasplib < matlab.mixin.CustomDisplay
                 H_sym_L = sym(zeros(1,16));
                 H_sym_Gamma_L = sym(zeros(1,16));
             end
-            tmp_mat_r = real(H_sym);
-            tmp_mat_i = imag(H_sym);
+            tmp_mat_r = real(H_double);
+            tmp_mat_i = imag(H_double);
             H_sym_L(1:2) = diag(tmp_mat_r);
             H_sym_L(3) = diag(tmp_mat_r,1);
-            H_sym_L(4) = diag(tmp_mat_r,2);
+            H_sym_L(4) = diag(tmp_mat_i,1);
             for i = 1:4
                 Label_tmp = find(Smat_inv(i,:));
                 H_sym_Gamma_L(Label_tmp) = H_sym_Gamma_L(Label_tmp)+H_sym_L(i)*Smat_inv(i,Label_tmp);
