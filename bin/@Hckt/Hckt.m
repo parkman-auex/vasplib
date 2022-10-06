@@ -1897,8 +1897,8 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     fprintf(fid,"R5 L_n2 R_n3 VarR0\n");
                     fprintf(fid,"R6 L_n3 R_n2 VarR0\n");
                     fprintf(fid,"X1_1prime L_n1_prime L_n1 TOGND VoltageFollower \n");
-                    fprintf(fid,"X2_2prime L_n2_prime L_n1 TOGND VoltageFollower \n");
-                    fprintf(fid,"X3_3prime L_n3_prime L_n1 TOGND VoltageFollower \n");
+                    fprintf(fid,"X2_2prime L_n2_prime L_n2 TOGND VoltageFollower \n");
+                    fprintf(fid,"X3_3prime L_n3_prime L_n3 TOGND VoltageFollower \n");
                     fprintf(fid,".ends PlusiSigma1\n");
                 case '-isigma_1_SOI' % checked
                     fprintf(fid,"* -isigma_1_SOI \n");
@@ -1909,8 +1909,8 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     fprintf(fid,"R2 L_n2 R_n1 VarR0\n");
                     fprintf(fid,"R3 L_n3 R_n3 VarR0\n");
                     fprintf(fid,"X1_1prime R_n1_prime R_n1 TOGND VoltageFollower \n");
-                    fprintf(fid,"X2_2prime R_n2_prime R_n1 TOGND VoltageFollower \n");
-                    fprintf(fid,"X3_3prime R_n3_prime R_n1 TOGND VoltageFollower \n");
+                    fprintf(fid,"X2_2prime R_n2_prime R_n2 TOGND VoltageFollower \n");
+                    fprintf(fid,"X3_3prime R_n3_prime R_n3 TOGND VoltageFollower \n");
                     fprintf(fid,".ends MinusiSigma1\n");
                 case '+igen3sigma_2_SOI' % checked
                     fprintf(fid,"* +igen3sigma_2_SOI \n");
@@ -1924,8 +1924,8 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     fprintf(fid,"R5 L_n2 R_n3 VarR0_2\n");
                     fprintf(fid,"R6 L_n3 R_n2 VarR0_2\n");
                     fprintf(fid,"X1_1prime L_n1_prime L_n1 TOGND VoltageFollower \n");
-                    fprintf(fid,"X2_2prime L_n2_prime L_n1 TOGND VoltageFollower \n");
-                    fprintf(fid,"X3_3prime L_n3_prime L_n1 TOGND VoltageFollower \n");
+                    fprintf(fid,"X2_2prime L_n2_prime L_n2 TOGND VoltageFollower \n");
+                    fprintf(fid,"X3_3prime L_n3_prime L_n3 TOGND VoltageFollower \n");
                     fprintf(fid,".ends PlusiGen3Sigma2\n");
                 case '-igen3sigma_2_SOI'
                     fprintf(fid,"* -igen3sigma_2_SOI \n");
@@ -1939,8 +1939,8 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     fprintf(fid,"R5 L_n2 R_n2 VarR0_2\n");
                     fprintf(fid,"R6 L_n3 R_n1  VarR0_2\n");
                     fprintf(fid,"X1_1prime R_n1_prime R_n1 TOGND VoltageFollower \n");
-                    fprintf(fid,"X2_2prime R_n2_prime R_n1 TOGND VoltageFollower \n");
-                    fprintf(fid,"X3_3prime R_n3_prime R_n1 TOGND VoltageFollower \n");
+                    fprintf(fid,"X2_2prime R_n2_prime R_n2 TOGND VoltageFollower \n");
+                    fprintf(fid,"X3_3prime R_n3_prime R_n3 TOGND VoltageFollower \n");
                     fprintf(fid,".ends MinusiGen3Sigma2\n");
                 case '+igen3sigma_3_SOI'
                     fprintf(fid,"* +igen3sigma_3_SOI \n");
@@ -1954,8 +1954,8 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     fprintf(fid,"C5 L_n2 R_n3 Var2C0\n");
                     fprintf(fid,"C6 L_n3 R_n1 Var2C0\n");
                     fprintf(fid,"X1_1prime L_n1_prime L_n1 TOGND VoltageFollower \n");
-                    fprintf(fid,"X2_2prime L_n2_prime L_n1 TOGND VoltageFollower \n");
-                    fprintf(fid,"X3_3prime L_n3_prime L_n1 TOGND VoltageFollower \n");
+                    fprintf(fid,"X2_2prime L_n2_prime L_n2 TOGND VoltageFollower \n");
+                    fprintf(fid,"X3_3prime L_n3_prime L_n3 TOGND VoltageFollower \n");
                     fprintf(fid,".ends PlusiGen3Sigma3\n");
                 case '-igen3sigma_3_SOI'
                     fprintf(fid,"* -igen3sigma_3_SOI \n");
@@ -1969,8 +1969,8 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     fprintf(fid,"C5 L_n2 R_n1 Var2C0\n");
                     fprintf(fid,"C6 L_n3 R_n2 Var2C0\n");
                     fprintf(fid,"X1_1prime R_n1_prime R_n1 TOGND VoltageFollower \n");
-                    fprintf(fid,"X2_2prime R_n2_prime R_n1 TOGND VoltageFollower \n");
-                    fprintf(fid,"X3_3prime R_n3_prime R_n1 TOGND VoltageFollower \n");
+                    fprintf(fid,"X2_2prime R_n2_prime R_n2 TOGND VoltageFollower \n");
+                    fprintf(fid,"X3_3prime R_n3_prime R_n3 TOGND VoltageFollower \n");
                     fprintf(fid,".ends MinusiGen3Sigma3\n");
             end
             fprintf(fid,"* ---------------\n");
