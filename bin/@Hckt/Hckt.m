@@ -950,6 +950,8 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     IpulseSTRING = ['Ipulse ',NodeStrList{1},' GND PU 0 1 5n 5n 50m'];
                 case 'm'
                     IpulseSTRING = ['Ipulse ',NodeStrList{1},' GND PU 0 1 5n 5n 500m'];
+                case 'n'
+                    IpulseSTRING = ['Ipulse ',NodeStrList{1},' GND PU 0 1 5n 5n 500u'];
             end
             % Vac
             VacSTRING = "Vac source GND AC 1 0";
@@ -965,6 +967,8 @@ classdef Hckt < matlab.mixin.CustomDisplay
                         IpulseSTRING = [IpulseSTRING;string(['Ipulse ',NodeStrList{i},' GND PU 0 1 5n 5n 50m'])];
                     case 'm'
                         IpulseSTRING = [IpulseSTRING;string(['Ipulse ',NodeStrList{i},' GND PU 0 1 5n 5n 500m'])];
+                    case 'n'
+                        IpulseSTRING = [IpulseSTRING;string(['Ipulse ',NodeStrList{i},' GND PU 0 1 5n 5n 50u'])];
                 end
                 % Vac
                 VacSTRING = "Vac source GND AC 1 0";
@@ -1028,8 +1032,8 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     DEFAULT_PARM = "%.PARAM InitV =0V CA = 100p C_hopping = 100p C_v = 100p";
                 case 'n'
                     TRAN =".tran 50ns 500us";
-                    AC = ".AC LIN 1000 0.5e06 1e06";
-                    DEFAULT_PARM = "%.PARAM InitV =0V CA = 100n C_hopping = 100n C_v = 100n";
+                    AC = ".AC LIN 1000 0.1e06 5e06";
+                    DEFAULT_PARM = "%.PARAM InitV =0V CA = 1n C_hopping = 2.7n C_v = 2.7n";
                 case 'u'
                     TRAN =".tran 1us 10ms";
                     AC = ".AC LIN 1000 0.5e04 2e04";
@@ -1624,6 +1628,10 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     Cmagnitude = 'p';
                     Lmagnitude = 'u';
                     Rmagnitude = '';
+                case 'n'
+                    Cmagnitude = 'n';
+                    Lmagnitude = 'u';
+                    Rmagnitude = '';
                 case 'u'
                     Cmagnitude = 'p';
                     Lmagnitude = 'u';
@@ -1640,7 +1648,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     fprintf(fid,"*\n");
                     fprintf(fid,"*Rb = Rf/M; Rc = Rf/L Ra = (2+M+L-N)Rf RNf = N Rf \n");
                     fprintf(fid,".SubCkt AdderSubtractor va vb vc vo TOGND " + ...
-                        "VarRf=100%s VarRa=100%s VarRb=100%s VarRc=100%s VarRNf=300%s\n", ...
+                        "VarRf=806%s VarRa=806%s VarRb=806%s VarRc=806%s VarRNf=2418%s\n", ...
                         Rmagnitude,Rmagnitude,Rmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"Ra va v_plus VarRa \n");
                     fprintf(fid,"Rb vb v_minus VarRb \n");
@@ -1668,15 +1676,19 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 case 'p'
                     Cmagnitude = 'p';
                     Lmagnitude = 'u';
-                    Rmagnitude = 'k';
+                    Rmagnitude = '';
+                case 'n'
+                    Cmagnitude = 'n';
+                    Lmagnitude = 'u';
+                    Rmagnitude = '';
                 case 'u'
                     Cmagnitude = 'p';
                     Lmagnitude = 'u';
-                    Rmagnitude = 'k';
+                    Rmagnitude = '';
                 case 'm'
                     Cmagnitude = 'p';
                     Lmagnitude = 'u';
-                    Rmagnitude = 'k';
+                    Rmagnitude = '';
             end
             fprintf(fid,"* ---------------\n");
             switch Modules
@@ -1693,10 +1705,10 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     fprintf(fid,"*\n");
                     fprintf(fid,"* n1 n2 n3 n1_prime n2_prime n3_prime nR1_prime nR2_prime nR3_prime  \n");
                     fprintf(fid,".SubCkt BasisC3_origin n1 n2 n3 TOGND " + ...
-                        "VarL0=1%s VarCg=100%s VarRh=0.1%s R_L=1u InitV=0V \n",Lmagnitude,Cmagnitude,Rmagnitude);
+                        "VarL0=1.8%s VarCg=1%s VarRh=10%s R_L=53m InitV=0V \n",Lmagnitude,Cmagnitude,Rmagnitude);
                     fprintf(fid,"L1 n1 n2 VarL0 R=R_L \n");
                     fprintf(fid,"L2 n2 n3 VarL0 R=R_L \n");
-                    fprintf(fid,"L3 n3 n2 VarL0 R=R_L \n");
+                    fprintf(fid,"L3 n3 n1 VarL0 R=R_L \n");
                     fprintf(fid,"X1_1prime n1 n1_prime TOGND VoltageFollower \n");
                     fprintf(fid,"X2_2prime n2 n2_prime TOGND VoltageFollower \n");
                     fprintf(fid,"X3_3prime n3 n3_prime TOGND VoltageFollower \n");
@@ -1714,7 +1726,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     fprintf(fid,"* +sigma_0 \n");
                     fprintf(fid,"*\n");
                     fprintf(fid,".SubCkt PlusSigma0 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
-                        "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
+                        "VarC0=2.7%s Var2C0=5.4%s VarR0=20%s VarR0_2=10%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"C1 L_n1 R_n1  VarC0 IC=InitV\n");
                     fprintf(fid,"C2 L_n2 R_n2 VarC0 IC=InitV\n");
                     fprintf(fid,"C3 L_n3 R_n3 VarC0 IC=InitV\n");
@@ -1723,11 +1735,11 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     fprintf(fid,"* -sigma_0 \n");
                     fprintf(fid,"*\n");
                     fprintf(fid,".SubCkt MinusSigma0 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
-                        "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
-                    fprintf(fid,"C1 L_n1  R_n2 VarC0 IC=InitV\n");
-                    fprintf(fid,"C2 L_n2 R_n1  VarC0 IC=InitV\n");
-                    fprintf(fid,"C3 L_n3 R_n1  VarC0 IC=InitV\n");
-                    fprintf(fid,"C4 L_n1  R_n3 VarC0 IC=InitV\n");
+                        "VarC0=2.7%s Var2C0=5.4%s VarR0=20%s VarR0_2=10%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
+                    fprintf(fid,"C1 L_n1 R_n2 VarC0 IC=InitV\n");
+                    fprintf(fid,"C2 L_n2 R_n1 VarC0 IC=InitV\n");
+                    fprintf(fid,"C3 L_n3 R_n1 VarC0 IC=InitV\n");
+                    fprintf(fid,"C4 L_n1 R_n3 VarC0 IC=InitV\n");
                     fprintf(fid,"C5 L_n2 R_n3 VarC0 IC=InitV\n");
                     fprintf(fid,"C6 L_n3 R_n2 VarC0 IC=InitV\n");
                     fprintf(fid,".ends MinusSigma0\n");
@@ -1735,7 +1747,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     fprintf(fid,"* +isigma_0 \n");
                     fprintf(fid,"*\n");
                     fprintf(fid,".SubCkt PlusiSigma0 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
-                        "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
+                        "VarC0=2.7%s Var2C0=5.4%s VarR0=20%s VarR0_2=10%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"R1 L_n1  R_n2 VarR0\n");
                     fprintf(fid,"R2 L_n2 R_n1  VarR0\n");
                     fprintf(fid,"R3 L_n3 R_n1  VarR0\n");
@@ -1747,7 +1759,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     fprintf(fid,"* -isigma_0 \n");
                     fprintf(fid,"*\n");
                     fprintf(fid,".SubCkt MinusiSigma0 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
-                        "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
+                        "VarC0=2.7%s Var2C0=5.4%s VarR0=20%s VarR0_2=10%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"R1 L_n1  R_n1  VarR0\n");
                     fprintf(fid,"R2 L_n2 R_n2 VarR0\n");
                     fprintf(fid,"R3 L_n3 R_n3 VarR0\n");
@@ -1756,7 +1768,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     fprintf(fid,"* +sigma_1 \n");
                     fprintf(fid,"*\n");
                     fprintf(fid,".SubCkt PlusSigma1 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
-                        "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
+                        "VarC0=2.7%s Var2C0=5.4%s VarR0=20%s VarR0_2=10%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"C1 L_n1  R_n2 VarC0 IC=InitV\n");
                     fprintf(fid,"C2 L_n2 R_n1  VarC0 IC=InitV\n");
                     fprintf(fid,"C3 L_n3 R_n3 VarC0 IC=InitV\n");
@@ -1765,7 +1777,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     fprintf(fid,"* -sigma_1 \n");
                     fprintf(fid,"*\n");
                     fprintf(fid,".SubCkt MinusSigma1 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
-                        "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
+                        "VarC0=2.7%s Var2C0=5.4%s VarR0=20%s VarR0_2=10%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"C1 L_n1  R_n1  VarC0 IC=InitV\n");
                     fprintf(fid,"C2 L_n2 R_n2 VarC0 IC=InitV\n");
                     fprintf(fid,"C3 L_n3 R_n1  VarC0 IC=InitV\n");
@@ -1777,7 +1789,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     fprintf(fid,"* +isigma_1 \n");
                     fprintf(fid,"*\n");
                     fprintf(fid,".SubCkt PlusiSigma1 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
-                        "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
+                        "VarC0=2.7%s Var2C0=5.4%s VarR0=20%s VarR0_2=10%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"R1 L_n1  R_n1  VarR0\n");
                     fprintf(fid,"R2 L_n2 R_n2 VarR0\n");
                     fprintf(fid,"R3 L_n3 R_n1  VarR0\n");
@@ -1789,7 +1801,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     fprintf(fid,"* -isigma_1 \n");
                     fprintf(fid,"*\n");
                     fprintf(fid,"SubCkt MinusiSigma1 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
-                        "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
+                        "VarC0=2.7%s Var2C0=5.4%s VarR0=20%s VarR0_2=10%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"R1 L_n1  R_n2 VarR0\n");
                     fprintf(fid,"R2 L_n2 R_n1  VarR0\n");
                     fprintf(fid,"R3 L_n3 R_n3 VarR0\n");
@@ -1798,7 +1810,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     fprintf(fid,"* +gen3sigma_2 \n");
                     fprintf(fid,"*\n");
                     fprintf(fid,".SubCkt PlusGen3Sigma2 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
-                        "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
+                        "VarC0=2.7%s Var2C0=5.4%s VarR0=20%s VarR0_2=10%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"C1 L_n1  R_n2 VarC0  IC=InitV\n");
                     fprintf(fid,"C2 L_n2 R_n1  VarC0  IC=InitV\n");
                     fprintf(fid,"C3 L_n3 R_n3 VarC0  IC=InitV\n");
@@ -1810,7 +1822,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     fprintf(fid,"* -gen3sigma_2 \n");
                     fprintf(fid,"*\n");
                     fprintf(fid,".SubCkt MinusGen3Sigma2 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
-                        "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
+                        "VarC0=2.7%s Var2C0=5.4%s VarR0=20%s VarR0_2=10%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"C1 L_n1  R_n2 VarC0  IC=InitV\n");
                     fprintf(fid,"C2 L_n2 R_n1  VarC0  IC=InitV\n");
                     fprintf(fid,"C3 L_n3 R_n3 VarC0  IC=InitV\n");
@@ -1822,7 +1834,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     fprintf(fid,"* +igen3sigma_2 \n");
                     fprintf(fid,"*\n");
                     fprintf(fid,".SubCkt PlusiGen3Sigma2 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
-                        "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
+                        "VarC0=2.7%s Var2C0=5.4%s VarR0=20%s VarR0_2=10%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"R1 L_n1 R_n2  VarR0  \n");
                     fprintf(fid,"R2 L_n2 R_n1  VarR0  \n");
                     fprintf(fid,"R3 L_n3 R_n3 VarR0  \n");
@@ -1834,7 +1846,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     fprintf(fid,"* -igen3sigma_2 \n");
                     fprintf(fid,"*\n");
                     fprintf(fid,".SubCkt MinusiGen3Sigma2 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
-                        "VarC0=100%s Var2C0=100%s   VarR0=100%s VarR0_2=100%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
+                        "VarC0=2.7%s Var2C0=5.4%s VarR0=20%s VarR0_2=10%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"R1 L_n1 R_n2  VarR0  \n");
                     fprintf(fid,"R2 L_n2 R_n1  VarR0  \n");
                     fprintf(fid,"R3 L_n3 R_n3 VarR0  \n");
@@ -1846,7 +1858,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     fprintf(fid,"* +gen3sigma_3 \n");
                     fprintf(fid,"*\n");
                     fprintf(fid,".SubCkt PlusGen3Sigma3 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
-                        "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
+                        "VarC0=2.7%s Var2C0=5.4%s VarR0=20%s VarR0_2=10%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"R1 L_n1  R_n1  VarR0  \n");
                     fprintf(fid,"R2 L_n2 R_n2 VarR0  \n");
                     fprintf(fid,"R3 L_n3 R_n3 VarR0  \n");
@@ -1858,7 +1870,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     fprintf(fid,"* -gen3sigma_3 \n");
                     fprintf(fid,"*\n");
                     fprintf(fid,".SubCkt MinusGen3Sigma3 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
-                        "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
+                        "VarC0=2.7%s Var2C0=5.4%s VarR0=20%s VarR0_2=10%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"R1 L_n1 R_n1   VarR0  \n");
                     fprintf(fid,"R2 L_n2 R_n2 VarR0  \n");
                     fprintf(fid,"R3 L_n3 R_n3 VarR0  \n");
@@ -1870,7 +1882,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     fprintf(fid,"* +igen3sigma_3 \n");
                     fprintf(fid,"*\n");
                     fprintf(fid,".SubCkt PlusiGen3Sigma3 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
-                        "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
+                        "VarC0=2.7%s Var2C0=5.4%s VarR0=20%s VarR0_2=10%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"C1 L_n1 R_n1 VarC0 \n");
                     fprintf(fid,"C2 L_n2 R_n2 VarC0 \n");
                     fprintf(fid,"C3 L_n3 R_n3 VarC0 \n");
@@ -1882,7 +1894,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     fprintf(fid,"* -igen3sigma_3 \n");
                     fprintf(fid,"*\n");
                     fprintf(fid,".SubCkt MinusiGen3Sigma3 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
-                        "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
+                        "VarC0=2.7%s Var2C0=5.4%s VarR0=20%s VarR0_2=10%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"C1 L_n1 R_n1 VarC0 \n");
                     fprintf(fid,"C2 L_n2 R_n2 VarC0 \n");
                     fprintf(fid,"C3 L_n3 R_n3 VarC0 \n");
@@ -1893,89 +1905,150 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 case '+isigma_1_SOI' % checked
                     fprintf(fid,"* +isigma_1_SOI \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt PlusiSigma1 L_n1_prime L_n2_prime L_n3_prime R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
-                        "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
-                    fprintf(fid,"R1 L_n1 R_n1  VarR0\n");
-                    fprintf(fid,"R2 L_n2 R_n2 VarR0\n");
-                    fprintf(fid,"R3 L_n3 R_n1  VarR0\n");
-                    fprintf(fid,"R4 L_n1 R_n3 VarR0\n");
-                    fprintf(fid,"R5 L_n2 R_n3 VarR0\n");
-                    fprintf(fid,"R6 L_n3 R_n2 VarR0\n");
+                    fprintf(fid,".SubCkt PlusiSigma1 L_n1_prime L_n2_prime L_n3_prime R_n1_prime R_n2_prime R_n3_prime TOGND InitV=0V " + ...
+                        "VarC0=2.7%s Var2C0=5.4%s VarR0=20%s VarR0_2=10%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
+                    fprintf(fid,"R1 L_n1 R_n1_prime VarR0\n");
+                    fprintf(fid,"R2 L_n2 R_n2_prime VarR0\n");
+                    fprintf(fid,"R3 L_n3 R_n1_prime VarR0\n");
+                    fprintf(fid,"R4 L_n1 R_n3_prime VarR0\n");
+                    fprintf(fid,"R5 L_n2 R_n3_prime VarR0\n");
+                    fprintf(fid,"R6 L_n3 R_n2_prime VarR0\n");
                     fprintf(fid,"X1_1prime L_n1_prime L_n1 TOGND VoltageFollower \n");
                     fprintf(fid,"X2_2prime L_n2_prime L_n2 TOGND VoltageFollower \n");
                     fprintf(fid,"X3_3prime L_n3_prime L_n3 TOGND VoltageFollower \n");
+                    %
+                    fprintf(fid,"R1_ L_n1_prime R_n2 VarR0\n");
+                    fprintf(fid,"R2_ L_n2_prime R_n1 VarR0\n");
+                    fprintf(fid,"R3_ L_n3_prime R_n3 VarR0\n");
+                    fprintf(fid,"X1_1prime_ R_n1_prime R_n1 TOGND VoltageFollower \n");
+                    fprintf(fid,"X2_2prime_ R_n2_prime R_n2 TOGND VoltageFollower \n");
+                    fprintf(fid,"X3_3prime_ R_n3_prime R_n3 TOGND VoltageFollower \n");
                     fprintf(fid,".ends PlusiSigma1\n");
                 case '-isigma_1_SOI' % checked
                     fprintf(fid,"* -isigma_1_SOI \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt MinusiSigma1 L_n1 L_n2 L_n3 R_n1_prime R_n2_prime R_n3_prime TOGND InitV=0V " + ...
-                        "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
-                    fprintf(fid,"R1 L_n1 R_n2 VarR0\n");
-                    fprintf(fid,"R2 L_n2 R_n1 VarR0\n");
-                    fprintf(fid,"R3 L_n3 R_n3 VarR0\n");
+                    fprintf(fid,".SubCkt MinusiSigma1 L_n1_prime L_n2_prime L_n3_prime R_n1_prime R_n2_prime R_n3_prime TOGND InitV=0V " + ...
+                        "VarC0=2.7%s Var2C0=5.4%s VarR0=20%s VarR0_2=10%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
+                    fprintf(fid,"R1 L_n1_prime R_n2 VarR0\n");
+                    fprintf(fid,"R2 L_n2_prime R_n1 VarR0\n");
+                    fprintf(fid,"R3 L_n3_prime R_n3 VarR0\n");
                     fprintf(fid,"X1_1prime R_n1_prime R_n1 TOGND VoltageFollower \n");
                     fprintf(fid,"X2_2prime R_n2_prime R_n2 TOGND VoltageFollower \n");
                     fprintf(fid,"X3_3prime R_n3_prime R_n3 TOGND VoltageFollower \n");
+                    %
+                    fprintf(fid,"R1_ L_n1 R_n1_prime VarR0\n");
+                    fprintf(fid,"R2_ L_n2 R_n2_prime VarR0\n");
+                    fprintf(fid,"R3_ L_n3 R_n1_prime VarR0\n");
+                    fprintf(fid,"R4_ L_n1 R_n3_prime VarR0\n");
+                    fprintf(fid,"R5_ L_n2 R_n3_prime VarR0\n");
+                    fprintf(fid,"R6_ L_n3 R_n2_prime VarR0\n");
+                    fprintf(fid,"X1_1prime_ L_n1_prime L_n1 TOGND VoltageFollower \n");
+                    fprintf(fid,"X2_2prime_ L_n2_prime L_n2 TOGND VoltageFollower \n");
+                    fprintf(fid,"X3_3prime_ L_n3_prime L_n3 TOGND VoltageFollower \n");
                     fprintf(fid,".ends MinusiSigma1\n");
                 case '+igen3sigma_2_SOI' % checked
                     fprintf(fid,"* +igen3sigma_2_SOI \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt PlusiGen3Sigma2 L_n1_prime L_n2_prime L_n3_prime R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
-                        "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
-                    fprintf(fid,"R1 L_n1 R_n2 VarR0  \n");
-                    fprintf(fid,"R2 L_n2 R_n1 VarR0  \n");
-                    fprintf(fid,"R3 L_n3 R_n3 VarR0  \n");
-                    fprintf(fid,"R4 L_n1 R_n1 VarR0_2\n");
-                    fprintf(fid,"R5 L_n2 R_n3 VarR0_2\n");
-                    fprintf(fid,"R6 L_n3 R_n2 VarR0_2\n");
+                    fprintf(fid,".SubCkt PlusiGen3Sigma2 L_n1_prime L_n2_prime L_n3_prime R_n1_prime R_n2_prime R_n3_prime TOGND InitV=0V " + ...
+                        "VarC0=2.7%s Var2C0=5.4%s VarR0=20%s VarR0_2=10%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
+                    fprintf(fid,"R1 L_n1 R_n2_primeVarR0  \n");
+                    fprintf(fid,"R2 L_n2 R_n1_prime VarR0  \n");
+                    fprintf(fid,"R3 L_n3 R_n3_prime VarR0  \n");
+                    fprintf(fid,"R4 L_n1 R_n1_prime VarR0_2\n");
+                    fprintf(fid,"R5 L_n2 R_n3_prime VarR0_2\n");
+                    fprintf(fid,"R6 L_n3 R_n2_prime VarR0_2\n");
                     fprintf(fid,"X1_1prime L_n1_prime L_n1 TOGND VoltageFollower \n");
                     fprintf(fid,"X2_2prime L_n2_prime L_n2 TOGND VoltageFollower \n");
                     fprintf(fid,"X3_3prime L_n3_prime L_n3 TOGND VoltageFollower \n");
+                    %
+                    fprintf(fid,"R1_ L_n1_prime R_n2  VarR0  \n");
+                    fprintf(fid,"R2_ L_n2_prime R_n1  VarR0  \n");
+                    fprintf(fid,"R3_ L_n3_prime R_n3  VarR0  \n");
+                    fprintf(fid,"R4_ L_n1_prime R_n3  VarR0_2\n");
+                    fprintf(fid,"R5_ L_n2_prime R_n2  VarR0_2\n");
+                    fprintf(fid,"R6_ L_n3_prime R_n1  VarR0_2\n");
+                    fprintf(fid,"X1_1prime_ R_n1_prime R_n1 TOGND VoltageFollower \n");
+                    fprintf(fid,"X2_2prime_ R_n2_prime R_n2 TOGND VoltageFollower \n");
+                    fprintf(fid,"X3_3prime_ R_n3_prime R_n3 TOGND VoltageFollower \n");
+                    %
                     fprintf(fid,".ends PlusiGen3Sigma2\n");
                 case '-igen3sigma_2_SOI'
                     fprintf(fid,"* -igen3sigma_2_SOI \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt MinusiGen3Sigma2 L_n1 L_n2 L_n3 R_n1_prime R_n2_prime R_n3_prime TOGND InitV=0V " + ...
-                        "VarC0=100%s Var2C0=100%s   VarR0=100%s VarR0_2=100%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
-                    fprintf(fid,"R1 L_n1 R_n2  VarR0  \n");
-                    fprintf(fid,"R2 L_n2 R_n1  VarR0  \n");
-                    fprintf(fid,"R3 L_n3 R_n3 VarR0  \n");
-                    fprintf(fid,"R4 L_n1 R_n3  VarR0_2\n");
-                    fprintf(fid,"R5 L_n2 R_n2 VarR0_2\n");
-                    fprintf(fid,"R6 L_n3 R_n1  VarR0_2\n");
+                    fprintf(fid,".SubCkt MinusiGen3Sigma2 L_n1_prime L_n2_prime L_n3_prime R_n1_prime R_n2_prime R_n3_prime TOGND InitV=0V " + ...
+                        "VarC0=2.7%s Var2C0=5.4%s VarR0=20%s VarR0_2=10%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
+                    fprintf(fid,"R1 L_n1_prime R_n2  VarR0  \n");
+                    fprintf(fid,"R2 L_n2_prime R_n1  VarR0  \n");
+                    fprintf(fid,"R3 L_n3_prime R_n3 VarR0  \n");
+                    fprintf(fid,"R4 L_n1_prime R_n3  VarR0_2\n");
+                    fprintf(fid,"R5 L_n2_prime R_n2 VarR0_2\n");
+                    fprintf(fid,"R6 L_n3_prime R_n1  VarR0_2\n");
                     fprintf(fid,"X1_1prime R_n1_prime R_n1 TOGND VoltageFollower \n");
                     fprintf(fid,"X2_2prime R_n2_prime R_n2 TOGND VoltageFollower \n");
                     fprintf(fid,"X3_3prime R_n3_prime R_n3 TOGND VoltageFollower \n");
+                    %
+                    fprintf(fid,"R1_ L_n1 R_n2_primeVarR0  \n");
+                    fprintf(fid,"R2_ L_n2 R_n1_prime VarR0  \n");
+                    fprintf(fid,"R3_ L_n3 R_n3_prime VarR0  \n");
+                    fprintf(fid,"R4_ L_n1 R_n1_prime VarR0_2\n");
+                    fprintf(fid,"R5_ L_n2 R_n3_prime VarR0_2\n");
+                    fprintf(fid,"R6_ L_n3 R_n2_prime VarR0_2\n");
+                    fprintf(fid,"X1_1prime_ L_n1_prime L_n1 TOGND VoltageFollower \n");
+                    fprintf(fid,"X2_2prime_ L_n2_prime L_n2 TOGND VoltageFollower \n");
+                    fprintf(fid,"X3_3prime_ L_n3_prime L_n3 TOGND VoltageFollower \n");
+                    %
                     fprintf(fid,".ends MinusiGen3Sigma2\n");
                 case '+igen3sigma_3_SOI'
                     fprintf(fid,"* +igen3sigma_3_SOI \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt PlusiGen3Sigma3 L_n1_prime L_n2_prime L_n3_prime R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
-                        "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
-                    fprintf(fid,"C1 L_n1 R_n1 VarC0 \n");
-                    fprintf(fid,"C2 L_n2 R_n2 VarC0 \n");
-                    fprintf(fid,"C3 L_n3 R_n3 VarC0 \n");
-                    fprintf(fid,"C4 L_n1 R_n2 Var2C0\n");
-                    fprintf(fid,"C5 L_n2 R_n3 Var2C0\n");
-                    fprintf(fid,"C6 L_n3 R_n1 Var2C0\n");
+                    fprintf(fid,".SubCkt PlusiGen3Sigma3 L_n1_prime L_n2_prime L_n3_prime R_n1_prime R_n2_prime R_n3_prime TOGND InitV=0V " + ...
+                        "VarC0=2.7%s Var2C0=5.4%s VarR0=20%s VarR0_2=10%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
+                    fprintf(fid,"C1 L_n1 R_n1_prime VarC0 \n");
+                    fprintf(fid,"C2 L_n2 R_n2_prime VarC0 \n");
+                    fprintf(fid,"C3 L_n3 R_n3_prime VarC0 \n");
+                    fprintf(fid,"C4 L_n1 R_n2_prime Var2C0\n");
+                    fprintf(fid,"C5 L_n2 R_n3_prime Var2C0\n");
+                    fprintf(fid,"C6 L_n3 R_n1_prime Var2C0\n");
                     fprintf(fid,"X1_1prime L_n1_prime L_n1 TOGND VoltageFollower \n");
                     fprintf(fid,"X2_2prime L_n2_prime L_n2 TOGND VoltageFollower \n");
                     fprintf(fid,"X3_3prime L_n3_prime L_n3 TOGND VoltageFollower \n");
+                    %
+                    fprintf(fid,"C1_ L_n1_prime R_n1 VarC0 \n");
+                    fprintf(fid,"C2_ L_n2_prime R_n2 VarC0 \n");
+                    fprintf(fid,"C3_ L_n3_prime R_n3 VarC0 \n");
+                    fprintf(fid,"C4_ L_n1_prime R_n3 Var2C0\n");
+                    fprintf(fid,"C5_ L_n2_prime R_n1 Var2C0\n");
+                    fprintf(fid,"C6_ L_n3_prime R_n2 Var2C0\n");
+                    fprintf(fid,"X1_1prime_ R_n1_prime R_n1 TOGND VoltageFollower \n");
+                    fprintf(fid,"X2_2prime_ R_n2_prime R_n2 TOGND VoltageFollower \n");
+                    fprintf(fid,"X3_3prime_ R_n3_prime R_n3 TOGND VoltageFollower \n");
+                    %
                     fprintf(fid,".ends PlusiGen3Sigma3\n");
                 case '-igen3sigma_3_SOI'
                     fprintf(fid,"* -igen3sigma_3_SOI \n");
                     fprintf(fid,"*\n");
                     fprintf(fid,".SubCkt MinusiGen3Sigma3 L_n1 L_n2 L_n3 R_n1_prime R_n2_prime R_n3_prime TOGND InitV=0V " + ...
-                        "VarC0=100%s Var2C0=200%s VarR0=100%s VarR0_2=50%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
-                    fprintf(fid,"C1 L_n1 R_n1 VarC0 \n");
-                    fprintf(fid,"C2 L_n2 R_n2 VarC0 \n");
-                    fprintf(fid,"C3 L_n3 R_n3 VarC0 \n");
-                    fprintf(fid,"C4 L_n1 R_n3 Var2C0\n");
-                    fprintf(fid,"C5 L_n2 R_n1 Var2C0\n");
-                    fprintf(fid,"C6 L_n3 R_n2 Var2C0\n");
+                        "VarC0=2.7%s Var2C0=5.4%s VarR0=20%s VarR0_2=10%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
+                    fprintf(fid,"C1 L_n1_prime R_n1 VarC0 \n");
+                    fprintf(fid,"C2 L_n2_prime R_n2 VarC0 \n");
+                    fprintf(fid,"C3 L_n3_prime R_n3 VarC0 \n");
+                    fprintf(fid,"C4 L_n1_prime R_n3 Var2C0\n");
+                    fprintf(fid,"C5 L_n2_prime R_n1 Var2C0\n");
+                    fprintf(fid,"C6 L_n3_prime R_n2 Var2C0\n");
                     fprintf(fid,"X1_1prime R_n1_prime R_n1 TOGND VoltageFollower \n");
                     fprintf(fid,"X2_2prime R_n2_prime R_n2 TOGND VoltageFollower \n");
                     fprintf(fid,"X3_3prime R_n3_prime R_n3 TOGND VoltageFollower \n");
+                    %
+                    fprintf(fid,"C1_ L_n1 R_n1_prime VarC0 \n");
+                    fprintf(fid,"C2_ L_n2 R_n2_prime VarC0 \n");
+                    fprintf(fid,"C3_ L_n3 R_n3_prime VarC0 \n");
+                    fprintf(fid,"C4_ L_n1 R_n2_prime Var2C0\n");
+                    fprintf(fid,"C5_ L_n2 R_n3_prime Var2C0\n");
+                    fprintf(fid,"C6_ L_n3 R_n1_prime Var2C0\n");
+                    fprintf(fid,"X1_1prime_ L_n1_prime L_n1 TOGND VoltageFollower \n");
+                    fprintf(fid,"X2_2prime_ L_n2_prime L_n2 TOGND VoltageFollower \n");
+                    fprintf(fid,"X3_3prime_ L_n3_prime L_n3 TOGND VoltageFollower \n");
+                    %
                     fprintf(fid,".ends MinusiGen3Sigma3\n");
             end
             fprintf(fid,"* ---------------\n");

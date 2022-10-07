@@ -5680,17 +5680,22 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                 options.magnitude = 'p';
                 options.mode {mustBeMember(options.mode,{'real','sigma'})}= 'real';
                 options_homecell.homecell = "normal";
+                options_homecell.defaultparameters = false;
             end
             %
-            VarC0=100;
-            Var2C0=200;
-            VarR0=1;
+            VarC0=1;
+            Var2C0=2;
+            VarR0=20;
             VarR0_2=0.5;
             switch options.magnitude
                 case 'p'
                     Cmagnitude = 'p';
                     Lmagnitude = 'u';
                     Rmagnitude = 'k';
+                case 'n'
+                    Cmagnitude = 'n';
+                    Lmagnitude = 'u';
+                    Rmagnitude = '';
                 case 'u'
                     Cmagnitude = 'p';
                     Lmagnitude = 'u';
@@ -5826,14 +5831,20 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                                 if i < 9
                                     Gen3Factor = 1;
                                 else
-                                    Gen3Factor = 1/sqrt(3);
+                                    Gen3Factor = 1;
                                 end
-                                HcktObj = HcktObj.set_hop(Rvector,HoppingDist{i},[1 2 3],[1 2 3],...
-                                    [' VarC0 = ',num2str(abs(Coe16(i)*Gen3Factor*VarC0)),Cmagnitude,...
-                                     ' Var2C0 = ',num2str(abs(Coe16(i)*Gen3Factor*Var2C0)),Cmagnitude,...
-                                     ' VarR0 = ',num2str(abs(Coe16(i)*Gen3Factor*VarR0)),Rmagnitude,...
-                                     ' VarR0_2 = ',num2str(abs(Coe16(i)*Gen3Factor*VarR0_2)),Rmagnitude ...
-                                        ]);
+                                if options_homecell.defaultparameters
+                                    Parameters = [];
+                                else
+                                    Parameters =  [
+                                        ' VarC0 = ',num2str(abs(Coe16(i)*Gen3Factor*VarC0)),Cmagnitude,...
+                                        ' Var2C0 = ',num2str(abs(Coe16(i)*Gen3Factor*Var2C0)),Cmagnitude,...
+                                        ' VarR0 = ',num2str(abs(Coe16(i)*Gen3Factor*VarR0)),Rmagnitude,...
+                                        ' VarR0_2 = ',num2str(abs(Coe16(i)*Gen3Factor*VarR0_2)),Rmagnitude ...
+                                        ];
+                                end
+                                HcktObj = HcktObj.set_hop(Rvector,HoppingDist{i},[1 2 3],[1 2 3],Parameters);
+;
                             end
                             
                         end
