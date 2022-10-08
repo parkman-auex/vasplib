@@ -542,8 +542,26 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 EIGENCAR = zeros(sizemesh(1),length(klist_l));
                 klist1_s = linspace(0,1,sizemesh(2));
                 %[K1grid,K2grid] = meshgrid(klist1_s,klist2_s);
+                TargetMat = normalize(DOSCAR,'scale');
+                TargetMatMax =  max(DOSCAR,[],'all');
+                TargetMatMin =  min(DOSCAR,[],'all');
+                TargetMatPlus = DOSCAR > 0;
+                TargetMatMinus = DOSCAR < 0;
+                TargetMatABSMax = max(abs(TargetMatMax),abs(TargetMatMin));
+                TargetMatPlusFactor = TargetMatMax/TargetMatABSMax;
+                TargetMatMinusFactor = TargetMatMin/TargetMatABSMax;
+                if ~sum(TargetMatPlus,'all')
+                    TargetMat(TargetMatPlus) = normalize(TargetMat(TargetMatPlus),'range',[0,1]);
+                end
+                if ~sum(TargetMatMinus,'all')
+                    TargetMat(TargetMatMinus) = normalize(TargetMat(TargetMatMinus),'range',[-1,0]);
+                end
+%                 OmergeN = 1:sizemesh(1);
+%                 [K1grid,OmergeNgrid] = meshgrid(klist1_s,OmergeN);
+%                 [K2grid,OmergeNgrid2] = meshgrid(klist_s(:,options.dir_seq(1)),OmergeN);
+                %EIGENCAR = interp2(K1grid,OmergeNgrid,TargetMat,K2grid,OmergeNgrid2,"linear");
                 for i = 1:sizemesh(1)
-                    EIGENCAR(i,:) = interp1(klist1_s,DOSCAR(i,:),klist_s(:,options.dir_seq(1)));
+                   EIGENCAR(i,:) = interp1(klist1_s,TargetMat(i,:),klist_s(:,options.dir_seq(1)));
                 end
             elseif Dim == 2
                 EIGENCAR = zeros(sizemesh(3),length(klist_l));
