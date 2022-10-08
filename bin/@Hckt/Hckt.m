@@ -1631,6 +1631,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
             end
         end
     end
+    %% Write
     methods(Static)
         function WriteVendorComponentLibrary
 
@@ -1740,6 +1741,55 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     fprintf(fid,"C2 n2 TOGND  VarCg \n");
                     fprintf(fid,"C3 n3 TOGND  VarCg \n");
                     fprintf(fid,".ends BasisC3_origin\n");
+                case 'Amplifier_M1'
+                    fprintf(fid,"*Amplifier_M1 \n");
+                    fprintf(fid,"*\n");
+                    fprintf(fid,"* va vb TOGND \n");
+                    fpprintf(fid,".SubCkt Amplifier_M1 va vb TOGND " + ...
+                        "VarRf=7.87k%s Var2Rf=55.09k%s \n",Rmagnitude,Rmagnitude);
+                    fprintf(fid,"R1 vb v_minus VarRf \n");
+                    fprintf(fid,"R2 va v_minus Var2Rf\n");
+                    fprintf(fid,"E_opamp vb TOGND v_plus v_minus level=1\n");
+                    fprintf(fid,".ends Amplifier_M1\n");
+                case 'Basis_Chern1'
+                    fprintf(fid,"* Basis_M1_module \n");
+                    fprintf(fid,"*\n");
+                    fprintf(fid,"* n1 n2 n3 n1_prime n2_prime n3_prime \n");
+                    fprintf(fid,".SubCkt Basis_M1_module n1 n2 n3 TOGND " + ...
+                        "VarRm=30%s InitV=0V \n",Rmagnitude);
+                    fprintf(fid,"R1 n2 n1_prime VarRm\n");
+                    fprintf(fid,"R2 n3 n2_prime VarRm\n");
+                    fprintf(fid,"R3 n1 n3_prime VarRm\n");
+                    fprintf(fid,"X1_prime n1 n1_prime TOGND Amplifier_M1 \n");
+                    fprintf(fid,"X2_prime n2 n2_prime TOGND Amplifier_M1 \n");
+                    fprintf(fid,"X3_prime n3 n3_prime TOGND Amplifier_M1 \n"); 
+                    fprintf(fid,".ends Basis_M1_module\n");
+                case 'Amplifier_M2'
+                    fprintf(fid,"*Amplifier_M2 \n");
+                    fprintf(fid,"*\n");
+                    fprintf(fid,"* va vb TOGND \n");
+                    fpprintf(fid,".SubCkt Amplifier_M2 va vb TOGND " + ...
+                        " VarCm=47%s Var3Cm=141%s VarR=300M%s VarRm=15%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude,);
+                    fprintf(fid,"C1 vo vb Var3Cm \n");
+                    fprintf(fid,"C2 vo v_minus VarCm\n");
+                    fprintf(fid,"R1 vo v_minus VarR \n");
+                    fprintf(fid,"R2 va v_minus VarRm\n");
+                    fprintf(fid,"R3 TOGND v_plus VarRm\n");
+                    fprintf(fid,"E_opamp vo TOGND v_plus v_minus level=1\n");
+                    fprintf(fid,".ends Amplifier_M2\n");
+                case 'Basis_Chern2'
+                    fprintf(fid,"* Basis_M2_module \n");
+                    fprintf(fid,"*\n");
+                    fprintf(fid,"* n1 n2 n3 \n");
+                    fprintf(fid,".SubCkt Basis_M2_module n1 n2 n3 TOGND " + ...
+                        "Var2Rm=30%s InitV=0V \n",Rmagnitude);
+                    fprintf(fid,"R1 n1 TOGND Var2Rm\n");
+                    fprintf(fid,"R2 n2 TOGND Var2Rm\n");
+                    fprintf(fid,"R3 n3 TOGND VarRm\n");
+                    fprintf(fid,"X1_prime n2 n1 TOGND Amplifier_M2 \n");
+                    fprintf(fid,"X2_prime n3 n2 TOGND Amplifier_M2 \n");
+                    fprintf(fid,"X3_prime n1 n3 TOGND Amplifier_M2 \n"); 
+                    fprintf(fid,".ends Basis_M2_module\n");
                 case '+sigma_0' % checked
                     fprintf(fid,"* +sigma_0 \n");
                     fprintf(fid,"*\n");
