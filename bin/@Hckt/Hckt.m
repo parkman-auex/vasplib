@@ -1769,7 +1769,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     fprintf(fid,"*\n");
                     fprintf(fid,"* va vb TOGND \n");
                     fpprintf(fid,".SubCkt Amplifier_M2 va vb TOGND " + ...
-                        " VarCm=47%s Var3Cm=141%s VarR=300M%s VarRm=15%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude,);
+                        " VarCm=47%s Var3Cm=141%s VarR=300M%s VarRm=15%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"C1 vo vb Var3Cm \n");
                     fprintf(fid,"C2 vo v_minus VarCm\n");
                     fprintf(fid,"R1 vo v_minus VarR \n");
