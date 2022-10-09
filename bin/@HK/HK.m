@@ -1168,10 +1168,6 @@ classdef HK < vasplib & matlab.mixin.CustomDisplay
                 case 'sym'
                     H_hk.HcoeL = subs(H_hk.HcoeL);
                     H_hk.Trig_to_save = subs(H_hk.Trig_to_save);
-                    H_hk.Hk_sym = sym(zeros(H_hk.Basis_num,H_hk.Basis_num));
-                    for i =1:H_hk.Kinds
-                        H_hk.Hk_sym = H_hk.Hk_sym + H_hk.HcoeL(:,:,i)*H_hk.HsymL_k(i);
-                    end
             end
         end
         function H_hk  = subs(H_hk,varargin)

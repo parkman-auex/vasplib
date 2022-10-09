@@ -32,7 +32,7 @@ H(4, 1) = conj(H(1, 4));
 H(3, 2) = conj(H(2, 3));
 % 
 BBH = Htrig(H);
-BBH_sym = sym(BBH)
+BBH_sym = sym(BBH);
 BBH = BBH.Subsall('sym');
 BBH = BBH <'POSCAR_4';
 BBH = BBH <'KPOINTS_4';

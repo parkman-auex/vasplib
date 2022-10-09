@@ -12,7 +12,7 @@ Graphene = Graphene.H_TBSK_gen('level_cut',level_cut, ...
     'per_dir',[1 1 0]);
 %%
 syms m real;
-Hal = Graphene.subs(sym('VppP_1'),sym('t'));
+Hal = Graphene.subs(sym('VppP_1'),sym('t','real'));
 V_NNN = [-1 0 0; 0 -1 0;1 1 0];
 Hal = Hal.set_hop(kron(sigma_z, -1i*m),1,1,V_NNN,'symadd');
 Hal = Hal.autohermi();
@@ -24,11 +24,15 @@ EIGENCAR = Hal_n.EIGENCAR_gen();
 bandplot(EIGENCAR ,[-3,3],'title',"Haldane-HR");
 chern1 = chern_number(Hal_n,1);
 chern2 = chern_number(Hal_n,2);
-wilson_loop(Hal_n,"kx"); % This function may be wrongly set 
-%% vasplin inner function
+figure();
+wilson_loop(Hal_n,"kx"); % This function may be wrongly set, raw edition from fyang 
+%% vasplib inner function
 chern0 = Hal_n.Chern()
 chern1 = Hal_n.Chern('BAND_index',1)
 chern2 = Hal_n.Chern('BAND_index',2)
-%% check why different?
-[BFCAR,~,klist_l] = Hal_n.WilsonLoop('knum_evol',101); % check wanniertools answer
-vasplib.WilsonLoopPlot(BFCAR,klist_l)
+%% check whether two results are same  
+[BFCAR,~,klist_l] = Hal_n.WilsonLoop('knum_evol',101); % please check wanniertools answer
+vasplib_plot.WilsonLoopPlot(BFCAR,klist_l)
+
+[WannierCenterCAR,~,klist_l] = Hal_n.WannierCenter('knum_evol',101); % please check wanniertools answer
+vasplib_plot.WccPlot(WannierCenterCAR,klist_l)

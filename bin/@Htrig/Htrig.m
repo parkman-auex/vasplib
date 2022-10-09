@@ -2155,6 +2155,12 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
                 if options.printmode
                     pb = vasplib_tool_outer.CmdLineProgressBar('BAND calculating ');
                 end
+                try
+                    syms k_x k_y k_z real;
+                    HsymL_fun = (matlabFunction( H_htrig.HsymL,'Vars',[k_x k_y k_z]));
+                catch 
+                    
+                end
                 for ki =1:kn
                     k_x=klist_r_tmp(ki,1);
                     k_y=klist_r_tmp(ki,2);
@@ -2166,7 +2172,7 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
                                 Htemp = Htemp +Hnum_list{i}*double(H_htrig.HsymL_trig(i));
                             end
                             Hout = Htemp;
-                        case 'mat'
+                        case {'mat'}
                             Factorlist = exp(1i*H_htrig.HsymL_numL*klist_r_tmp(ki,:).');
                             Hout = sum(vasplib.matrixtimespage(Factorlist,H_htrig.HnumL),3);
                             Hout = (Hout+Hout')/2;
@@ -2180,6 +2186,15 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
                             %[ij_unique,sumFactorlist] = HollowKnight.generalcontractrow(H_htrig.HsymL_numL(:,4:5),Factorlist);
                             %indL = sub2ind(sizemesh,ij_unique(:,1),ij_unique(:,2));
                             %Hout(indL) = sumFactorlist;
+                            Hout = (Hout+Hout')/2;
+                        case 'sincos'
+                            kL = HsymL_fun(k_x,k_y,k_z);
+                            Hout = H_htrig.HnumL;
+                            for i =1:H_htrig.Kinds
+                                Hout(:,:,i) = Hout(:,:,i).*kL(:,i);
+                            end
+                            Hout = sum(Hout,3);
+                            %                 end
                             Hout = (Hout+Hout')/2;
                         otherwise
                             Hout = H_htrig.Hfun(k_x,k_y,k_z);

@@ -2347,6 +2347,9 @@ classdef vasplib < matlab.mixin.CustomDisplay
             end
             switch class(vasplibobj)
                 case {'Htrig','HK'}
+                    if isempty(vasplibobj.orbL)
+                        vasplibobj.orbL = zeros(vasplibobj.Basis_num,3);
+                    end
                     for i = 1:optionsK.knum_evol
                         klist_tmp = kloop1_cart(i,:)+kloop2_cart+kstart_cart;
                         [E,WAVECAR_loop] = vasplibobj.EIGENCAR_gen(...
@@ -2868,6 +2871,9 @@ classdef vasplib < matlab.mixin.CustomDisplay
             % EIGEN
             switch class(vasplibobj)
                 case {'Htrig','HK'}
+                    if isempty(vasplibobj.orbL)
+                        vasplibobj.orbL = zeros(vasplibobj.Basis_num,3);
+                    end
                     for i = 1:optionsK.knum_evol
                         klist_tmp = kloop1_cart(i,:)+kloop2_cart+kstart_cart;
                         [E,WAVECAR_loop] = vasplibobj.EIGENCAR_gen(...
@@ -2875,6 +2881,7 @@ classdef vasplib < matlab.mixin.CustomDisplay
                         WAVECAR_loop_tmp = WAVECAR_loop(:,BAND_index,:);
                         % The last bloch state is the same as the first up to a phase factor
                         WAVECAR_loop_tmp(:,:,end) = WAVECAR_loop_tmp(:,:,1).* exp(-1i*(vasplibobj.orbL*vasplibobj.Rm*(klist_tmp(end,:)-klist_tmp(1,:)).'));
+                        % WAVECAR_loop_tmp(:,:,end) = WAVECAR_loop_tmp(:,:,1);
                         if options.LWAVE
                             WAVECAR_loop_tmp = vasplib.cleanWAVECAR(WAVECAR_loop_tmp,E(BAND_index,:),V,options.Accuracy);
                             WAVELOOPCAR(:,:,:,i) = WAVECAR_loop_tmp;
@@ -3212,6 +3219,7 @@ classdef vasplib < matlab.mixin.CustomDisplay
             for kj = 1:Nloop-1
                 HWan = HWan* vasplib.BerryConnection(WAVECAR_loop(:,:,kj),WAVECAR_loop(:,:,kj+1));
             end
+            
             %HWan = eye(size(WAVECAR_loop,2));
             %Nloop = size(WAVECAR_loop,3);
             %WAVECAR_loop(:,:,Nloop+1) =WAVECAR_loop(:,:,1);
@@ -3235,6 +3243,7 @@ classdef vasplib < matlab.mixin.CustomDisplay
             %HWan = HWan*Wan*WAVECAR_loop(:,:,end);%HWan*Wan*WAVECAR_loop(:,:,1)
             %Wan
             [WCCvec,WCCU] = eig(HWan);
+            %Ei = mod((angle(diag(WCCU))/(2*pi)),1);
             Ei = mod(real(log(diag(WCCU))/(2*pi*1i)),1);
             [WCCvec,WCC] = park.sorteig(Ei,WCCvec);
         end
@@ -4617,9 +4626,8 @@ classdef vasplib < matlab.mixin.CustomDisplay
                 vec = true;
             end
             if strcmp(mode,'whole')
-                % %--step9--:按从大到小的特征值顺序排序重新组合对应的特征向量
+                % 按从大到小的特征值顺序排序重新组合对应的特征向量
                 Asort=zeros(NUM_WAN ,NBANDS );
-
                 [Usort,IJ]=sort(SortTmp,1,'ComparisonMethod','real');
                 for jj=1:NBANDS
                     Asort(:,jj)=A(:,IJ(jj));%取特征向量的列向量
@@ -4628,7 +4636,7 @@ classdef vasplib < matlab.mixin.CustomDisplay
                     Usort = diag(Usort);
                 end
             elseif strcmp(mode,'eigenval')
-                % %--step9--:按从大到小的特征值顺序排序重新组合对应的特征向量
+                % 按从大到小的特征值顺序排序重新组合对应的特征向量
                 SortTmp=diag(U);%抽取特征值
                 [Usort,~]=sort(SortTmp,1,'ComparisonMethod','real');
                 if ~vec
