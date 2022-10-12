@@ -12,7 +12,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
         HnodeL  logical= [];
         ScktL Subckt = Subckt([]);
         vectorL = [1];
-        PortInCell = {[]}; % The subckt must IN - OUT
+        PortInCell = {[]}; % The Subckt must IN - OUT
         PortOutCell = {[]};
         DescriptionL = "";
     end
@@ -1687,7 +1687,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     fprintf(fid,"*InvertingOpAmp (M1) \n");
                     fprintf(fid,"*\n");
                     fprintf(fid,"* va vb TOGND \n");
-                    fpprintf(fid,".SubCkt InvertingOpAmp va vb TOGND " + ...
+                    fprintf(fid,".SubCkt InvertingOpAmp va vb TOGND " + ...
                         "VarRf=7.87k%s Var2Rf=55.09k%s \n",Rmagnitude,Rmagnitude);
                     fprintf(fid,"R1 vb v_minus VarRf \n");
                     fprintf(fid,"R2 va v_minus Var2Rf\n");
@@ -1768,7 +1768,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     fprintf(fid,"* Basis_M1_module \n");
                     fprintf(fid,"*\n");
                     fprintf(fid,"* n1 n2 n3 n1_prime n2_prime n3_prime \n");
-                    fprintf(fid,".SubCkt Basis_M1_module n1 n2 n3 TOGND " + ...
+                    fprintf(fid,".SubCkt BasisC3_origin n1 n2 n3 TOGND " + ...
                         "VarRm=30%s InitV=0V \n",Rmagnitude);
                     fprintf(fid,"R1 n2 n1_prime VarRm\n");
                     fprintf(fid,"R2 n3 n2_prime VarRm\n");
@@ -1776,12 +1776,12 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     fprintf(fid,"X1_prime n1 n1_prime TOGND InvertingOpAmp \n");
                     fprintf(fid,"X2_prime n2 n2_prime TOGND InvertingOpAmp \n");
                     fprintf(fid,"X3_prime n3 n3_prime TOGND InvertingOpAmp \n"); 
-                    fprintf(fid,".ends Basis_M1_module\n");
+                    fprintf(fid,".ends BasisC3_origin\n");
                 case 'Basis_Chern2'
                     fprintf(fid,"* Basis_M2_module \n");
                     fprintf(fid,"*\n");
                     fprintf(fid,"* n1 n2 n3 \n");
-                    fprintf(fid,".SubCkt Basis_M2_module n1 n2 n3 TOGND " + ...
+                    fprintf(fid,".SubCkt BasisC3_origin n1 n2 n3 TOGND " + ...
                         "Var2Rm=30%s InitV=0V \n",Rmagnitude);
                     fprintf(fid,"R1 n1 TOGND Var2Rm\n");
                     fprintf(fid,"R2 n2 TOGND Var2Rm\n");
@@ -1789,7 +1789,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     fprintf(fid,"X1_prime n2 n1 TOGND IntegratorOpAmp \n");
                     fprintf(fid,"X2_prime n3 n2 TOGND IntegratorOpAmp \n");
                     fprintf(fid,"X3_prime n1 n3 TOGND IntegratorOpAmp \n"); 
-                    fprintf(fid,".ends Basis_M2_module\n");
+                    fprintf(fid,".ends BasisC3_origin\n");
                 case '+sigma_0' % checked
                     fprintf(fid,"* +sigma_0 \n");
                     fprintf(fid,"*\n");
@@ -1868,7 +1868,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 case '-isigma_1' % checked
                     fprintf(fid,"* -isigma_1 \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,"SubCkt MinusiSigma1 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
+                    fprintf(fid,".SubCkt MinusiSigma1 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
                         "VarC0=2.7%s Var2C0=5.4%s VarR0=20%s VarR0_2=10%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
                     fprintf(fid,"R1 L_n1  R_n2 VarR0\n");
                     fprintf(fid,"R2 L_n2 R_n1  VarR0\n");
@@ -2146,7 +2146,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 case 'hopping_minusC'
                     fprintf(fid,"* minusC \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCKt minusC n+ n- TOGND C_hopping = 100%s R_0 = 1 R_L=1u\n",magnitude);
+                    fprintf(fid,".SubCkt minusC n+ n- TOGND C_hopping = 100%s R_0 = 1 R_L=1u\n",magnitude);
                     fprintf(fid,"E_opamp1 Op1out TOGND   n+ Op1-  1E6 max=+100 min=-100\n");
                     fprintf(fid,"E_opamp2 Op2-   TOGND   n+ Op2-  1E6 max=+100 min=-100\n");
                     fprintf(fid,"E_opamp3 Op3out TOGND   n- Op3-  1E6 max=+100 min=-100\n");
@@ -2161,7 +2161,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 case 'hopping_minusC_DM'
                     fprintf(fid,"* minusC 2 \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCKt minusC_DM n+ n- TOGND C_hopping = 100%s C_h = 'SQRT(C_hopping)' L_DM = 1u C_DM = 1\n",magnitude);
+                    fprintf(fid,".SubCkt minusC_DM n+ n- TOGND C_hopping = 100%s C_h = 'SQRT(C_hopping)' L_DM = 1u C_DM = 1\n",magnitude);
                     fprintf(fid,"Xonsite n1 TOGND E_A VarC0 =  C_DM  VarL0 = L_DM\n");
                     fprintf(fid,"C1 n+ n1 C_h\n");
                     fprintf(fid,"C2 n1 n- C_h\n");
@@ -2182,14 +2182,14 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 case 'hopping_AL'
                     fprintf(fid,"* hopping_AL \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCKt AL n+ n- TOGND L_hopping2 = 2%s R_L=1u\n",magnitude);
+                    fprintf(fid,".SubCkt AL n+ n- TOGND L_hopping2 = 2%s R_L=1u\n",magnitude);
                     fprintf(fid,"E_opamp1 Op1-   TOGND   n+ Op1-  level=1\n");
                     fprintf(fid,"Lp2 Op1- n- L_hopping2 R=R_L\n");
                     fprintf(fid,".ends AL\n");
                 case 'hopping_LA'
                     fprintf(fid,"* hopping_LA \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCKt LA n+ n- TOGND L_hopping2 = 2%s R_L=1u\n",magnitude);
+                    fprintf(fid,".SubCkt LA n+ n- TOGND L_hopping2 = 2%s R_L=1u\n",magnitude);
                     fprintf(fid,"E_opamp1 Op1-   TOGND   n- Op1-  level=1 \n");
                     fprintf(fid,"Lp2 Op1- n+ L_hopping2 R=R_L\n");
                     fprintf(fid,".ends LA\n");
@@ -2218,7 +2218,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 options.ComponentLib = ["E_A_LC","hopping_C","hopping_minusC","hopping_minusC_DM"];
                 options.ModulesLib = [];
                 options.PlugIns = [];
-                options.WorkingArea {mustBeMember(options.WorkingArea,{'realTB','nonH','Sigma_SOI'})}= 'realTB';
+                options.WorkingArea {mustBeMember(options.WorkingArea,{'realTB','nonH','Sigma_SOI','Chern_M1','Chern_M2'})}= 'realTB';
             end
             magnitude = options.magnitude;
             switch  options.WorkingArea
