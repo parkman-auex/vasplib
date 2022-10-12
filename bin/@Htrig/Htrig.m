@@ -2028,29 +2028,30 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
             tji_mat_r = H_hr.tjmti{1};
             %%
             syms k_x k_y k_z real
-            hsym = Htrig_exp.HsymL_trig;
+            hsym = Htrig_exp.HsymL;
             rm = H_hr.Rm;
             for n = 1:length(hsym)
                 if isequal(hsym(n), sym(1))
                     kd_num = [0 0 0];
                 else
                     ikd = children(hsym(n));
-                    kd = ikd{1,1}*1i;
+                    kd = ikd{1,1}/1i;
                     cx = subs(kd,k_x,1) - subs(kd,k_x,0);
                     cy = subs(kd,k_y,1) - subs(kd,k_y,0);
                     cz = subs(kd,k_z,1) - subs(kd,k_z,0);
                     kd_num = double([cx cy cz]);
                 end
-
+                % Factorlist_R $H_{i j}^{\mathbf{k}}=\left\langle\chi_{i}^{\mathbf{k}}|H| \chi_{j}^{\mathbf{k}}\right\rangle=\sum_{\mathbf{R}} e^{i \mathbf{k} \cdot\left(\mathbf{R}+\mathbf{t}_{j}-\mathbf{t}_{i}\right)} H_{i j}(\mathbf{R})$
+                % exp(i(R+tj-ti))
                 for i = 1:WAN_NUM
                     for j = 1:WAN_NUM
                         if isequal(Hexp(i,j,n), sym(0))
                             continue               
                         end
                         kji_num = reshape(tji_mat_r(i,j,:),[1,3]);
-                        kr =  kji_num + kd_num;
+                        kr =   kd_num-kji_num;
                         vector = round(kr/rm);
-                        H_hr = H_hr.set_hop(conj(Hexp(i,j,n)),j,i,vector,'symadd');
+                        H_hr = H_hr.set_hop((Hexp(i,j,n)),i,j,vector,'symadd');
                     end
                 end
             end

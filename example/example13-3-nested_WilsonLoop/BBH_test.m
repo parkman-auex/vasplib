@@ -9,7 +9,7 @@ Gamma_1 = -1*tau_y*sigma_x;
 Gamma_2 = -1*tau_y*sigma_y;
 Gamma_3 = -1*tau_y*sigma_z;
 Gamma_4 = -1*tau_x*sigma_0;
-syms gamma lambda Delta_x Delta_y delta_x delta_y real;
+syms gamma lambda  real;
 syms k_x k_y k_z real ;
 %
 gamma_x = gamma;
@@ -18,14 +18,10 @@ lambda_x = lambda;
 lambda_y = lambda;
 %%
 H = zeros(4,'sym');
-H(1, 1) = Delta_x;
-H(2, 2) = Delta_y;
-H(3, 3) = Delta_y;
-H(4, 4) = Delta_x;
-H(1, 3) = gamma_x+lambda_x*exp(1i*k_x);
-H(2, 4) = gamma_x+lambda_x*exp(-1i*k_x);
-H(1, 4) = gamma_y+lambda_y*exp(1i*k_y);
-H(2, 3) = (-gamma_y-lambda_y*exp(-1i*k_y))*(delta_x+1);
+H(1, 3) = gamma_x+exp(1i*k_x);
+H(2, 4) = gamma_x+exp(-1i*k_x);
+H(1, 4) = gamma_y+exp(1i*k_y);
+H(2, 3) = (-gamma_y-lambda_y*exp(-1i*k_y));
 H(3, 1) = conj(H(1, 3));
 H(4, 2) = conj(H(2, 4));
 H(4, 1) = conj(H(1, 4));
@@ -37,11 +33,6 @@ BBH = BBH.Subsall('sym');
 BBH = BBH <'POSCAR_4';
 BBH = BBH <'KPOINTS_4';
 %%
-delta_x = 0;
-delta_y = 0;
-Delta_x = 0;
-Delta_y = 0;
-delta = 0;
 lambda = 1;
 gamma = 0.5;
 % bandplot
