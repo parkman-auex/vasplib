@@ -1691,7 +1691,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                         "VarRf=7.87k%s Var2Rf=55.09k%s \n",Rmagnitude,Rmagnitude);
                     fprintf(fid,"R1 vb v_minus VarRf \n");
                     fprintf(fid,"R2 va v_minus Var2Rf\n");
-                    fprintf(fid,"E_opamp vb TOGND v_plus v_minus level=1\n");
+                    fprintf(fid,"E_opamp vb TOGND TOGND v_minus level=1\n");
                     fprintf(fid,".ends InvertingOpAmp\n");
                 case 'IntegratorOpAmp'
                     fprintf(fid,"*IntegratorOpAmp (M2) \n");
