@@ -1,11 +1,9 @@
 # vasplib
 
-![Vasplib_intro](/fig/vasplib_intro.png "Magic Gardens")
-
 parkman@buaa.edu.cn
 
 #### 介绍
-{**以下是 vasplib 说明，您可以帮忙更改**
+{**以下是 vasplib 说明，您可以帮忙更改**}
 vasplib是 BUAA-TCMP 推出的基于 matlab 的第一性原理计算结果分析处理，紧束缚模型与低能有效kp模型的构建，调控与计算。为拓扑材料，磁性材料以及量子输运相关科研工作者提供稳定快速、简易高效的程序开发框架
 无论是个人、团队、或是高校，都能够用 vasplib实...。
 
@@ -16,7 +14,7 @@ vasplib基本函数，vasplib类，HR类，HK类，Htrig类
 
 #### 安装教程
 
-~/Documents/MATLAB/vasplib 
+~/Documents/MATLAB/vasplib/bin 
 addpath 放入matlab目录
 
 #### 使用说明
@@ -24,13 +22,11 @@ addpath 放入matlab目录
 直接使用；编写脚本或命令行使用
 
 #### 短期目标
-- [ ] plot类的构建 完美继承matlab的基础绘图的handle类的情况下 完成所有绘图函数的构建（参考<https://github.com/plotly/plotly_matlab><https://github.com/masumhabib/PlotPub> 外部箭头类内部化）
-- [ ] 拓扑电路绘图切片能带
-- [ ] HR2Hckt
 - [ ] Clifford 类的建立 一般性地对哈密顿量进行Clifford拆分
 - [ ] 强化 HR Htrig HK 对称性分析功能
-- [ ] 向量化 作对称性 Htrig HK
-
+- [ ] 向量化作对称性 Htrig HK
+- [ ] 半经典输运的接入，异质节
+- [ ] Hckt针对一般TB的转化 与实验数据的对接
 
 #### 发展目标
 
@@ -49,22 +45,22 @@ addpath 放入matlab目录
 
 #### 已完成
 - [x] Symmetry TB in HR-(2021.07.12-07.20)(Htrig working;HK done)；完成
-- [x] 多带Berry phase in HK；Then -> HR Htrig （2021.07）(fyang) 完成
+- [x] 多带Berry phase in HK；Then -> HR Htrig (fyang) 完成
 - [x]  主类 vasplib 绘图与输入输出的提炼总结 （2021.07~08）(已基本构建) 完成
 - [x]  HK Htrig 用Gamma矩阵（tau sigma）矩阵展开
 - [x]  Oper 自动生成对称矩阵; 
 - [x]  fyang:学习牛派的半经典方法(BCP,BCD等)，融入vasplib体系 （2021.08）程序尽量General一点;
 - [x]  Hckt的建立
 - [x] 分析 hspice的数据 建立拓扑电路绘图的基本函数
+- [x] plot类的构建 完美继承matlab的基础绘图的handle类的情况下 完成所有绘图函数的构建（参考<https://github.com/plotly/plotly_matlab><https://github.com/masumhabib/PlotPub> 外部箭头类内部化）
+- [x] 拓扑电路绘图切片能带
+- [x] HR2Hckt
+
 #### 参与贡献
 
-* parkman 曾旭涛 框架设计 主体程序
-* cchen 陈聪 程序启发 Slater-Koster HTRCI  待续
-* fyang 杨帆 OpenMX QE等第一性原理软件接口 Mag 半经典（BC，BCD，BCP）待续
-* leo 刘彬彬 转角石墨烯 程序测试与开发 待续
+* parkman 曾旭涛 框架设计 主体程序 
+* cchen 陈聪 Slater-Koster HTRCI LHE IHR
+* fyang 杨帆 OpenMX QE等第一性原理软件接口 Mag 半经典（BC，BCD，BCP）输运相关
+* leo 刘彬彬 转角石墨烯 程序测试与开发 Hckt
 * xlsheng 胜献雷 指导、开创，评价与反馈
-
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
+* xtchen 陈晓婷 Hckt 电路基本模块
