@@ -1688,18 +1688,18 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     fprintf(fid,"*\n");
                     fprintf(fid,"* va vb TOGND \n");
                     fprintf(fid,".SubCkt InvertingOpAmp va vb TOGND " + ...
-                        "VarRf=7.87k%s Var2Rf=55.09k%s \n",Rmagnitude,Rmagnitude);
-                    fprintf(fid,"R1 vb v_minus VarRf \n");
-                    fprintf(fid,"R2 va v_minus Var2Rf\n");
+                        "VarRf=7.87k%s Var2Rf=15.74k%s \n",Rmagnitude,Rmagnitude);
+                    fprintf(fid,"R1 vb v_minus Var2Rf \n");
+                    fprintf(fid,"R2 va v_minus VarRf\n");
                     fprintf(fid,"E_opamp vb TOGND TOGND v_minus level=1\n");
                     fprintf(fid,".ends InvertingOpAmp\n");
                 case 'IntegratorOpAmp'
                     fprintf(fid,"*IntegratorOpAmp (M2) \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,"* va vb TOGND \n");
-                    fpprintf(fid,".SubCkt IntegratorOpAmp va vb TOGND " + ...
-                        " VarCm=47%s Var3Cm=141%s VarR=300M%s VarRm=15%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
-                    fprintf(fid,"C1 vo vb Var3Cm \n");
+                    fprintf(fid,"* va vo TOGND \n");
+                    fprintf(fid,".SubCkt IntegratorOpAmp va vo TOGND " + ...
+                        " VarCm=47%s VarR=300M%s VarRm=15%s\n",Cmagnitude,Rmagnitude,Rmagnitude);
+                    %fprintf(fid,"C1 vo vb Var3Cm \n");
                     fprintf(fid,"C2 vo v_minus VarCm\n");
                     fprintf(fid,"R1 vo v_minus VarR \n");
                     fprintf(fid,"R2 va v_minus VarRm\n");
@@ -1769,10 +1769,13 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     fprintf(fid,"*\n");
                     fprintf(fid,"* n1 n2 n3 n1_prime n2_prime n3_prime \n");
                     fprintf(fid,".SubCkt BasisC3_origin n1 n2 n3 TOGND " + ...
-                        "VarRm=30%s InitV=0V \n",Rmagnitude);
+                        "VarRm=30%s VarL0=1.8%s R_L=53m InitV=0V \n",Rmagnitude,Lmagnitude);
                     fprintf(fid,"R1 n2 n1_prime VarRm\n");
                     fprintf(fid,"R2 n3 n2_prime VarRm\n");
                     fprintf(fid,"R3 n1 n3_prime VarRm\n");
+                    fprintf(fid,"L1 n1 n2 VarL0 R=R_L \n");
+                    fprintf(fid,"L2 n2 n3 VarL0 R=R_L \n");
+                    fprintf(fid,"L3 n3 n1 VarL0 R=R_L \n");
                     fprintf(fid,"X1_prime n1 n1_prime TOGND InvertingOpAmp \n");
                     fprintf(fid,"X2_prime n2 n2_prime TOGND InvertingOpAmp \n");
                     fprintf(fid,"X3_prime n3 n3_prime TOGND InvertingOpAmp \n"); 
@@ -1782,13 +1785,19 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     fprintf(fid,"*\n");
                     fprintf(fid,"* n1 n2 n3 \n");
                     fprintf(fid,".SubCkt BasisC3_origin n1 n2 n3 TOGND " + ...
-                        "Var2Rm=30%s InitV=0V \n",Rmagnitude);
+                        "Var2Rm=30%s Var3Cm=141%s VarL0=1.8%s R_L=53m InitV=0V \n",Rmagnitude,Cmagnitude,Lmagnitude);
                     fprintf(fid,"R1 n1 TOGND Var2Rm\n");
                     fprintf(fid,"R2 n2 TOGND Var2Rm\n");
-                    fprintf(fid,"R3 n3 TOGND VarRm\n");
-                    fprintf(fid,"X1_prime n2 n1 TOGND IntegratorOpAmp \n");
-                    fprintf(fid,"X2_prime n3 n2 TOGND IntegratorOpAmp \n");
-                    fprintf(fid,"X3_prime n1 n3 TOGND IntegratorOpAmp \n"); 
+                    fprintf(fid,"R3 n3 TOGND Var2Rm\n");
+                    fprintf(fid,"L1 n1 n2 VarL0 R=R_L \n");
+                    fprintf(fid,"L2 n2 n3 VarL0 R=R_L \n");
+                    fprintf(fid,"L3 n3 n1 VarL0 R=R_L \n");
+                    fprintf(fid,"C1 n1 n1_prime Var3Cm\n");
+                    fprintf(fid,"C2 n2 n2_prime Var3Cm\n");
+                    fprintf(fid,"C3 n3 n3_prime Var3Cm\n");
+                    fprintf(fid,"X1_prime n2 n3_prime TOGND IntegratorOpAmp \n");
+                    fprintf(fid,"X2_prime n3 n1_prime TOGND IntegratorOpAmp \n");
+                    fprintf(fid,"X3_prime n1 n2_prime TOGND IntegratorOpAmp \n"); 
                     fprintf(fid,".ends BasisC3_origin\n");
                 case '+sigma_0' % checked
                     fprintf(fid,"* +sigma_0 \n");
@@ -1836,22 +1845,22 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     fprintf(fid,"* +sigma_1 \n");
                     fprintf(fid,"*\n");
                     fprintf(fid,".SubCkt PlusSigma1 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
-                        "VarC0=2.7%s Var2C0=5.4%s VarR0=20%s VarR0_2=10%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
-                    fprintf(fid,"C1 L_n1  R_n2 VarC0 IC=InitV\n");
-                    fprintf(fid,"C2 L_n2 R_n1  VarC0 IC=InitV\n");
+                        "VarC0=6.8%s Var2C0=5.4%s VarR0=20%s VarR0_2=10%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
+                    fprintf(fid,"C1 L_n1 R_n2 VarC0 IC=InitV\n");
+                    fprintf(fid,"C2 L_n2 R_n1 VarC0 IC=InitV\n");
                     fprintf(fid,"C3 L_n3 R_n3 VarC0 IC=InitV\n");
                     fprintf(fid,".ends PlusSigma1\n");
                 case '-sigma_1' % checked
                     fprintf(fid,"* -sigma_1 \n");
                     fprintf(fid,"*\n");
                     fprintf(fid,".SubCkt MinusSigma1 L_n1 L_n2 L_n3 R_n1 R_n2 R_n3 TOGND InitV=0V " + ...
-                        "VarC0=2.7%s Var2C0=5.4%s VarR0=20%s VarR0_2=10%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
-                    fprintf(fid,"C1 L_n1  R_n1  VarC0 IC=InitV\n");
+                        "VarC0=6.8%s Var2C0=5.4%s VarR0=20%s VarR0_2=10%s\n",Cmagnitude,Cmagnitude,Rmagnitude,Rmagnitude);
+                    fprintf(fid,"C1 L_n1 R_n1 VarC0 IC=InitV\n");
                     fprintf(fid,"C2 L_n2 R_n2 VarC0 IC=InitV\n");
-                    fprintf(fid,"C3 L_n3 R_n1  VarC0 IC=InitV\n");
-                    fprintf(fid,"C4 L_n1  R_n3 VarC0 IC=InitV\n");
+                    fprintf(fid,"C3 L_n3 R_n1 VarC0 IC=InitV\n");
+                    fprintf(fid,"C4 L_n1 R_n3 VarC0 IC=InitV\n");
                     fprintf(fid,"C5 L_n2 R_n3 VarC0 IC=InitV\n");
-                    fprintf(fid,"C6 L_n3 R_n2  VarC0 IC=InitV\n");
+                    fprintf(fid,"C6 L_n3 R_n2 VarC0 IC=InitV\n");
                     fprintf(fid,".ends MinusSigam1\n");
                 case '+isigma_1' % checked
                     fprintf(fid,"* +isigma_1 \n");
@@ -2254,7 +2263,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                         ];
                 case 'Chern_M1'
                     ComponentLib  = [];
-                    PlugIns = ["Na-(Mb+Lc)","VoltageFollower","InvertingOpAmp"];
+                    PlugIns = ["InvertingOpAmp"];
                     ModulesLib = [
                         "Basis_Chern1",...
                         "+sigma_0" ,...
@@ -2276,7 +2285,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                         ];
                 case 'Chern_M2'
                     ComponentLib  = [];
-                    PlugIns = ["Na-(Mb+Lc)","VoltageFollower","IntegratorOpAmp"];
+                    PlugIns = ["IntegratorOpAmp"];
                     ModulesLib = [
                         "Basis_Chern2",...
                         "+sigma_0" ,...
