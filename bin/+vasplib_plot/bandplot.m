@@ -68,7 +68,12 @@ end
         Fig =  Figs(1,1);
         ax = Fig.axes(1);
     else
-        ax = options.ax;
+        if isvalid(options.ax)
+            ax = options.ax;
+        else
+            Fig =  Figs(1,1);
+            ax = Fig.axes(1);
+        end
     end
 %--------  juge  --------
     if isempty(options.klist_l)

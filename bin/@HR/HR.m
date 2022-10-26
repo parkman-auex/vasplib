@@ -7534,9 +7534,13 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                 options.fast = true;
                 options.ax = [];
                 options.Select = [];
+                options.cmap = @parula;
             end
             import vasplib_plot.*;
             Rm_ = H_hr.Rm*options.scale;
+            if H_hr.vectorhopping
+                H_hr = H_hr.GenfromOrth();
+            end
             switch mode
                 case 'POSCAR'
                     fig  = POSCAR_plot(Rm_,H_hr.sites,H_hr.Atom_name,H_hr.Atom_num);
@@ -7579,10 +7583,10 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                     Rm_ = Rm_ * options.scale;
                     if H_hr.coe
                         if isempty(options.Select)
-                            Plot_Hopping(H_hr.vectorL,H_hr.HcoeL,Rm_,H_hr.orbL,'ax',ax,'TwoD',options.TwoD );
+                            Plot_Hopping(H_hr.vectorL,H_hr.HcoeL,Rm_,H_hr.orbL,'ax',ax,'TwoD',options.TwoD,'cmap', options.cmap );
                         else
-                            SelectL = H_hr.HcoeL == options.Select;
-                            Plot_Hopping(H_hr.vectorL(SelectL,:),H_hr.HcoeL(SelectL),Rm_,H_hr.orbL,'ax',ax,'TwoD',options.TwoD );
+                            SelectL = ismember(H_hr.HcoeL,options.Select);
+                            Plot_Hopping(H_hr.vectorL(SelectL,:),H_hr.HcoeL(SelectL),Rm_,H_hr.orbL,'ax',ax,'TwoD',options.TwoD ,'cmap', options.cmap);
                         end
                     else
                         if isempty(options.Select)

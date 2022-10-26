@@ -75,7 +75,7 @@ if strcmp(options.mode,'band')
 try
     set(ax,'XLim',X_cut);
 catch
-    error('check if load KPOINTS./Or use bandplot wrongly')
+    warning('check if load KPOINTS./Or use bandplot wrongly')
 end
     set(ax,'YLim',Y_cut);
     %set(ax,'Xlabel',options.xlabel)  ;
