@@ -4,20 +4,22 @@ classdef vasplib < matlab.mixin.CustomDisplay
 
     %% public properties
     properties
+        Dim = 3;
         Basis_num ;
-        Rm = [1 0 0;0 1 0;0 0 1];
-        Gk = []  ;
+        Rm = [];
     end
     %% Hsym and Hfun
     properties
+        VarsSeqLcart = [];
+        VarsSeqLfrac = [];
         Hsym;
     end
     %% private properties
     properties (GetAccess = protected,Hidden = true)
-
+        
     end
     properties (GetAccess = protected)
-
+        
     end
     %% temp properties
     properties (Transient,Hidden = true)
@@ -26,6 +28,7 @@ classdef vasplib < matlab.mixin.CustomDisplay
     end
     %% dynamic properties dependent
     properties(Dependent = true)
+        Gk;
         symvar_list ; % the symvar in HcoeL
         Nbands ;
         Hfun;
@@ -47,10 +50,10 @@ classdef vasplib < matlab.mixin.CustomDisplay
         Atom_num  = []   ;
         sites            ;
         symmetry_operation = [];
-        klist_r          ;
+        klist_cart          ;
         klist_l          ;
-        klist_s          ;
-        kpoints_s        ;
+        klist_frac          ;
+        kpoints_frac        ;
         kpoints_l        ;
         kpoints_name     ;
         Rnn              ;
@@ -64,68 +67,66 @@ classdef vasplib < matlab.mixin.CustomDisplay
     %% Define which properties show
     methods (Access = protected)
         function propgrp = getPropertyGroups(~)
-            proplist = {'Basis_num','Rm','Gk'};
+            proplist = {'Basis_num','Rm','Gk','Dim'};
             propgrp = matlab.mixin.util.PropertyGroup(proplist);
         end
     end
-    %% method
+    %% method Constuction
     methods
-        function vasplibobj =vasplib()
-
+        function vasplibobj =vasplib(propArgs)
+            arguments
+                propArgs.?vasplib;
+            end
+            Fieldnames = fieldnames(propArgs);
+            if isempty(Fieldnames)
+            else
+                for iFieldname = 1:numel(Fieldnames)
+                    vasplibobj.(Fieldnames{iFieldname}) = propArgs.(Fieldnames{iFieldname});
+                end
+            end
+            vasplibobj = vasplibobj.vasplib_init();
+        end
+        function vasplibobj = vasplib_init(vasplibobj)
+            if isempty(vasplibobj.Rm)
+                vasplibobj.Rm = eye(vasplibobj.Dim);
+            end
+            if isempty(vasplibobj.VarsSeqLcart)
+                syms k_x k_y k_z k_w real;
+                vasplibobj.VarsSeqLcart = [k_x k_y k_z k_w];
+            end
+            if isempty(vasplibobj.VarsSeqLfrac)
+                syms k_1 k_2 k_3 k_4 real;
+                vasplibobj.VarsSeqLfrac = [k_1 k_2 k_3 k_4];
+            end
         end
         function vasplibobj = vasplibCopy(vasplibobj,vasplibobj_in)
-            vasplibobj.Rm = vasplibobj_in.Rm;
-            vasplibobj.orbL = vasplibobj_in.orbL; % the orbital list fractional
-            vasplibobj.elementL = vasplibobj_in.elementL; % the element of each orbital
-            vasplibobj.quantumL = vasplibobj_in.quantumL; % [n,l,m,s] the three quantum number combined with spin
-            vasplibobj.orb_symL = vasplibobj_in.orb_symL; % orbital function, makes your own
-            % for spacegroup
-            vasplibobj.sgn       = vasplibobj_in.sgn    ;
-            vasplibobj.Atom_name = vasplibobj_in.Atom_name   ;
-            vasplibobj.Atom_num  = vasplibobj_in.Atom_num   ;
-            vasplibobj.sites = vasplibobj_in.sites           ;
-            vasplibobj.symmetry_operation = vasplibobj_in.symmetry_operation;
-            vasplibobj.klist_r = vasplibobj_in.klist_r          ;
-            vasplibobj.klist_l =  vasplibobj_in.klist_l       ;
-            vasplibobj.klist_s = vasplibobj_in.klist_s          ;
-            vasplibobj.kpoints_l = vasplibobj_in.kpoints_l         ;
-            vasplibobj.kpoints_s = vasplibobj_in.kpoints_s         ;
-            vasplibobj.kpoints_name = vasplibobj_in.kpoints_name     ;
-            vasplibobj.Rnn = vasplibobj_in.Rnn                  ;
-            vasplibobj.nn_store = vasplibobj_in.nn_store        ;
+            CopyItem = [...
+                "Rm","orbL","Dim","elementL","quantumL","orb_symL","sgn","Atom_name","Atom_num",...
+                "sites","symmetry_operation","klist_cart","klist_l","klist_frac","kpoints_l","kpoints_name",...
+                "Rnn","nn_store"...
+                ];
+            for i = 1:numel(CopyItem)
+                vasplibobj.(CopyItem(i)) = vasplibobj_in.(CopyItem(i));
+            end
         end
     end
     %% get
     methods
         function Hfun = get.Hfun(vasplibobj)
-            syms k_x k_y k_z real;
-            Hfun = matlabFunction(vasplibobj.Hsym,'Vars',[k_x k_y k_z]);
+            Hfun = matlabFunction(vasplibobj.Hsym,'Vars',vasplibobj.VarsSeqL(1:vasplibobj.Dim));
         end
         function Gk = get.Gk(vasplibobj)
-            %Gk = (eye(3)*2*pi/vasplibobj.Rm).';
             Gk = (eye(length(vasplibobj.Rm))*2*pi/(vasplibobj.Rm)).';
         end
         function symvar_list = get.symvar_list(vasplibobj)
             symvar_list = symvar(vasplibobj.HcoeL);
-            %             if isa(vasplibobj,'HR')
-            %                 if vasplibobj.overlap
-            %                     symvar_list = [symvar_list,symvar(vasplibobj.ScoeL)];
-            %                 end
-            %             end
         end
         function Nbands = get.Nbands(vasplibobj)
-            switch class(vasplibobj)
-                case "HR"
-                    mat_size = size(vasplibobj.HcoeL);
-                    if mat_size(1) == 0
-                        Nbands = vasplibobj.WAN_NUM;
-                    else
-                        Nbands = mat_size(1);
-                    end
-                case {"Htrig","HK"}
-                    Nbands = vasplibobj.Basis_num;
+            if isfield(vasplibobj,"WAN_NUM")
+                Nbands = vasplibobj.WAN_NUM;
+            else
+                Nbands = vasplibobj.Basis_num;
             end
-
         end
     end
     %% (ti tj)
@@ -139,102 +140,56 @@ classdef vasplib < matlab.mixin.CustomDisplay
             % {3} symbolic term cartesian
             % {4} symbolic term fractional
             % Prepare ti - tj
-            vasplibobj.timtj{1} = zeros([size(vasplibobj.orbL,1),size(vasplibobj.orbL,1),3]);
+            vasplibobj.timtj{1} = zeros([size(vasplibobj.orbL,1),size(vasplibobj.orbL,1),vasplibobj.Dim]);
             if strcmp(mode,'sym')
                 vasplibobj.timtj{1} = sym( vasplibobj.timtj{1});
                 vasplibobj.timtj{3} = sym(zeros(size(vasplibobj.orbL,1)));
-                syms k_x k_y k_z real;
-                syms k_1 k_2 k_3 real;
+                %syms k_x k_y k_z real;
+                %syms k_1 k_2 k_3 real;
             end
             vasplibobj.timtj{2} = vasplibobj.timtj{1};
-            %             vasplibobj.timtj{3}(:,:,1) = zeros(size(vasplibobj.orbL,1));
-            %             vasplibobj.timtj{3}(:,:,2) = zeros(size(vasplibobj.orbL,1));
-            %             vasplibobj.timtj{3}(:,:,3) = zeros(size(vasplibobj.orbL,1));
-            %
             for i = 1:size(vasplibobj.orbL,1)
                 ti= vasplibobj.orbL(i,:);
                 for j = 1:size(vasplibobj.orbL,1)
                     tj= vasplibobj.orbL(j,:);
                     tij = ti-tj;
-                    tij_r = tij*vasplibobj.Rm;
-                    %                     tij_e = tij*H_hr.Rm;
-                    vasplibobj.timtj{1}(i,j,1) = tij_r(1);
-                    vasplibobj.timtj{1}(i,j,2) = tij_r(2);
-                    vasplibobj.timtj{1}(i,j,3) = tij_r(3);
-                    vasplibobj.timtj{2}(i,j,1) = tij(1);
-                    vasplibobj.timtj{2}(i,j,2) = tij(2);
-                    vasplibobj.timtj{2}(i,j,3) = tij(3);
+                    tij_cart = tij*vasplibobj.Rm;
+                    for d = 1:vasplibobj.Dim
+                        vasplibobj.timtj{1}(i,j,d) = tij_cart(d);
+                        vasplibobj.timtj{2}(i,j,d) = tij(d);
+                    end
                 end
             end
             if strcmp(mode,'sym')
-                vasplibobj.timtj{3}(:,:) = exp(1i*(...
-                    vasplibobj.timtj{1}(:,:,1)*k_x+...
-                    vasplibobj.timtj{1}(:,:,2)*k_y+...
-                    vasplibobj.timtj{1}(:,:,3)*k_z)...
-                    );
-                vasplibobj.timtj{4}(:,:) = exp(1i*2*pi*(...
-                    vasplibobj.timtj{2}(:,:,1)*k_1+...
-                    vasplibobj.timtj{2}(:,:,2)*k_2+...
-                    vasplibobj.timtj{2}(:,:,3)*k_3)...
-                    );
+                ExpInnerTerm = pagemtimes(vasplibobj.timtj{1},...
+                    reshape(vasplibobj.VarsSeqLcart(1:vasplibobj.Dim),[1 1 vasplibobj.Dim]));
+                vasplibobj.timtj{3}(:,:) = exp(1i*(sum(ExpInnerTerm,3)));
+                ExpInnerTermFrac = pagemtimes(vasplibobj.timtj{2},...
+                    reshape(vasplibobj.VarsSeqLfrac(1:vasplibobj.Dim),[1 1 vasplibobj.Dim]));
+                vasplibobj.timtj{4}(:,:) =  exp(1i*(sum(ExpInnerTermFrac,3)));
             end
         end
         function vasplibobj = tjmti_gen(vasplibobj,mode)
             if nargin < 2
                 mode = 'num';
             end
+            vasplibobj = vasplibobj.timtj_gen(mode);
             % Prepare tj - ti
-            vasplibobj.tjmti{1} = zeros([size(vasplibobj.orbL,1),size(vasplibobj.orbL,1),3]);
-            if strcmp(mode,'sym')
-                vasplibobj.tjmti{1} = sym( vasplibobj.tjmti{1});
-                vasplibobj.tjmti{3} = sym(zeros(size(vasplibobj.orbL,1)));
-                syms k_x k_y k_z real;
-                syms k_1 k_2 k_3 real;
-            end
-            vasplibobj.tjmti{2} = vasplibobj.tjmti{1};
-            %             vasplibobj.timtj{3}(:,:,1) = zeros(size(vasplibobj.orbL,1));
-            %             vasplibobj.timtj{3}(:,:,2) = zeros(size(vasplibobj.orbL,1));
-            %             vasplibobj.timtj{3}(:,:,3) = zeros(size(vasplibobj.orbL,1));
-            %
-            for i = 1:size(vasplibobj.orbL,1)
-                ti= vasplibobj.orbL(i,:);
-                for j = 1:size(vasplibobj.orbL,1)
-                    tj= vasplibobj.orbL(j,:);
-                    tji = tj-ti;
-                    tji_r = tji*vasplibobj.Rm;
-                    %                     tij_e = tij*H_hr.Rm;
-                    vasplibobj.tjmti{1}(i,j,1) = tji_r(1);
-                    vasplibobj.tjmti{1}(i,j,2) = tji_r(2);
-                    vasplibobj.tjmti{1}(i,j,3) = tji_r(3);
-                    vasplibobj.tjmti{2}(i,j,1) = tji(1);
-                    vasplibobj.tjmti{2}(i,j,2) = tji(2);
-                    vasplibobj.tjmti{2}(i,j,3) = tji(3);
-                end
-            end
-            if strcmp(mode,'sym')
-                vasplibobj.tjmti{3}(:,:) = exp(1i*(...
-                    vasplibobj.tjmti{1}(:,:,1)*k_x+...
-                    vasplibobj.tjmti{1}(:,:,2)*k_y+...
-                    vasplibobj.tjmti{1}(:,:,3)*k_z)...
-                    );
-                vasplibobj.tjmti{4}(:,:) = exp(1i*2*pi*(...
-                    vasplibobj.tjmti{2}(:,:,1)*k_1+...
-                    vasplibobj.tjmti{2}(:,:,2)*k_2+...
-                    vasplibobj.tjmti{2}(:,:,3)*k_3)...
-                    );
-                
+            for i = 1:4
+                vasplibobj.tjmti{i} = - vasplibobj.timtj{i};
             end
         end
         function vasplibobj = SliceGen(vasplibobj)
             % $H_{i j}^{\mathbf{k}}=\left\langle\chi_{i}^{\mathbf{k}}|H| \chi_{j}^{\mathbf{k}}\right\rangle=\sum_{\mathbf{R}} e^{i \mathbf{k} \cdot\left(\mathbf{R}+\mathbf{t}_{j}-\mathbf{t}_{i}\right)} H_{i j}(\mathbf{R})$
+            DIM = vasplibobj.Dim;
             if strcmp(vasplibobj.Type,'list')
                 switch class(vasplibobj)
                     case 'Htrig'
                         Kind = size(vasplibobj.HsymL_numL,1);
-                        [ij_list,index_row] = sortrows(vasplibobj.HsymL_numL(:,4:5));
+                        [ij_list,index_row] = sortrows(vasplibobj.HsymL_numL(:,DIM+1:DIM+2));
                     case 'HR'
                         Kind = vasplibobj.NRPTS;
-                        [ij_list,index_row] = sortrows(vasplibobj.vectorL(:,4:5));
+                        [ij_list,index_row] = sortrows(vasplibobj.vectorL(:,DIM+1:DIM+2));
                 end
                 vasplibobj = vasplibobj.reseq(':',index_row);% ?
                 [vasplibobj.Sparse_vector,SliceList] = unique(ij_list,'rows');
@@ -247,9 +202,9 @@ classdef vasplib < matlab.mixin.CustomDisplay
     methods
         function vasplibobj = input_Rm(vasplibobj,Rm)
             if nargin <2 && exist('POSCAR','file')
-                [Rm,~,~,~,~] = vasplibobj.POSCAR_readin('POSCAR','vasp');
+                [Rm,~,~,~,~] = vasplib.POSCAR_readin('POSCAR','vasp');
             elseif nargin <2 && ~exist('POSCAR','file')
-                Rm = [1 0 0;0 1 0;0 0 1];
+                Rm = eye(vasplibobj.Dim);
                 %warning('POSCAR or Rm needed');
             else
                 if isa(Rm,'string') || isa(Rm,'char')
@@ -258,10 +213,6 @@ classdef vasplib < matlab.mixin.CustomDisplay
             end
             Rm = (Rm);
             vasplibobj.Rm = Rm;
-
-        end
-        function vasplibobj = input_orbL(vasplibobj,orb_init)
-            vasplibobj.orbL = orb_init;
         end
         function vasplibobj = input_orb_struct(vasplibobj,filename,mode,options)
             arguments
@@ -415,19 +366,19 @@ classdef vasplib < matlab.mixin.CustomDisplay
             %       nn_t=struct('totseq',[],'orbit_on',[],'orbit_in',[],'Rlength',[],'Rc',[],'name',[],'nn_level',[]);
             %       Rnn sort the Ri -> ti in a primitivecell
             %       the Accuracy takes weight
+            % Debug: Unsupport For Dim
             arguments
                 vasplibobj ;
-                search_range = [0 0 0];
+                search_range = zeros(1,vasplibobj.Dim);
                 Accuracy = 1e-4;
                 Rlength_cut = 5;
                 options.MAX_NN_LENGTH =  10000000;
                 options.onsite = false;
             end
             MAX_NN_LENGTH = options.MAX_NN_LENGTH;
-
             %% -------- init --------
             if isempty(vasplibobj.orbL)
-                error('no orbL, please induce struct information.');
+                error('no orbL, please load orbL.');
             end
             if Accuracy > 1
                 warning('Attention，your ACCURACY may set wrongly!')
@@ -516,10 +467,10 @@ classdef vasplib < matlab.mixin.CustomDisplay
             %%
             %% Usage:
             %
-            % * [klist_cart,klist_l,klist_s,kpoints_l,kpoints_name]=kpathgen3D(Rm,kpoints,nodes,kpoints_name)
-            % * [klist_cart,klist_l,klist_s,kpoints_l,kpoints_name]=kpathgen3D(Rm,kpoints,nodes)
-            % * [klist_cart,klist_l,klist_s,kpoints_l,kpoints_name]=kpathgen3D(Rm,kpoints)
-            % * [klist_cart,klist_l,klist_s,kpoints_l,kpoints_name]=kpathgen3D(Rm)
+            % * [klist_cart,klist_l,klist_frac,kpoints_l,kpoints_name]=kpathgen3D(Rm,kpoints,nodes,kpoints_name)
+            % * [klist_cart,klist_l,klist_frac,kpoints_l,kpoints_name]=kpathgen3D(Rm,kpoints,nodes)
+            % * [klist_cart,klist_l,klist_frac,kpoints_l,kpoints_name]=kpathgen3D(Rm,kpoints)
+            % * [klist_cart,klist_l,klist_frac,kpoints_l,kpoints_name]=kpathgen3D(Rm)
             %
             %% Input:
             %
@@ -545,7 +496,7 @@ classdef vasplib < matlab.mixin.CustomDisplay
             % # kpoints_l    (for plot : To gen high symmetry points along k-path,one-dimension)
             % # kpoints_name (for plot : To gen high symmetry points name along k-path,one-dimension)
             % # klist_cart   (for caculation: cati real)
-            % # klist_s   (for other function you need )
+            % # klist_frac   (for other function you need )
             %
             %% example:
             %   commmad
@@ -554,10 +505,10 @@ classdef vasplib < matlab.mixin.CustomDisplay
             %   result
             %
             %% Note:
-            % if [klist_cart,klist_l,klist_s,kpoints_l,kpoints_name]=kpathgen3D()
+            % if [klist_cart,klist_l,klist_frac,kpoints_l,kpoints_name]=kpathgen3D()
             %          the kpoints , nodes ,kpoints_name will be given by KPOINTS POSCAR file
             %
-            % if [klist_cart,klist_l,klist_s,kpoints_l,kpoints_name]=kpathgen3D(Rm)
+            % if [klist_cart,klist_l,klist_frac,kpoints_l,kpoints_name]=kpathgen3D(Rm)
             %          the kpoints , nodes ,kpoints_name will be given by KPOINTS file
             % note : ['Line-Mode' ],['Reciprocal' ]}
             %
@@ -565,26 +516,28 @@ classdef vasplib < matlab.mixin.CustomDisplay
             %
             % * Document Date: 2020/12/03
             % * Creation Date: 2020/12/03
-            % * Last updated : 2021/02/25
+            % * Last updated : 2022/11/06
             %
             %% Copyright
             %
             % * parkman
             % * <parkman@buaa.edu.cn>
             %
-
+            arguments
+                vasplibobj
+                KPOINTS_name = 'KPOINTS';
+                nodes = [];
+                kpoints_name_tmp = [];
+            end
             if isempty(vasplibobj.Rm)
                 vasplibobj = vasplibobj.input_Rm();
             end
-            if nargin < 2
-                KPOINTS_name = 'KPOINTS';
-            end
-            if nargin < 3
+            if isempty(nodes)
                 [kpoints,nodes,kpoints_name_tmp] = vasplib.KPOINTS_read(KPOINTS_name);
             else
                 kpoints = KPOINTS_name;
             end
-            [vasplibobj.klist_r,vasplibobj.klist_s,vasplibobj.klist_l,vasplibobj.kpoints_l,vasplibobj.kpoints_s] =...
+            [vasplibobj.klist_cart,vasplibobj.klist_frac,vasplibobj.klist_l,vasplibobj.kpoints_l,vasplibobj.kpoints_frac] =...
                 vasplib.kpathgen(kpoints,nodes,vasplibobj.Gk);
             %high symmetry points store
             vasplibobj.kpoints_name = kpoints_name_tmp;
@@ -611,17 +564,12 @@ classdef vasplib < matlab.mixin.CustomDisplay
             %a3 a3x a3y a3z
             % unit A?e-6
             % usage : POSCAR_gen(Rm,sites,Atom_name,Atom_num,filename);
-
-            if nargin < 3
+            arguments
+                vasplibobj
+                filename = 'POSCAR';
                 Rm = vasplibobj.Rm;
-            end
-            if nargin < 4
                 sites = vasplibobj.sites;
-            end
-            if nargin < 5
                 Atom_name = vasplibobj.Atom_name;
-            end
-            if nargin < 6
                 Atom_num = vasplibobj.Atom_num;
             end
             title = "POSCAR Gen by vasplib";
@@ -656,12 +604,6 @@ classdef vasplib < matlab.mixin.CustomDisplay
                 fprintf(fileID,"%f  ",mod(sites(i).rc1,1));
                 fprintf(fileID,"%f  ",mod(sites(i).rc2,1));
                 fprintf(fileID,"%f  ",mod(sites(i).rc3,1));
-                %         if ~strcmp(string(sites(i).name),"")
-                %             %fprintf(fileID,"%s\n  ",sites(i).name);
-                %             fprintf(fileID,"\n  ");
-                %         else
-                %             fprintf(fileID,"\n  ");
-                %         end
                 fprintf(fileID,"\n  ");
             end
             fclose(fileID);
@@ -788,19 +730,16 @@ classdef vasplib < matlab.mixin.CustomDisplay
         function varargout = klist_show(vasplibobj,options)
             arguments
                 vasplibobj vasplib;
-                options.klist double = vasplibobj.klist_r;
-                options.fig = handle([]);
+                options.klist double = vasplibobj.klist_cart;
                 options.ax = handle([]);
                 options.show = true;
                 options.color = [rand rand rand];
                 options.LineWidth = 2;
             end
             if options.show
-                if isempty(options.fig) && isempty(options.ax)
-                    %[fig,ax] = create_figure();
-                    [fig,ax] = vasplib.BZplot(vasplibobj.Rm,'color','r');
+                if isempty(options.ax)
+                    [~,ax] = vasplib.BZplot(vasplibobj.Rm);
                 else
-                    fig = options.fig;
                     ax = options.ax;
                 end
             end
@@ -811,16 +750,15 @@ classdef vasplib < matlab.mixin.CustomDisplay
                     'LineWidth',options.LineWidth);
                 try % test
                     for i = 1:length(vasplibobj.kpoints_name)-1
-                        kpoints_r = vasplibobj.kpoints_s(2*i-1,:)*vasplibobj.Gk;
+                        kpoints_r = vasplibobj.kpoints_frac(2*i-1,:)*vasplibobj.Gk;
                         text(ax,kpoints_r(1),kpoints_r(2),kpoints_r(3),vasplibobj.kpoints_name(i),'FontSize',24);
                     end
-                    kpoints_r = vasplibobj.kpoints_s(end,:)*vasplibobj.Gk;
+                    kpoints_r = vasplibobj.kpoints_frac(end,:)*vasplibobj.Gk;
                     text(ax,kpoints_r(1),kpoints_r(2),kpoints_r(3),vasplibobj.kpoints_name(end),'FontSize',24);
                 catch
 
                 end
-                varargout{1} = fig;
-                varargout{2} = ax;
+                varargout{1} = ax;
             end
         end
         function varargout = PARCHG_gen(varargin)
@@ -828,7 +766,7 @@ classdef vasplib < matlab.mixin.CustomDisplay
         end
     end
     methods(Static)
-        function [kloop1_f,kloop2_f,kloop1_r,kloop2_r,klist_l,kstart_s,kstart_r] = kloop2D(Rm,options)
+        function [kloop1_frac,kloop2_frac,kloop1_cart,kloop2_cart,klist_l,kstart_frac,kstart_cart] = kloop2D(Rm,options)
             arguments
                 Rm
                 options.knum_evol   = 51;
@@ -850,29 +788,29 @@ classdef vasplib < matlab.mixin.CustomDisplay
             end
             if options.cartesian
                 Gk_ = vasplib.CartisianMat(Gk,options.dir_seq,options.dir_start);
-                kstart_s  = options.kstart * Gk_ /Gk;
+                kstart_frac  = options.kstart * Gk_ /Gk;
             else
                 Gk_ = Gk;
-                kstart_s = options.kstart;
+                kstart_frac = options.kstart;
             end
             %
             knum1 = options.knum_evol;
             knum2 = options.knum_int;
             %
-            [kloop1_r,kloop1_f,~,~] =...
+            [kloop1_cart,kloop1_frac,~,~] =...
                 vasplib.kpathgen([[0,0,0];options.kevolution],knum1,Gk_,Gk);
-            [kloop2_r,kloop2_f,~,~] =...
+            [kloop2_cart,kloop2_frac,~,~] =...
                 vasplib.kpathgen([[0,0,0];options.kintegral],knum2,Gk_,Gk);
             %
             klist_l = zeros(knum1,1);
-            normklist_l = norm(options.kevolution)/norm(kloop1_f(end,:));
+            normklist_l = norm(options.kevolution)/norm(kloop1_frac(end,:));
             for i = 1:knum1
-                klist_l(i) = norm(kloop1_f(i,:)*(eye(3)*2*pi))*normklist_l;
+                klist_l(i) = norm(kloop1_frac(i,:)*(eye(3)*2*pi))*normklist_l;
             end
-            klist_l = klist_l + sum(sign(kstart_s))* norm(kstart_s*(eye(3)*2*pi))*normklist_l;
-            kstart_r = options.kstart*Gk_;
+            klist_l = klist_l + sum(sign(kstart_frac))* norm(kstart_frac*(eye(3)*2*pi))*normklist_l;
+            kstart_cart = options.kstart*Gk_;
         end
-        function [klist_cart,klist_frac,klist_r_plot,sizemesh,Gk_,Grid] = kmesh2D(Rm,options,optionsEdge)
+        function [klist_cart,klist_frac,klist_cart_plot,sizemesh,Gk_,Grid] = kmesh2D(Rm,options,optionsEdge)
             arguments
                 Rm =POSCAR_readin;
                 options.knum1   = 51;
@@ -949,13 +887,13 @@ classdef vasplib < matlab.mixin.CustomDisplay
             if optionsEdge.full
                 klist_frac_ = repmat(klist_s_1_,[ knum2_ 1 ])+kron(klist_s_2_,ones( knum1_, 1 )) + kstart_s;
                 klist_cart_ = klist_frac_*Gk_;
-                klist_r_plot = klist_cart_ + shift;
+                klist_cart_plot = klist_cart_ + shift;
             else
-                klist_r_plot = klist_cart + shift;
+                klist_cart_plot = klist_cart + shift;
             end
-            Grid(:,:,1)  = reshape(klist_r_plot(:,1),sizemesh);
-            Grid(:,:,2)  = reshape(klist_r_plot(:,2),sizemesh);
-            Grid(:,:,3)  = reshape(klist_r_plot(:,3),sizemesh);
+            Grid(:,:,1)  = reshape(klist_cart_plot(:,1),sizemesh);
+            Grid(:,:,2)  = reshape(klist_cart_plot(:,2),sizemesh);
+            Grid(:,:,3)  = reshape(klist_cart_plot(:,3),sizemesh);
             
         end
         function [klist_cart,klist_frac] = kloop1D(kpoint_frac,Orientation,radius,opt)
@@ -1026,13 +964,13 @@ classdef vasplib < matlab.mixin.CustomDisplay
                 fprintf(fid,"%d\n",abs(length(vasplibobj.kpoints_name-1)));
                 for i=1:abs(length(vasplibobj.kpoints_name-1))
                     fprintf(fid,"%1s ",strrep(vasplibobj.kpoints_name(i),'GAMMA','G'));
-                    fprintf(fid,"%9f ",num2str(vasplibobj.kpoints_s(2*i-1,1)));
-                    fprintf(fid,"%9f ",num2str(vasplibobj.kpoints_s(2*i-1,2)));
-                    fprintf(fid,"%9f ",num2str(vasplibobj.kpoints_s(2*i-1,3)));
+                    fprintf(fid,"%9f ",num2str(vasplibobj.kpoints_frac(2*i-1,1)));
+                    fprintf(fid,"%9f ",num2str(vasplibobj.kpoints_frac(2*i-1,2)));
+                    fprintf(fid,"%9f ",num2str(vasplibobj.kpoints_frac(2*i-1,3)));
                     fprintf(fid,"%1s ",strrep(vasplibobj.kpoints_name(i+1),'GAMMA','G'));
-                    fprintf(fid,"%9s ",num2str(vasplibobj.kpoints_s(2*i,1)));
-                    fprintf(fid,"%9s ",num2str(vasplibobj.kpoints_s(2*i,2)));
-                    fprintf(fid,"%9s \n",num2str(vasplibobj.kpoints_s(2*i,3)));
+                    fprintf(fid,"%9s ",num2str(vasplibobj.kpoints_frac(2*i,1)));
+                    fprintf(fid,"%9s ",num2str(vasplibobj.kpoints_frac(2*i,2)));
+                    fprintf(fid,"%9s \n",num2str(vasplibobj.kpoints_frac(2*i,3)));
                 end
                 fclose(fid);
             end
@@ -1474,7 +1412,7 @@ classdef vasplib < matlab.mixin.CustomDisplay
             end
             %-------- return --------
         end
-        function [klist_r,klist_s,klist_l,kpoints_l,kpoints_s] = kpathgen(kpoints,nodes,Gk,Gk_)
+        function [klist_cart,klist_frac,klist_l,kpoints_l,kpoints_frac] = kpathgen(kpoints,nodes,Gk,Gk_)
             %-------- nargin --------
             if nargin > 3 && ~isequal(Gk,Gk_)
                 mode = 'return mode';
@@ -1485,10 +1423,10 @@ classdef vasplib < matlab.mixin.CustomDisplay
             kn = size(kpoints,1)/2;
 
             if length(nodes) == 1
-                klist_s=zeros(kn*nodes,3);
+                klist_frac=zeros(kn*nodes,3);
                 nodes = ones(kn,1)*nodes;
             else
-                klist_s=zeros(sum(nodes),3);
+                klist_frac=zeros(sum(nodes),3);
             end
             for i = 1:kn
                 klisttempX = linspace(kpoints(2*i-1,1),kpoints(2*i,1),nodes(i));
@@ -1496,9 +1434,9 @@ classdef vasplib < matlab.mixin.CustomDisplay
                 klisttempZ = linspace(kpoints(2*i-1,3),kpoints(2*i,3),nodes(i));
                 start_seq = sum(nodes(1:i-1))+1;
                 end_seq = sum(nodes(1:i));
-                klist_s(start_seq :end_seq ,:)   = [klisttempX' klisttempY' klisttempZ'];
+                klist_frac(start_seq :end_seq ,:)   = [klisttempX' klisttempY' klisttempZ'];
             end
-            klist_r=klist_s*Gk;
+            klist_cart=klist_frac*Gk;
             %klist_liner & kpoints_liner
             kpoints_l=zeros(kn+1,1);
             kpoints_l(1) = 0;
@@ -1515,9 +1453,9 @@ classdef vasplib < matlab.mixin.CustomDisplay
                 klist_l(1,start_seq :end_seq) = klisttemp;
             end
             if strcmp(mode,'return mode')
-                klist_s = klist_r/Gk_;
+                klist_frac = klist_cart/Gk_;
             end
-            kpoints_s = kpoints;
+            kpoints_frac = kpoints;
         end
     end
     % ---------------------   semi infinite Green function   ------------------------
@@ -2103,10 +2041,10 @@ classdef vasplib < matlab.mixin.CustomDisplay
             [varargout{1:nargout}] = vasplib_plot.ShowSurfIntegral(varargin{:});
         end
     end
-    %% semi-classical
+    %% Gemometric Phase
     methods
         function IndividualChern_number = IndividualChern(vasplibobj,options,options_Chern)
-
+            IndividualChern_number = 'Not implement yet';
         end
         function Chern_number = Chern(vasplibobj,options,options_Chern)
             arguments
@@ -3726,7 +3664,7 @@ classdef vasplib < matlab.mixin.CustomDisplay
             Gk = (2*pi*eye(3)/Rm).';
             %
             optionsKcell = namedargs2cell(optionsK);
-            [klist_r,~,klist_r_plot,sizemesh,Gk_,Grid] = vasplib.kmesh2D(Rm,optionsKcell{:},'full',true);
+            [klist_cart,~,klist_r_plot,sizemesh,Gk_,Grid] = vasplib.kmesh2D(Rm,optionsKcell{:},'full',true);
             if isa(Hfun,'sym')
                 Hfun = matlabFunction(Hfun,'Vars',[sym('k_x'),sym('k_y'),sym('k_z')]);
             end
@@ -3740,7 +3678,7 @@ classdef vasplib < matlab.mixin.CustomDisplay
                     BAND_index = options.BAND_index;
                 end
                 % integral method
-                [~,BC_WAVECAR] = vasplib.EIGENSOLVE(Hfun,klist_r,Norb);
+                [~,BC_WAVECAR] = vasplib.EIGENSOLVE(Hfun,klist_cart,Norb);
                 BC_WAVECAR = BC_WAVECAR(:,BAND_index,:);
                 %reshape(BC_WAVECAR(:,BAND_index,:),[vasplibobj.Basis_num options.knum1*options.knum2]);
                 BCCAR = vasplib.BerryCuvature_2D( BC_WAVECAR ,sizemesh);
@@ -3764,7 +3702,7 @@ classdef vasplib < matlab.mixin.CustomDisplay
                     dS = cross(dk_1,dk_2);
                 end
                 optionsPlotcell = namedargs2cell(optionsPlot);
-                [~,~] = vasplib.ShowSurfIntegral(Gk,klist_r,dk_1,dk_2,BCCAR(:)*norm(dS)/(2*pi),optionsPlotcell{:});
+                [~,~] = vasplib.ShowSurfIntegral(Gk,klist_cart,dk_1,dk_2,BCCAR(:)*norm(dS)/(2*pi),optionsPlotcell{:});
             end
         end
         % origin definition for full symbolic obj
@@ -3861,26 +3799,33 @@ classdef vasplib < matlab.mixin.CustomDisplay
     end
     %% eig
     methods(Static)
-        function HoutL = HCAR_gen(Hfun,klist_r,Norb)
-            kn = size(klist_r,1);
+        function HoutL = HCAR_gen(Hfun,klist_cart,Norb)
+            arguments
+                Hfun function_handle;
+                klist_cart double;
+                Norb;
+            end
+            kn = size(klist_cart,1);
             HoutL = zeros(Norb,Norb,kn);
             for i = 1:kn
-                HoutL(:,:,i) = Hfun(klist_r(i,1),klist_r(i,2),klist_r(i,3));
+                Input = num2cell(klist_cart(i,:));
+                HoutL(:,:,i) = Hfun(Input{:});
             end
         end
-        function [EIGENCAR,WAVECAR,HoutL] = EIGENSOLVE(Hfun,klist_r,Norb)
+        function [EIGENCAR,WAVECAR,HoutL] = EIGENSOLVE(Hfun,klist_cart,Norb)
             if nargin < 3
                 Norb = size(Hfun(0,0,0),1);
             end
-            %HoutL = vasplib.HCAR_gen(Hfun,klist_r,Norb);
-            kn = size(klist_r,1);
+            %HoutL = vasplib.HCAR_gen(Hfun,klist_cart,Norb);
+            kn = size(klist_cart,1);
             EIGENCAR = zeros(Norb,kn);
             WAVECAR  = zeros(Norb,Norb,kn);
             if nargout >2
                 HoutL = zeros(Norb,Norb,kn);
             end
             for i = 1:kn
-                Hout = Hfun(klist_r(i,1),klist_r(i,2),klist_r(i,3));
+                Input = num2cell(klist_cart(i,:));
+                HoutL(:,:,i) = Hfun(Input{:});
                 Hout = (Hout+Hout')/2;
                 [A, U]=eig(Hout);
                 [A, U]= park.sorteig(U,A);

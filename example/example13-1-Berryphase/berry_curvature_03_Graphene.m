@@ -48,7 +48,7 @@ Graphene_hk = sym(Graphene_n);
 Graphene_hk_n = subs(Graphene_hk);
 [W,E] = eig(Graphene_hk_n);
 %%
-Bcsym = vasplib.Berry_curvature_kubo((Graphene_hk_n),k_x,k_y);
+Bcsym = vasplib.BC_kubo_sym((Graphene_hk_n),k_x,k_y);
 Bcfun = matlabFunction(Bcsym,'Var',[k_x,k_y]);
 %%
 count = 0;
@@ -60,12 +60,12 @@ for kx = linspace(-2*pi,2*pi,size)
         count =count +1;
         R(count, :) = [ kx,ky,0];
         Bc_n = Bcfun(kx,ky);
-        A(count,:) = [0,0,Bc_n(2)];
+        A(count,:) = [0,0,Bc_n];
     end
 end
+A = A*10;
 [fig,ax] = BZplot(Graphene.Rm);
-A(:,3) = A(:,3)*1e20;
-vasplib_tool.quiverplot(R,A,'b','Graphene',fig,ax)
+vasplib_plot.quiverplot3(R,A,'r','Graphene',ax)
 % klist = rand(4,2);
 % Bc_n = Berry_curvature_2bandn(subs(Graphene_kp),k_x,k_y,klist)
 % u1 = simplify(NomalizeEigenvector(W(:,2))); 

@@ -40,9 +40,17 @@ classdef HK < vasplib & matlab.mixin.CustomDisplay
     end
     %% constuction
     methods
-        function H_hk = HK(BASIS_NUM,Degree,Term_list)
+        function H_hk = HK(BASIS_NUM,Degree,Term_list,propArgs)
+            arguments
+                BASIS_NUM
+                Degree
+                Term_list
+                propArgs.?vasplib;
+
+            end
             %
-            H_hk = H_hk@vasplib();
+            propArgsCell = namedargs2cell(propArgs);      
+            H_hk = H_hk@vasplib(propArgsCell{:});
             switch nargin
                 case 1
                     if isnumeric(BASIS_NUM)
@@ -721,8 +729,9 @@ classdef HK < vasplib & matlab.mixin.CustomDisplay
 %             end
 %         end 
         function H_hk = Degree2Kinds(H_hk)
-            syms k_x k_y k_z real;
-            str_tmp = string(expand((1+k_x+k_y+k_z)^H_hk.Degree));
+            %syms k_x k_y k_z real;
+            VarUsing = H_hk.VarsSeqLcart(1:H_hk.Dim);
+            str_tmp = string(expand((1+fold(@plus,VarUsing))^H_hk.Degree));      
             str_cell = strsplit(str_tmp,'+');
             H_hk.Kinds = length(str_cell);
             coeff_list = zeros(H_hk.Kinds,1);
@@ -831,9 +840,7 @@ classdef HK < vasplib & matlab.mixin.CustomDisplay
             else
                 coe_label = false;
             end
-            k_x = sym('k_x','real');
-            k_y = sym('k_y','real');
-            k_z = sym('k_z','real');
+            VarUsing = H_hk.VarsSeqLcart(1:H_hk.Dim);
             %
             for i = 1:H_hk.Degree+1
                 Orderlist = HK.orderlist(i-1);
@@ -846,7 +853,7 @@ classdef HK < vasplib & matlab.mixin.CustomDisplay
                 HsymC{i}(1:nOrderlist) = H_hk.HsymL_k(Orderlist);
             end  
             HsymC_bk = HsymC;
-            k_orgin = [k_x;k_y;k_z];
+            k_orgin = VarUsing.';
             k_R = R*k_orgin;
             for i = 1:H_hk.Degree+1
                 HsymC{i} = subs(HsymC{i},k_orgin,k_R);
@@ -855,7 +862,7 @@ classdef HK < vasplib & matlab.mixin.CustomDisplay
                 H_symL_i = simplify(HsymC{i}) ;
                 nOrderlist = length(H_symL_i);
                 for j = 1:nOrderlist
-                    [A,B] = coeffs(H_symL_i(j),[k_x k_y k_z]);
+                    [A,B] = coeffs(H_symL_i(j),VarUsing);
                     for k = 1:length(B)
                         tempSym = B(k);
                         for l  = 1:nOrderlist
@@ -1244,9 +1251,9 @@ classdef HK < vasplib & matlab.mixin.CustomDisplay
 %             H_hr.Atom_num  = H_hk.Atom_num   ;
 %             H_hr.sites = H_hk.sites           ;
 %             H_hr.symmetry_operation = H_hk.symmetry_operation;
-%             H_hr.klist_r = H_hk.klist_r          ;
+%             H_hr.klist_cart = H_hk.klist_cart          ;
 %             H_hr.klist_l =  H_hk.klist_l       ;
-%             H_hr.klist_s = H_hk.klist_s          ;
+%             H_hr.klist_frac = H_hk.klist_frac          ;
 %             H_hr.kpoints_l = H_hk.kpoints_l         ;
 %             H_hr.kpoints_name = H_hk.kpoints_name     ;
 %             H_hr.Rnn = H_hk.Rnn                  ;
@@ -1371,12 +1378,11 @@ classdef HK < vasplib & matlab.mixin.CustomDisplay
                 H_hk HK;
                 options.fermi double = 0;
                 options.norb double = -1;
-                options.klist double = H_hk.klist_r;
+                options.klist double = H_hk.klist_cart;
                 options.para  = [];
                 options.paraname ;
                 options.show = false;
                 options.OriginGk = [0 0 0];
-                options.fig = handle([]);
                 options.ax = handle([]);
                 options.printmode = false;
             end
@@ -1385,17 +1391,15 @@ classdef HK < vasplib & matlab.mixin.CustomDisplay
             norb_enforce  = options.norb;
             if isempty(options.klist)
                 H_hk = H_hk.kpathgen3D('KPOINTS');
-                klist_r_tmp = H_hk.klist_r;
+                klist_cart_tmp = H_hk.klist_cart;
             else
-                klist_r_tmp = options.klist;
+                klist_cart_tmp = options.klist;
             end
-            klist_r_tmp = klist_r_tmp + options.OriginGk;
+            klist_cart_tmp = klist_cart_tmp + options.OriginGk;
             if options.show
-                if isempty(options.fig) && isempty(options.ax)
-                    %[fig,ax] = create_figure();
-                    [fig,ax] = vasplib.BZplot(H_hk.Rm,'color','r');
+                if iisempty(options.ax)
+                   ax = vasplib.BZplot(H_hk.Rm,'color','r');
                 else
-                    fig = options.fig;
                     ax = options.ax;
                 end
             end
@@ -1409,7 +1413,7 @@ classdef HK < vasplib & matlab.mixin.CustomDisplay
             else
                 print_mode = 0;
             end
-            [kn,~] = size(klist_r_tmp);
+            [kn,~] = size(klist_cart_tmp);
             %--------  check  --------
             if norb_enforce <0
                 NBANDS=H_hk.Basis_num;
@@ -1420,14 +1424,12 @@ classdef HK < vasplib & matlab.mixin.CustomDisplay
             end
             WAVECAR  = zeros(H_hk.Basis_num,NBANDS,kn);
             EIGENCAR = zeros(NBANDS,kn);
-            syms k_x k_y k_z real;
-            HsymL_fun = (matlabFunction( H_hk.HsymL,'Vars',[k_x k_y k_z]));
+            %syms k_x k_y k_z real;
+            HsymL_fun = matlabFunction( H_hk.HsymL,'Vars',H_hk.VarsSeqLcart(1:H_hk.Dim));
             %numL = reshape(H_hk.HnumL, NBANDS^2, []);
             for ki =1:kn
-                x=klist_r_tmp(ki,1);
-                y=klist_r_tmp(ki,2);
-                z=klist_r_tmp(ki,3);
-                kL = HsymL_fun(x,y,z);
+                Input = num2cell(klist_cart_tmp(ki,:));
+                kL = HsymL_fun(Input{:});
                 Hout = H_hk.HnumL;
                 %Hout = reshape(numL*kL, NBANDS, NBANDS);
                 for i =1:H_hk.Kinds
@@ -1459,9 +1461,8 @@ classdef HK < vasplib & matlab.mixin.CustomDisplay
             varargout{1} = EIGENCAR;
             varargout{2} = WAVECAR;
             if options.show
-                [varargout{3},varargout{4}] = H_hk.klist_show(...
-                    'klist',klist_r_tmp,...
-                    'fig',fig,...
+                [varargout{3}] = vasplib.klist_show(...
+                    'klist',klist_cart_tmp,...
                     'ax',ax);
             end
             %             if kn >1
@@ -1485,6 +1486,8 @@ classdef HK < vasplib & matlab.mixin.CustomDisplay
                         k_symbol = strrep(k_symbol,str_tmp,'k_y');
                     case {'k_z','k_Z','K_z','K_Z','kz','kZ','Kz','KZ','z','Z'}
                         k_symbol = strrep(k_symbol,str_tmp,'k_z');
+                    case {'k_w','k_W','K_w','K_W','kw','kW','Kw','KW'}
+                        k_symbol_str = strrep(k_symbol_str,str_tmp,'k_w');
                 end
             end
             coeff_tmp = coeffs(str2sym(k_symbol));
@@ -1494,9 +1497,13 @@ classdef HK < vasplib & matlab.mixin.CustomDisplay
         end
     end
     methods(Static)
-        function Degree = checkDegree(Hsym)
-            syms k_x k_y k_z real;
-            Degree_mat = polynomialDegree(Hsym,[k_x k_y k_z]);
+        function Degree = checkDegree(Hsym,Dim)
+            arguments
+                Hsym
+                Dim = 3;
+            end
+            VarsSeqLcart = [sym('k_x'),sym('k_y'),sym('k_z'),sym('k_w')];
+            Degree_mat = polynomialDegree(Hsym,VarsSeqLcart(1:Dim));
             Degree = max(Degree_mat,[],'all');
         end
         function Orderlist  = orderlist(order)
@@ -1528,7 +1535,7 @@ classdef HK < vasplib & matlab.mixin.CustomDisplay
             str_tmp = replace(str_tmp,{'k_z','k_Z','K_z','K_Z','kz','kZ','Kz','KZ'},'k_z');
             sym_term = str2sym(str_tmp);
         end
-        function [sym_coe,sym_single,str_single] = coeff_extract(sym_term)
+        function [sym_coe,sym_single,str_single] = coeff_extract(sym_term,Dim)
 %             str_list_tmp = strsplit(string(sym_term),'*');
 %             sym_coe = sym(1);
 %             for i = 1:length(str_list_tmp)
@@ -1539,7 +1546,12 @@ classdef HK < vasplib & matlab.mixin.CustomDisplay
 %             sym_single = sym_term/sym_coe;
 %             str_single = string(sym_single);
             % test use coeffs if bugs exist, try to umcomment above and comment below!
-            [sym_coe,sym_single] = coeffs(sym_term,[sym('k_x'),sym('k_y'),sym('k_z')]);
+            arguments
+                sym_term
+                Dim = 3;
+            end
+            VarsSeqLcart = [sym('k_x'),sym('k_y'),sym('k_z'),sym('k_w')];
+            [sym_coe,sym_single] = coeffs(sym_term,VarsSeqLcart(1:Dim));
             str_single = string(sym_single);
         end
     end

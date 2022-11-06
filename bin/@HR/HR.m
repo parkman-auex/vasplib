@@ -13,7 +13,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
     %% example:
     %
     %% Note:
-    % For the number part, it is a direct copy of tbmodels
+    % For the number part, it has simlar features of tbmodels/pythtb
     % <https://github.com/Z2PackDev/TBmodels>
     % * (c) 2015-2018, ETH Zurich, Institut fuer Theoretische Physik
     % * Author: Dominik Gresch <greschd@gmx.ch>
@@ -23,7 +23,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
     %
     % * Document Date: 2021/02/23
     % * Creation Date: 2021/01/04
-    % * Last updated : 2021/04/07
+    % * Last updated : 2022/11/06
     %
     %% Copyright
     %
@@ -33,7 +33,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
     
     %% public properties
     properties
-        vectorL  ; % int8 -128 ~ 128 % the Rvector list ;int64 list; int32 will be used more widely
+        vectorL ; % int8 -128 ~ 128 % the Rvector list ;int64 list; int32 will be used more widely
         HnumL   ; % Hnum_list
         HcoeL   ; % Hcoe_list
     end
@@ -91,7 +91,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
     %% construction method
     % --------------------- construction method -----------------------
     methods
-        function H_hr = HR(WAN_NUM,vectorL,options)
+        function H_hr = HR(WAN_NUM,vectorL,options,propArgs)
             % HR H_hr = HR(WAN_NUM,vectorL) construct a empty TB obj
             %   H_hr = HR() construct a 4-orbs empty TB obj
             %   H_hr = HR(WAN_NUM) construct a WAN_NUM-orbs empty TB obj
@@ -114,8 +114,10 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                 options.ScoeL sym=sym([]) ;
                 options.vectorL_overlap = int32([0 ,0 ,0]);
                 options.sym = true;
+                propArgs.?vasplib;
             end
-            H_hr = H_hr@vasplib();
+            propArgsCell = namedargs2cell(propArgs);  
+            H_hr = H_hr@vasplib(propArgsCell{:});
             H_hr.Basis_num = WAN_NUM;
             % -------------check---------------
             Type = options.Type;
@@ -214,7 +216,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             %             else
             %                 H_hr.orbL  = zeros(WAN_NUM,3);
             %             end
-            H_hr.orbL  = zeros(WAN_NUM,3);
+            H_hr.orbL  = zeros(WAN_NUM,H_hr.Dim);
             H_hr.overlap = options.overlap;
             %H_hr.Duality_vector_dist = containers.Map('KeyType','double','ValueType','double');
         end
@@ -622,13 +624,10 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             end
         end
         function H_hr = expand_empty_one(H_hr,orbOne,QuantumOne,elementOne)
-            if nargin < 2
-                orbOne = [0,0,0];
-            end
-            if nargin < 3
+            arguments
+                H_hr;
+                orbOne = zeros(1,H_hr.Dim);
                 QuantumOne = [1,0,0,1];
-            end
-            if nargin < 4
                 elementOne = 1;
             end
             H_hr.orbL = [H_hr.orbL;orbOne];
@@ -735,16 +734,9 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                         case 'add'
                             H_hr.HnumL{seq} = H_hr.HnumL{seq} + amp  ;
                         case 'sym'
-                            error('not be implemented yet');
-                            zeros_coe_mat = sym(zeros(H_hr.WAN_NUM));
-                            if H_hr.HcoeL(:,:,seq) ~= zeros_coe_mat
-                                warning('May be you should use symadd mode on this NRPT ');
-                                fprintf('%d %d %d %d %d \n',vector(1),vector(2),vector(3));
-                            end
-                            H_hr.HcoeL(:,:,seq) =  amp  ;
+                            error('not be implemented yet');                           
                         case 'symadd'
                             error('not be implemented yet');
-                            H_hr.HcoeL(:,:,seq) = H_hr.HcoeL(:,:,seq) + amp  ;
                     end
                 otherwise
                     [~,seq]=ismember(int32(vector),V,'rows');
@@ -758,7 +750,9 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                             zeros_num_mat = zeros(H_hr.WAN_NUM);
                             if H_hr.HnumL(:,:,seq) ~= zeros_num_mat
                                 warning('May be you should use add mode on this NRPT');
-                                fprintf('%d %d %d %d %d \n',vector(1),vector(2),vector(3));
+                                Format = repmat("%d ",[1 H_hr.Dim]);
+                                Input = num2cell(vector(1,:));
+                                fprintf(strcat(Format," \n"),Input{:});
                             end
                             H_hr.HnumL(:,:,seq) = amp ;
                         case 'add'
@@ -767,7 +761,9 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                             zeros_coe_mat = sym(zeros(H_hr.WAN_NUM));
                             if H_hr.HcoeL(:,:,seq) ~= zeros_coe_mat
                                 warning('May be you should use symadd mode on this NRPT ');
-                                fprintf('%d %d %d %d %d \n',vector(1),vector(2),vector(3));
+                                Format = repmat("%d ",[1 H_hr.Dim]);
+                                Input = num2cell(vector(1,:));
+                                fprintf(strcat(Format," \n"),Input{:});
                             end
                             H_hr.HcoeL(:,:,seq) =  amp  ;
                         case 'symadd'
@@ -799,7 +795,9 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                         case 'set'
                             if H_hr.HnumL(seq) ~= 0
                                 warning('May be you should use add mode on this NRPT and hi hj');
-                                fprintf('%d %d %d %d %d \n',vector(1),vector(2),vector(3),vector(4),vector(5));
+                                Format = repmat("%d ",[1 H_hr.Dim+2]);
+                                Input = num2cell(vector(1,:));
+                                fprintf(strcat(Format," \n"),Input{:});
                             end
                             H_hr.HnumL(seq) = amp ;
                         case 'add'
@@ -807,7 +805,9 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                         case 'sym'
                             if H_hr.HcoeL(seq) ~= sym(0)
                                 warning('May be you should use symadd mode on this NRPT and hi hj');
-                                fprintf('%d %d %d %d %d \n',vector(1),vector(2),vector(3),vector(4),vector(5));
+                                Format = repmat("%d ",[1 H_hr.Dim+2]);
+                                Input = num2cell(vector(1,:));
+                                fprintf(strcat(Format," \n"),Input{:});
                             end
                             H_hr.HcoeL(seq) =  amp  ;
                         case 'symadd'
@@ -818,7 +818,9 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                         case 'set'
                             if H_hr.HnumL{seq}(hi,hj) ~= 0
                                 warning('May be you should use add mode on this NRPT and hi hj');
-                                fprintf('%d %d %d %d %d \n',vector(1),vector(2),vector(3),hi,hj);
+                                Format = repmat("%d ",[1 H_hr.Dim+2]);
+                                Input = num2cell([vector(1,:),hi,hj]);
+                                fprintf(strcat(Format," \n"),Input{:});
                             end
                             H_hr.HnumL{seq}(hi,hj) = amp ;
                         case 'add'
@@ -826,7 +828,9 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                         case 'sym'
                             if H_hr.HcoeL{seq}(hi,hj) ~= sym(0)
                                 warning('May be you should use symadd mode on this NRPT and hi hj');
-                                fprintf('%d %d %d %d %d \n',vector(1),vector(2),vector(3),hi,hj);
+                                Format = repmat("%d ",[1 H_hr.Dim+2]);
+                                Input = num2cell([vector(1,:),hi,hj]);
+                                fprintf(strcat(Format," \n"),Input{:});
                             end
                             H_hr.HcoeL{seq}(hi,hj) =  amp  ;
                         case 'symadd'
@@ -837,7 +841,9 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                         case 'set'
                             if H_hr.HnumL(hi,hj,seq) ~= 0
                                 warning('May be you should use add mode on this NRPT and hi hj');
-                                fprintf('%d %d %d %d %d \n',vector(1),vector(2),vector(3),hi,hj);
+                                Format = repmat("%d ",[1 H_hr.Dim+2]);
+                                Input = num2cell([vector(1,:),hi,hj]);
+                                fprintf(strcat(Format," \n"),Input{:});
                             end
                             H_hr.HnumL(hi,hj,seq) = amp ;
                         case 'add'
@@ -845,7 +851,9 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                         case 'sym'
                             if H_hr.HcoeL(hi,hj,seq) ~= sym(0)
                                 warning('May be you should use symadd mode on this NRPT and hi hj');
-                                fprintf('%d %d %d %d %d \n',vector(1),vector(2),vector(3),hi,hj);
+                                Format = repmat("%d ",[1 H_hr.Dim+2]);
+                                Input = num2cell([vector(1,:),hi,hj]);
+                                fprintf(strcat(Format," \n"),Input{:});
                             end
                             H_hr.HcoeL(hi,hj,seq) =  amp  ;
                         case 'symadd'
@@ -853,7 +861,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                     end
             end
         end
-        % set overlap
+        % set overlap; !!!A better way is use another HR as Overlap!!!
         function H_hr = set_overlap(H_hr,amp,si,sj,vector_list,mode)
             % -------- nargin -------------
             if nargin <6
@@ -1030,7 +1038,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                 WAN_NUM = size(H_hr.HnumL{1},1);
             elseif strcmp(H_hr.Type,'list')
                 try
-                    [Sparse_vector,~,~] = unique(H_hr.vectorL(:,4:5),'rows');
+                    [Sparse_vector,~,~] = unique(H_hr.vectorL(:,H_hr.Dim+1:H_hr.Dim+2),'rows');
                     WAN_NUM = double(max(Sparse_vector(:)));
                 catch
                     WAN_NUM = 0;
@@ -1048,12 +1056,9 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                 end
             end
         end
-        %         function Basis_num = get.Basis_num(H_hr)
-        %             Basis_num = H_hr.WAN_NUM;
-        %         end
         function Line_000 = get.Line_000(H_hr)
             vector = [0,0,0];
-            [~,Line_000]=ismember(int32(vector),H_hr.vectorL(:,1:3),'rows');
+            [~,Line_000]=ismember(int32(vector),H_hr.vectorL(:,1:H_hr.Dim),'rows');
         end
         function homecell = get.homecell(H_hr)
             if strcmp(H_hr.Type,'list')
@@ -1069,12 +1074,6 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
         function Type = type(H_hr)
             Type = H_hr.Type;
         end
-        %         function AvectorL = get.AvectorL(H_hr)
-        %             AvectorL = H_hr.HnumL;
-        %         end
-        %         function BvectorL = get.BvectorL(H_hr)
-        %             BvectorL = H_hr.HcoeL;
-        %         end
     end
     %% unknown(Not Classify yet)
     methods
@@ -1158,7 +1157,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                             for i = 1:H_hr.NRPTS
                                 % Duality_vector_dist();
                                 vector_tmp = H_hr.vectorL(i,:);
-                                vector_tmp_oppo(1:3) = -vector_tmp(1:3);
+                                vector_tmp_oppo(1:H_hr.Dim) = -vector_tmp(1:H_hr.Dim);
                                 vector_tmp_oppo(4) = vector_tmp(5);
                                 vector_tmp_oppo(5) = vector_tmp(4);
                                 [~,j]=ismember(vector_tmp_oppo,H_hr_tmp.vectorL,'rows');
@@ -1169,12 +1168,12 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                                             fprintf('The testing homecell hamilton %3d,%3d,%3d[i:%3d j:%3d] does not exist, build it with : %s!\n', ...
                                                 vector_tmp(1),vector_tmp(2),vector_tmp(3),vector_tmp(4),vector_tmp(5), ...
                                                 string(H_hr.HcoeL(j)'));
-                                            H_hr_tmp = H_hr_tmp.set_hop(H_hr.HcoeL(j)',vector_tmp(4),vector_tmp(5),vector_tmp(1:3),'sym');
+                                            H_hr_tmp = H_hr_tmp.set_hop(H_hr.HcoeL(j)',vector_tmp(4),vector_tmp(5),vector_tmp(1:H_hr.Dim),'sym');
                                         elseif H_hr.HcoeL(j)== sym(0)
                                             fprintf('The opposite homecell hamilton %3d,%3d,%3d[i:%3d j:%3d] does not exist, build it : %s!\n', ...
                                                 vector_tmp_oppo(1),vector_tmp_oppo(2),vector_tmp_oppo(3), vector_tmp_oppo(4),vector_tmp_oppo(5), ...
                                                 string(H_hr.HcoeL(i)'));
-                                            H_hr_tmp = H_hr_tmp.set_hop(H_hr.HcoeL(i)',vector_tmp_oppo(4),vector_tmp_oppo(5),vector_tmp_oppo(1:3),'sym');
+                                            H_hr_tmp = H_hr_tmp.set_hop(H_hr.HcoeL(i)',vector_tmp_oppo(4),vector_tmp_oppo(5),vector_tmp_oppo(1:H_hr.Dim),'sym');
                                         else
                                             fprintf('The homecell hamilton is not hermi, never mind, we will not hermi it enforcely!\n');
                                         end
@@ -1186,7 +1185,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                                     fprintf('The opposite vector hamilton %3d,%3d,%3d[i:%3d j:%3d] does not exist, build it : %s!\n', ...
                                         vector_tmp_oppo(1),vector_tmp_oppo(2),vector_tmp_oppo(3), vector_tmp_oppo(4),vector_tmp_oppo(5), ...
                                         string(H_hr.HcoeL(i)'));
-                                    H_hr_tmp = H_hr_tmp.set_hop(H_hr.HcoeL(i)',vector_tmp_oppo(4),vector_tmp_oppo(5),vector_tmp_oppo(1:3),'sym');
+                                    H_hr_tmp = H_hr_tmp.set_hop(H_hr.HcoeL(i)',vector_tmp_oppo(4),vector_tmp_oppo(5),vector_tmp_oppo(1:H_hr.Dim),'sym');
                                     continue;
                                 end
                                 %
@@ -1195,12 +1194,12 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                                         fprintf('The testing vector hamilton %3d,%3d,%3d[i:%3d j:%3d] does not exist, build it with : %s!\n', ...
                                             vector_tmp(1),vector_tmp(2),vector_tmp(3),vector_tmp(4),vector_tmp(5), ...
                                             string(H_hr.HcoeL(j)'));
-                                        H_hr_tmp = H_hr_tmp.set_hop(H_hr.HcoeL(j)',vector_tmp(4),vector_tmp(5),vector_tmp(1:3),'sym');
+                                        H_hr_tmp = H_hr_tmp.set_hop(H_hr.HcoeL(j)',vector_tmp(4),vector_tmp(5),vector_tmp(1:H_hr.Dim),'sym');
                                     elseif H_hr.HcoeL(j)== sym(0)
                                         fprintf('The opposite vector hamilton %3d,%3d,%3d[i:%3d j:%3d] does not exist, build it : %s!\n', ...
                                             vector_tmp_oppo(1),vector_tmp_oppo(2),vector_tmp_oppo(3), vector_tmp_oppo(4),vector_tmp_oppo(5), ...
                                             string(H_hr.HcoeL(i)'));
-                                        H_hr_tmp = H_hr_tmp.set_hop(H_hr.HcoeL(i)',vector_tmp_oppo(4),vector_tmp_oppo(5),vector_tmp_oppo(1:3),'sym');
+                                        H_hr_tmp = H_hr_tmp.set_hop(H_hr.HcoeL(i)',vector_tmp_oppo(4),vector_tmp_oppo(5),vector_tmp_oppo(1:H_hr.Dim),'sym');
                                     else
                                         fprintf(['check on the %3d th NRPT,\n' ...
                                             '---------the vector is %3d %3d %3d[i:%d j:%d],\n' ...
@@ -1211,8 +1210,8 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                                             vector_tmp_oppo(1),vector_tmp_oppo(2),vector_tmp_oppo(3),vector_tmp_oppo(4),vector_tmp_oppo(5), ...
                                             j);
                                         tmpsym = (H_hr.HcoeL(i)+H_hr.HcoeL(j)')/2;
-                                        H_hr_tmp = H_hr_tmp.set_hop(tmpsym,vector_tmp(4),vector_tmp(5),vector_tmp(1:3),'sym');
-                                        H_hr_tmp = H_hr_tmp.set_hop(tmpsym',vector_tmp_oppo(4),vector_tmp_oppo(5),vector_tmp_oppo(1:3)','sym');
+                                        H_hr_tmp = H_hr_tmp.set_hop(tmpsym,vector_tmp(4),vector_tmp(5),vector_tmp(1:H_hr.Dim),'sym');
+                                        H_hr_tmp = H_hr_tmp.set_hop(tmpsym',vector_tmp_oppo(4),vector_tmp_oppo(5),vector_tmp_oppo(1:H_hr.Dim)','sym');
                                     end
                                 end
                             end
@@ -2434,7 +2433,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                         H_hr.HnumL{i}=H_hr.HnumL{i}(wan_list,wan_list);
                     end
                 elseif strcmp(H_hr.Type,'list')
-                    wan_list =  all(ismember(H_hr.vectorL(:,4:5),int32(wan_list)),2);
+                    wan_list =  all(ismember(H_hr.vectorL(:,H_hr.Dim+1:H_hr.Dim+2),int32(wan_list)),2);
                     H_hr.HnumL=H_hr.HnumL(wan_list,:);
                     H_hr.HcoeL=H_hr.HcoeL(wan_list,:);
                     H_hr.vectorL=H_hr.vectorL(wan_list,:);
@@ -3368,7 +3367,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                 count = 0;
                 for ih = 1:H_hr.NRPTS % go over all NRPTS
                     % lattice vector of the hopping
-                    ind_R = vectorList(ih,1:3);
+                    ind_R = vectorList(ih,1:H_hr.Dim);
                     jump_fin=ind_R(fin_dir);
                     % store by how many cells is the hopping in finite direction
                     %temp_Hnum =sparse(OUT_WAN_NUM,OUT_WAN_NUM);
@@ -3427,7 +3426,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                     count = 0;
                     for ih = 1:NRPTS_S % go over all NRPTS
                         % lattice vector of the hopping
-                        ind_R = vectorList_overlap(ih,1:3);
+                        ind_R = vectorList_overlap(ih,1:H_hr.Dim);
                         jump_fin=ind_R(fin_dir);
                         % store by how many cells is the hopping in finite direction
                         %temp_Hnum =sparse(OUT_WAN_NUM,OUT_WAN_NUM);
@@ -3736,7 +3735,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                         cur_sc_vec = double(sc_vec(icur_sc_vec,:));
                         hiL = VectorList(:,4);
                         hjL = VectorList(:,5);
-                        ind_RL = double(VectorList(:,1:3));
+                        ind_RL = double(VectorList(:,1:H_hr.Dim));
                         % ----- find hj in orgin or sc_vec_list --------
                         ind_R_in_supercellL = double(ind_RL+cur_sc_vec)/Ns;
                         ind_R_in_supercellL = roundn(ind_R_in_supercellL,Accuracy_roundn);
@@ -3862,7 +3861,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                     hjL_orb_id_in_primitiveL = hjL_orb_id_in_primitiveL(SelectedL);
                     hiL_orb_id_in_primitiveL = hiL_orb_id_in_primitiveL(SelectedL);
                     Selected_vectorL = VectorList(SelectedL,:);
-                    ind_R_in_supercellL = double(Selected_vectorL(:,1:3));
+                    ind_R_in_supercellL = double(Selected_vectorL(:,1:H_hr.Dim));
                     Selected_sc_hiL = Selected_vectorL(:,4);
                     Selected_sc_hjL = Selected_vectorL(:,5);
                     TijL_in_supercellL = ind_R_in_supercellL + ...
@@ -3936,7 +3935,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             %;
             hiL = VectorList(:,4);
             hjL = VectorList(:,5);
-            ind_RL = double(VectorList(:,1:3));
+            ind_RL = double(VectorList(:,1:H_hr.Dim));
             % ----- find hj --------
             %ind_R_in_supercellL = double(ind_RL+cur_sc_vec)/Ns;
             %ind_R_in_supercellL = roundn(ind_R_in_supercellL,Accuracy_roundn);
@@ -4253,7 +4252,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             end
             H_hr.vectorL = int32(vector_list_wire);
             H_hr.orbL = H_hr.nanowire_orb(Nslab,vacuum_mode,'fast',options.fast);
-            for i = 1:3
+            for i = 1:H_hr.Dim
                 if  Nslab(i)<1
                     Nslab(i) = 1;
                 end
@@ -4299,7 +4298,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                 case 0
                     orbital_out = orbital_init;
                     % orb
-                    for i = 1:3
+                    for i = H_hr.Dim
                         Nslab = fin_dir(i);
                         if  Nslab == 0
                             Nslab = 1;
@@ -4333,7 +4332,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                 case 1
                     orbital_out = orbital_init;
                     % orb
-                    for i = 1:3
+                    for i = H_hr.Dim
                         Nslab = fin_dir(i);
                         if  Nslab == 0
                             Nslab = 1;
@@ -4988,14 +4987,14 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             if nargin <2
                 fin_dir = 2;
             end
-            k_n=length(H_hr.klist_s(:,1));
+            k_n=length(H_hr.klist_frac(:,1));
             H00_H11_cell_list_1 = zeros(H_hr.WAN_NUM,H_hr.WAN_NUM,k_n); % H00
             H00_H11_cell_list_2 = zeros(H_hr.WAN_NUM,H_hr.WAN_NUM,k_n); % H01
             %hr_sparse = hr2hr_sparse(H_hr);
             pb = vasplib_tool_outer.CmdLineProgressBar('Hamiltionian Generating ');
             for j = 1:k_n
                 pb.print(j,k_n);
-                kpoints_f = H_hr.klist_s(j,:);
+                kpoints_f = H_hr.klist_frac(j,:);
                 H_hrz = H_hr.hrz_gen(kpoints_f,fin_dir);
                 [H00,H01,~] = H_hrz.Green_prepare(principle_layer,fin_dir);
                 H00_H11_cell_list_1(:,:,j) = H00;
@@ -5076,7 +5075,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             varargout{3} = H_hrz_green;
         end
         % ----------------------     data update    ------------------------
-        function [klist_car,klist_f,gap_list,fig] = findnodes2(H_hr,kzf_list,Noccupy,tolerance)
+        function [klist_cart,klist_frac,gap_list,fig] = findnodes2(H_hr,kzf_list,Noccupy,tolerance)
             if nargin < 4
                 tolerance = 0.01;
             end
@@ -5092,23 +5091,23 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             ylabel(ax,'min gap in k_z plane');
             title(ax,'findnode k_z plane mode');
             Gk_ = (eye(3)*2*pi)/H_hr.Rm;
-            klist_car = [];
-            klist_f = [];
+            klist_cart = [];
+            klist_frac = [];
             gap_list =[];
             for i = 1:length(kzf_list)
-                H_hr.klist_s(:,3) = kzf_list(i);
+                H_hr.klist_frac(:,3) = kzf_list(i);
                 EIGENCAR = H_hr.EIGENCAR_gen();
                 [bandgap,label] = min(EIGENCAR(Noccupy+1,:)- EIGENCAR(Noccupy,:));
                 scatter(ax,kzf_list(i),EIGENCAR(Noccupy,label));
                 scatter(ax,kzf_list(i),EIGENCAR(Noccupy+1,label));
                 drawnow limitrate;
                 if bandgap < tolerance
-                    fprintf('find it: %7.4f eV (%6.3f, %6.3f,%6.3f)\n',bandgap,H_hr.klist_s(label,1),H_hr.klist_s(label,2),kzf_list(i));
-                    klist_car = [ klist_car ;H_hr.klist_r(label,1),H_hr.klist_r(label,2),kzf_list(i)*(Gk_(3,3))];
-                    klist_f = [klist_f ;H_hr.klist_s(label,1),H_hr.klist_s(label,2),kzf_list(i)];
+                    fprintf('find it: %7.4f eV (%6.3f, %6.3f,%6.3f)\n',bandgap,H_hr.klist_frac(label,1),H_hr.klist_frac(label,2),kzf_list(i));
+                    klist_cart = [ klist_cart ;H_hr.klist_cart(label,1),H_hr.klist_cart(label,2),kzf_list(i)*(Gk_(3,3))];
+                    klist_frac = [klist_frac ;H_hr.klist_frac(label,1),H_hr.klist_frac(label,2),kzf_list(i)];
                     gap_list =[gap_list;bandgap];
                 else
-                    fprintf('min gap: %7.4f eV (%6.3f, %6.3f,%6.3f)\n',bandgap,H_hr.klist_s(label,1),H_hr.klist_s(label,2),kzf_list(i));
+                    fprintf('min gap: %7.4f eV (%6.3f, %6.3f,%6.3f)\n',bandgap,H_hr.klist_frac(label,1),H_hr.klist_frac(label,2),kzf_list(i));
                 end
                 
             end
@@ -5355,8 +5354,8 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             fprintf(fileID,"%s\n",options.title);
             fprintf(fileID,"%d\n",options.a_crystal_constance);
             %fprintf(fileID,"  ",Rm(i,j));
-            for i=1:3
-                for j=1:3
+            for i=H_hr.Dim
+                for j=H_hr.Dim
                     fprintf(fileID,"  %f",Rm(i,j));
                 end
                 fprintf(fileID,"\n");
@@ -5519,7 +5518,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             %% unitcell
             Gk = eye(3)/H_hr.Rm;
             fprintf(fileID,' unit_cell:\n');
-            for i =1:3
+            for i =H_hr.Dim
                 fprintf(fileID,'    %12.9f %12.9f %12.9f    %12.9f %12.9f %12.9f \n',...
                     H_hr.Rm(i,1),H_hr.Rm(i,2),H_hr.Rm(i,3),Gk(1,i),Gk(2,i),Gk(3,i));
             end
@@ -5565,7 +5564,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             fprintf(fileID,'# lattice vectors and orbital positions\n');
             % Rm
             latstring = "lat=[";
-            for i = 1:3
+            for i = H_hr.Dim
                 latstring = latstring+vasplib.mat2str_python(H_hr.Rm(i,:))+", ";
             end
             latstring = latstring + "]";
@@ -5584,8 +5583,8 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             fprintf(fileID,'\n');
             fprintf(fileID,'# define hopping between orbitals\n');
             % hopping homecell
-            SelectLabel_home = all([H_hr.vectorL(:,1:3) == 0,H_hr.vectorL(:,5)>=H_hr.vectorL(:,4)],2);
-            SelectLabel_other = all(H_hr.vectorL(:,1:3) >=0,2) & ~all(H_hr.vectorL(:,1:3) == 0,2);
+            SelectLabel_home = all([H_hr.vectorL(:,1:H_hr.Dim) == 0,H_hr.vectorL(:,5)>=H_hr.vectorL(:,4)],2);
+            SelectLabel_other = all(H_hr.vectorL(:,1:H_hr.Dim) >=0,2) & ~all(H_hr.vectorL(:,1:H_hr.Dim) == 0,2);
             SelectLabel = SelectLabel_home|SelectLabel_other;
             SelectVector=H_hr.vectorL(SelectLabel,:);
             if options.sym
@@ -5599,7 +5598,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             for i = 1:numel(SelectHop)
                 fprintf(fileID,'HRTB.set_hop('+string(SelectHop(i))+","+...
                     num2str(SelectVector(i,4)-1)+","+num2str(SelectVector(i,5)-1)+","+...
-                    vasplib.mat2str_python(SelectVector(i,1:3))+')\n');
+                    vasplib.mat2str_python(SelectVector(i,1:H_hr.Dim))+')\n');
             end
             fprintf(fileID,'\n');
             % band
@@ -5939,8 +5938,8 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                 %H_htrig = H_htrig.tjmti_gen();
                 tiL = H_htrig.orbL(H_hr.vectorL(:,4),:);
                 tjL = H_htrig.orbL(H_hr.vectorL(:,5),:);
-                RtjmtiL = (double(H_hr.vectorL(:,1:3))+ tjL-tiL); %
-                % H_htrig.vectorL(:,1:3)+ tjL-tiL use this convention
+                RtjmtiL = (double(H_hr.vectorL(:,1:H_hr.Dim))+ tjL-tiL); %
+                % H_htrig.vectorL(:,1:H_hr.Dim)+ tjL-tiL use this convention
                 ijL = double(H_hr.vectorL(:,[4,5]));
                 if options.num
                     H_htrig.HnumL = H_hr.HnumL;
@@ -5980,7 +5979,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                             SymVar = exp(...
                                 1i...
                                 *[k_x k_y k_z]*((...
-                                vectorList(k,1:3)*H_hr.Rm)'+reshape(tji_mat_cart(i,j,:),[3,1])...
+                                vectorList(k,1:H_hr.Dim)*H_hr.Rm)'+reshape(tji_mat_cart(i,j,:),[3,1])...
                                 ));
                             %SymVar = simplify(rewrite(SymVar,'sincos'));
                             H_htrig = H_htrig.set_hop(SymHopping,SymVar,[i,j]);
@@ -6065,7 +6064,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                         for i = 1:H_hr.WAN_NUM
                             for j = 1:H_hr.WAN_NUM
                                 tjitmp = reshape(tji_mat(i,j,:),[1 3]);
-                                R_add_t_vector = (vectorList(n,1:3)*H_hr.Rm+tjitmp).';
+                                R_add_t_vector = (vectorList(n,1:H_hr.Dim)*H_hr.Rm+tjitmp).';
                                 kpoints_phase = exp(1i*kpoints_r*(R_add_t_vector));
                                 tmp_HsymL_trig = exp(1i*[k_x k_y k_z]*(R_add_t_vector));
                                 symbolic_polynomial = taylor(tmp_HsymL_trig,[k_x k_y k_z],'Order',options.Order);
@@ -6159,13 +6158,13 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             elseif  strcmp(H_hr.Type ,'list') && options.rewind
                 %vectorList = int32([0,0,0]);
                 if H_hr.overlap
-                    [vectorList_overlap,~,ic_S] = unique(H_hr.vectorL_overlap(:,1:3),'rows');
+                    [vectorList_overlap,~,ic_S] = unique(H_hr.vectorL_overlap(:,1:H_hr.Dim),'rows');
                     NRPTS_S= size(vectorList_overlap,1);
                     SnumLtmp = zeros(WANNUM,WANNUM,NRPTS_S);
                     ScoeLtmp = sym(zeros(WANNUM,WANNUM,NRPTS_S));
                 end
                 if H_hr.num
-                    [vectorList,~,icL] = unique(H_hr.vectorL(:,1:3),'rows');
+                    [vectorList,~,icL] = unique(H_hr.vectorL(:,1:H_hr.Dim),'rows');
                     NRPTS_= size(vectorList,1);
                     HnumLtmp = zeros(WANNUM,WANNUM,NRPTS_);
                     sizemesh = [WANNUM,WANNUM,NRPTS_];
@@ -6175,7 +6174,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                         end
                     end
                 else
-                    [vectorList,~,icL] = unique(H_hr.vectorL(:,1:3),'rows');
+                    [vectorList,~,icL] = unique(H_hr.vectorL(:,1:H_hr.Dim),'rows');
                     NRPTS_= size(vectorList,1);
                     HcoeLtmp = sym(zeros(WANNUM,WANNUM,NRPTS_));
                     sizemesh = [WANNUM,WANNUM,NRPTS_];
@@ -6579,7 +6578,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
         function H_hr = dualize(H_hr)
             NRPTS_ = H_hr.NRPTS;
             vectorList = H_hr.vectorL;
-            vectorList_oppo(:,1:3) = -vectorList(:,1:3);
+            vectorList_oppo(:,1:H_hr.Dim) = -vectorList(:,1:H_hr.Dim);
             if size(vectorList,2) == 5
                 vectorList_oppo(:,4) = vectorList(:,5);
                 vectorList_oppo(:,5) = vectorList(:,4);
@@ -6602,7 +6601,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             H_hr = H_hr.timtj_gen();
             timtj_mat = H_hr.timtj{2};
             Size_timtj_mat = size(timtj_mat);
-            vectorList = double(H_hr.vectorL(:,1:3));
+            vectorList = double(H_hr.vectorL(:,1:H_hr.Dim));
             IndList1 = sub2ind(Size_timtj_mat,H_hr.vectorL(:,4),H_hr.vectorL(:,5),ONESLIST);
             IndList2 = sub2ind(Size_timtj_mat,H_hr.vectorL(:,4),H_hr.vectorL(:,5),ONESLIST*2);
             IndList3 = sub2ind(Size_timtj_mat,H_hr.vectorL(:,4),H_hr.vectorL(:,5),ONESLIST*3);
@@ -6626,7 +6625,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             NRPTS_ = H_hr.NRPTS;
             orblist = H_hr.orbL;
             Norb = size(orblist,1);
-            ij_list= unique(double(H_hr.vectorL(:,4:5)),'rows');
+            ij_list= unique(double(H_hr.vectorL(:,H_hr.Dim+1:H_hr.Dim+2)),'rows');
             addtional_ij_list = [];
             count  = 0;
             ml_cell{size(ij_list,1)} = [];
@@ -6702,8 +6701,8 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             invRf = inv(double(Rf));
             invU = inv(U);
             [ml_cell,ij_list] = Tij2lm(H_hr,Rf);
-            vectorList = double(H_hr.vectorL(:,1:3));
-            ij_list_full = double(H_hr.vectorL(:,4:5));
+            vectorList = double(H_hr.vectorL(:,1:H_hr.Dim));
+            ij_list_full = double(H_hr.vectorL(:,H_hr.Dim+1:H_hr.Dim+2));
             %
             VectorDistMat = zeros(NRPTS_,NRPTS_);
             % Rotated vector
@@ -7026,7 +7025,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             end
             options2 = rmfield(options,{'output','cartisian','fin_dir'});
             optionsCell = namedargs2cell(options2);
-            [H_hr.klist_s,klist1,klist2] = H_hr.kmesh3D(kmesh,k3d,'fermiarc');
+            [H_hr.klist_frac,klist1,klist2] = H_hr.kmesh3D(kmesh,k3d,'fermiarc');
             if options.WEIGHTCAR
                 [EIGENCAR_3D,WAVECAR_3D,WEIGHTCAR_3D] = H_hr.EIGENCAR_gen(...
                     optionsCell{:});
@@ -7043,7 +7042,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             end
             if options.cartisian
                 options.output = 'refined';
-                klist = H_hr.klist_s*H_hr.Gk;
+                klist = H_hr.klist_frac*H_hr.Gk;
             end
             if options.LWAVE
                 WEIGHTCAR_3D = WAVECAR_3D;
@@ -7142,7 +7141,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             Hnum_list_wire = H_hr_wire.HnumL;
             vector_list_wire = double(H_hr_wire.vectorL);
             [nz,~] = size(vector_list_wire);
-            factor_list_wire = exp(1i*2*pi*H_hr_wire.klist_s*vector_list_wire');
+            factor_list_wire = exp(1i*2*pi*H_hr_wire.klist_frac*vector_list_wire');
             %--------  HSVCAR  --------
             % generate orbitals of a finite model
             % -------------- nargin ------------------
@@ -7157,7 +7156,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                 NBANDS=norb_enforce;
             else
             end
-            kn = size(H_hr_wire.klist_s,1);
+            kn = size(H_hr_wire.klist_frac,1);
             EIGENCAR = zeros(NBANDS,kn);
             WEIGHTCAR = zeros(NBANDS,kn);
             %--------  calculate  --------
@@ -7209,7 +7208,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                         WEIGHTCAR= A;
                     end
                     fprintf('%d th kpoint(%7.4f, %7.4f, %7.4f) has been calculated in %d kpoints total\n',...
-                        ki,H_hr_wire.klist_s(ki,1),H_hr_wire.klist_s(ki,2),H_hr_wire.klist_s(ki,3),kn);
+                        ki,H_hr_wire.klist_frac(ki,1),H_hr_wire.klist_frac(ki,2),H_hr_wire.klist_frac(ki,3),kn);
                 end
             else
                 for ki =1:kn
@@ -7229,7 +7228,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                     EIGENCAR(:,ki) = diag(U);
                     [~,WEIGHTCAR(:,ki)] = COLORCAR_gen(A,HSVCAR_hinge);
                     fprintf('%d th kpoint(%7.4f, %7.4f, %7.4f) has been calculated in %d kpoints total\n',...
-                        ki,H_hr_wire.klist_s(ki,1),H_hr_wire.klist_s(ki,2),H_hr_wire.klist_s(ki,3),kn);
+                        ki,H_hr_wire.klist_frac(ki,1),H_hr_wire.klist_frac(ki,2),H_hr_wire.klist_frac(ki,3),kn);
                 end
             end
             
@@ -7383,7 +7382,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             end
             w_arc = w_arc + fermi;
             H_hr_arc = H_hr;
-            [H_hr_arc.klist_s,klist1,klist2] = H_hr_arc.kmesh3D(kmesh,kfermiarc,'fermiarc');
+            [H_hr_arc.klist_frac,klist1,klist2] = H_hr_arc.kmesh3D(kmesh,kfermiarc,'fermiarc');
             switch fin_dir
                 case 1
                     klist1 =klist1(:,2);
@@ -7430,7 +7429,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                 nw = length(w_range);
             end
             H_hr_arc = H_hr;
-            [H_hr_arc.klist_s,klist1,klist2] = H_hr_arc.kmesh3D(kmesh,kfermiarc,'fermiarc');
+            [H_hr_arc.klist_frac,klist1,klist2] = H_hr_arc.kmesh3D(kmesh,kfermiarc,'fermiarc');
             switch fin_dir
                 case 1
                     klist1 =klist1(:,2);
@@ -7497,9 +7496,9 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                 if isa(vectorL,'double')
                     switch size(vectorL,2)
                         case 2
-                            [seq] = find(all(vectorL == vectorList(:,4:5),2));
+                            [seq] = find(all(vectorL == vectorList(:,H_hr.Dim+1:H_hr.Dim+2),2));
                         case 3
-                            [seq] = find(all(vectorL == vectorList(:,1:3),2));
+                            [seq] = find(all(vectorL == vectorList(:,1:H_hr.Dim),2));
                         case 5
                             [seq] = find(all(vectorL == vectorList,2));
                     end
@@ -7546,7 +7545,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                     fig  = POSCAR_plot(Rm_,H_hr.sites,H_hr.Atom_name,H_hr.Atom_num);
                 case 'NRPTS'
                     if isempty(options.vectorList)
-                        vectorList = double(unique(H_hr.vectorL(:,1:3),'rows'));
+                        vectorList = double(unique(H_hr.vectorL(:,1:H_hr.Dim),'rows'));
                     else
                         vectorList = options.vectorList ;
                     end
@@ -7655,10 +7654,10 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                 HnumLtmp = H_hr2.HnumL(ic);
             else
                 if size(vectorL,1) == 1
-                    ic = all(int32(vectorL) == H_hr.vectorL(:,1:3),2);
+                    ic = all(int32(vectorL) == H_hr.vectorL(:,1:H_hr.Dim),2);
                     HcoeLtmp = H_hr.HcoeL(ic);
                     vector1 = H_hr.vectorL(ic,:);
-                    ic = all(int32(vectorL) == H_hr2.vectorL(:,1:3),2);
+                    ic = all(int32(vectorL) == H_hr2.vectorL(:,1:H_hr.Dim),2);
                     HnumLtmp = H_hr2.HnumL(ic);
                     vector2 = H_hr2.vectorL(ic,:);
                     [ia,ic] = ismember(vector1,vector2,'row');
@@ -8056,7 +8055,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             pb.delete();
         end
     end
-    %% sewing HR
+    %% sewing HR ? This function needs documnets, since I forget !
     methods
         function H_hr_n = Connect2D(H_hr_n,H_hr_unitcell,opt)
             %--------  init  --------
@@ -8079,7 +8078,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                 Nrep_x = WANNUM/WANNUM_unit/Nrep_y;
                 Nrep_tot = Nrep_x*Nrep_y;
                 for k = -1:1:1 % to consider 3 NRTPs with -1 0 1
-                    slct = ismember(H_hr_unitcell.vectorL(:,1:3),[1 k 0],'rows');
+                    slct = ismember(H_hr_unitcell.vectorL(:,1:H_hr.Dim),[1 k 0],'rows');
                     if all(slct==0)
                         continue;
                     end
@@ -8157,7 +8156,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                 Nrep_x = length(opt.Sequ);
                 Nrep_y = WANNUM/WANNUM_unit/Nrep_x;
                 for k = -1:1:1 % to consider 3 NRTPs with -1 0 1
-                    slct = ismember(H_hr_unitcell.vectorL(:,1:3),[k 1 0],'rows');
+                    slct = ismember(H_hr_unitcell.vectorL(:,1:H_hr.Dim),[k 1 0],'rows');
                     if all(slct==0)
                         continue;
                     end                          

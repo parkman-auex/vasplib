@@ -3,7 +3,7 @@ arguments
     H_hr HR;
     options.fermi double = 0;
     options.norb double = -1;
-    options.klist double = H_hr.klist_s;
+    options.klist double = H_hr.klist_frac;
     options.para  = [];
     options.paraname ;
     options.convention {mustBeMember(options.convention,{'I','II'})}= 'II';
@@ -11,7 +11,7 @@ arguments
     options.ax = handle([]);
     options.WEIGHTCAR = false;
     options.ProjectionMethod {mustBeMember(options.ProjectionMethod,{'hinge','surf','select','select-points','slab'})}= 'hinge';
-    options.ProjectionStruct = struct('discrimination',0.1,'center',[0.5,0.5,0.5],'orientation',3,'sign',true);
+    options.ProjectionStruct = struct('discrimination',0.1,'center',repmat(0.5,[1 H_hr.Dim]),'orientation',3,'sign',true);
     options.printmode = true;
     options.LWAVE = true;
     options.Umat = [];
@@ -25,9 +25,8 @@ Hermite = options.Hermite;
 NRPTS_tmp = H_hr.NRPTS;
 % -------------- plot ------------------
 if options.show
-    if isempty(options.fig) && isempty(options.ax)
-        %[fig,ax] = create_figure();
-        [fig,ax] = vasplib.BZplot(vasplibobj.Rm,'color','r');
+    if  isempty(options.ax)
+        ax = vasplib_plot.BZplot(vasplibobj.Rm,'color','r');
     else
         ax = options.ax;
     end
@@ -42,11 +41,11 @@ else
 end
 if isempty(options.klist)
     H_hr = H_hr.kpathgen3D('KPOINTS');
-    klist_s_tmp = H_hr.klist_s;
-    klist_r = klist_s_tmp*H_hr.Gk;
+    klist_frac_tmp = H_hr.klist_frac;
+    klist_cart = klist_frac_tmp*H_hr.Gk;
 else
-    klist_s_tmp = options.klist;
-    klist_r = klist_s_tmp*H_hr.Gk;
+    klist_frac_tmp = options.klist;
+    klist_cart = klist_frac_tmp*H_hr.Gk;
 end
 if isempty(options.Umat)
     UmatMode = false;
@@ -68,32 +67,19 @@ if options.WEIGHTCAR
     orb_list  = H_hr.orbL;
     signlist =1;
     %HSVCAR_hinge = vasplib.HSVCAR_gen(orb_list,'hinge',0.05,[0.5,0.5,0.5],-3);
+    HSVCAR = vasplib.HSVCAR_gen(orb_list,options.ProjectionMethod,...
+        options.ProjectionStruct.discrimination,...
+        options.ProjectionStruct.center,...
+        options.ProjectionStruct.orientation...
+        );
     switch options.ProjectionMethod
         case 'hinge'
-            HSVCAR = vasplib.HSVCAR_gen(orb_list,'hinge',...
-                options.ProjectionStruct.discrimination,...
-                options.ProjectionStruct.center,...
-                options.ProjectionStruct.orientation...
-                );
+            
         case 'surf'
-            HSVCAR = vasplib.HSVCAR_gen(orb_list,'surf',...
-                options.ProjectionStruct.discrimination,...
-                options.ProjectionStruct.center,...
-                options.ProjectionStruct.orientation...
-                );
+      
         case {'select','select-points'}
-            HSVCAR = vasplib.HSVCAR_gen(orb_list,options.ProjectionMethod,...
-                options.ProjectionStruct.discrimination,...
-                options.ProjectionStruct.center,...
-                options.ProjectionStruct.orientation...
-                );
             signlist = sign(HSVCAR(:,1));
         case 'slab'
-            HSVCAR = vasplib.HSVCAR_gen(orb_list,options.ProjectionMethod,...
-                options.ProjectionStruct.discrimination,...
-                options.ProjectionStruct.center,...
-                options.ProjectionStruct.orientation...
-                );
             if options.ProjectionStruct.sign
                 switch  options.ProjectionStruct.orientation
                     case 1
@@ -102,6 +88,8 @@ if options.WEIGHTCAR
                         signlist = sign((orb_list(:,2)-0.5));
                     case 3
                         signlist = sign((orb_list(:,3)-0.5));
+                    case 4
+                        signlist = sign((orb_list(:,4)-0.5));
                 end
                 signlist(HSVCAR(:,1) == 0) = 0;
             end
@@ -112,7 +100,6 @@ if H_hr.overlap
     NRPTS_tmp_S = size(H_hr.vectorL_overlap,1);
 end
 if strcmp(H_hr.Type,'list')
-    %[ij_list,index_row] = sortrows(H_hr.vectorL(:,4:5));
     if H_hr.overlap
         H_hr = H_hr.SliceGen();
         [ij_list_S,index_row_S] = sortrows(H_hr.vectorL_overlap(:,4:5));
@@ -127,10 +114,10 @@ end
 %disp("EIGENCAR gen for H_xyz(wt TB) type: HR class ");
 % reseq makes HR different! take attention
 HnumList = H_hr.HnumL ;
-vectorList = double(H_hr.vectorL(:,1:3)) ;
+vectorList = double(H_hr.vectorL(:,1:H_hr.Dim)) ;
 if H_hr.overlap
     Snum_list = double(H_hr.SnumL) ;
-    vectorlist_overlap = double(H_hr.vectorL_overlap(:,1:3)) ;
+    vectorlist_overlap = double(H_hr.vectorL_overlap(:,1:H_hr.Dim)) ;
 end
 if UmatMode
     WANNUM = length(subband);
@@ -140,7 +127,7 @@ end
 if options.printmode
     pb = vasplib_tool_outer.CmdLineProgressBar('BAND calculating ');
 end
-[kn,~] = size(klist_s_tmp);
+[kn,~] = size(klist_frac_tmp);
 %--------  check  --------
 if norb_enforce <0
     NBANDS=WANNUM;
@@ -167,9 +154,9 @@ end
 % give back
 WANNUM = H_hr.WAN_NUM;
 % Factorlist_R $H_{i j}^{\mathbf{k}}=\left\langle\chi_{i}^{\mathbf{k}}|H| \chi_{j}^{\mathbf{k}}\right\rangle=\sum_{\mathbf{R}} e^{i \mathbf{k} \cdot\left(\mathbf{R}+\mathbf{t}_{j}-\mathbf{t}_{i}\right)} H_{i j}(\mathbf{R})$
-FactorList = exp(1i*2*pi*vectorList*klist_s_tmp.');
+FactorList = exp(1i*2*pi*vectorList*klist_frac_tmp.');
 if H_hr.overlap
-    FactorListS = exp(1i*2*pi*vectorlist_overlap*klist_s_tmp.');
+    FactorListS = exp(1i*2*pi*vectorlist_overlap*klist_frac_tmp.');
 end
 % convention I
 if strcmp(options.convention,'I') && (isempty(H_hr.tjmti) || size(H_hr.tjmti{1},1)~= WANNUM)
@@ -177,11 +164,11 @@ if strcmp(options.convention,'I') && (isempty(H_hr.tjmti) || size(H_hr.tjmti{1},
 end
 if strcmp(options.convention ,'I')
     tji_mat_r = H_hr.tjmti{1}; % tj - ti
-    % efactor tji   
-    kjiL_x =  pagemtimes(tji_mat_r(:,:,1),reshape(klist_r(:,1),[1 1 kn]));
-    kjiL_y =  pagemtimes(tji_mat_r(:,:,2),reshape(klist_r(:,2),[1 1 kn]));
-    kjiL_z =  pagemtimes(tji_mat_r(:,:,3),reshape(klist_r(:,3),[1 1 kn]));
-    FactorList_tji = exp(1i*(kjiL_x+kjiL_y+kjiL_z));
+    % efactor tji 
+    for i = 1:H_hr.Dim
+        kjiL{i} =  pagemtimes(tji_mat_r(:,:,i),reshape(klist_cart(:,i),[1 1 kn]));
+    end
+    FactorList_tji = exp(1i*(fold(@plus,kjiL)));
 end
 if strcmp(options.convention,'II')
     for ki =1:kn
@@ -267,7 +254,7 @@ if strcmp(options.convention,'II')
     end
     % normalize phases to get u instead of phi
     %                 for j =1:size(WAVECAR,3)
-    %                     WAVECAR(:,:,j) = WAVECAR(:,:,j).* exp(-2i*pi*(H_hr.orbL*klist_s_tmp(j,:).'));
+    %                     WAVECAR(:,:,j) = WAVECAR(:,:,j).* exp(-2i*pi*(H_hr.orbL*klist_frac_tmp(j,:).'));
     %                 end
 elseif strcmp(options.convention,'I')
     tji_mat = double(H_hr.tjmti{2});
@@ -283,9 +270,9 @@ elseif strcmp(options.convention,'I')
             %tij_mat(:,:,1) = tij_mat(:,:,1).';
             %tij_mat(:,:,2) = tij_mat(:,:,2).';
             %tij_mat(:,:,3) = tij_mat(:,:,3).';
-            k1=klist_s_tmp(ki,1);
-            k2=klist_s_tmp(ki,2);
-            k3=klist_s_tmp(ki,3);
+            k1=klist_frac_tmp(ki,1);
+            k2=klist_frac_tmp(ki,2);
+            k3=klist_frac_tmp(ki,3);
             Htemp=zeros(WANNUM ,WANNUM);
             for i=1:NRPTS_tmp
                 Htemp = Htemp +full(HnumList{i})...
@@ -381,7 +368,7 @@ if options.WEIGHTCAR
 end
 if options.show
 %     [varargout{3},varargout{4}] = H_hr.klist_show(...
-%         'klist',klist_s_tmp*H_hr.Gk,...
+%         'klist',klist_frac_tmp*H_hr.Gk,...
 %         'fig',fig,...
 %         'ax',ax);
 end
