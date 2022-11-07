@@ -13,15 +13,20 @@ classdef pauli_matric
                     PM(i)=pauli_matric(i-1);
                 end
             else
-                switch label
-                    case {'0','I',0}
-                        PM.mat = [1,0;0,1];
-                    case {'x','1','X',1}
-                        PM.mat = [0,1;1,0];
-                    case {'y','2','Y',2}
-                        PM.mat = [0,-1i;1i,0];
-                    case {'z','3','Z',3}
-                        PM.mat = [1,0;0,-1];
+                if isa(label,'pauli_matric')
+                    PM.mat = label.mat;
+                else
+
+                    switch label
+                        case {'0','I',0}
+                            PM.mat = [1,0;0,1];
+                        case {'x','1','X',1}
+                            PM.mat = [0,1;1,0];
+                        case {'y','2','Y',2}
+                            PM.mat = [0,-1i;1i,0];
+                        case {'z','3','Z',3}
+                            PM.mat = [1,0;0,-1];
+                    end
                 end
             end
         end

@@ -42,11 +42,10 @@ classdef HK < vasplib & matlab.mixin.CustomDisplay
     methods
         function H_hk = HK(BASIS_NUM,Degree,Term_list,propArgs)
             arguments
-                BASIS_NUM
-                Degree
-                Term_list
+                BASIS_NUM = 4;
+                Degree = 2;
+                Term_list = [];
                 propArgs.?vasplib;
-
             end
             %
             propArgsCell = namedargs2cell(propArgs);      

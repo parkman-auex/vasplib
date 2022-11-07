@@ -34,7 +34,7 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
     %% Define which properties show
     methods (Access = protected)
         function propgrp = getPropertyGroups(~)
-            proplist = {'Basis_num','Kinds','Type','HsymL','symvar_list'};
+            proplist = {'Basis_num','Kinds','Type','HsymL','symvar_list','Dim'};
             propgrp = matlab.mixin.util.PropertyGroup(proplist);
         end
     end
@@ -92,7 +92,7 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
                     end
                 case 2
                     opitonsCell = namedargs2cell(options);
-                    H_htrig = Htrig(BASIS_NUM,opitonsCell{:});
+                    H_htrig = Htrig(BASIS_NUM,opitonsCell{:},propArgsCell{:});
                     H_htrig = H_htrig + Trig_list;
             end
         end
@@ -2023,7 +2023,7 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
             Hexp = Htrig_exp.HcoeL;
             WAN_NUM = Htrig_exp.Basis_num;
             %% empty HR class
-            H_hr = HR(WAN_NUM);
+            H_hr = HR(WAN_NUM,'Dim',Htrig_exp.Dim);
             H_hr = H_hr.vasplibCopy(Htrig_exp);            
             if isempty(H_hr.orbL)
                 warning(['use ',options.POSCAR,'enforcely, please check it']);
@@ -2032,19 +2032,21 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
             H_hr = H_hr.tjmti_gen();
             tji_mat_r = H_hr.tjmti{1};
             %%
-            syms k_x k_y k_z real
+            VarsUsing = H_htrig.VarsSeqLcart(1:H_htrig.Dim);
+            %syms k_x k_y k_z real
             hsym = Htrig_exp.HsymL;
-            rm = H_hr.Rm;
+            RM = H_hr.Rm;
+            DIM = H_hr.Dim;
             for n = 1:length(hsym)
                 if isequal(hsym(n), sym(1))
-                    kd_num = [0 0 0];
+                    kd_num = zeros(1,DIM);
                 else
                     ikd = children(hsym(n));
                     kd = ikd{1,1}/1i;
-                    cx = subs(kd,k_x,1) - subs(kd,k_x,0);
-                    cy = subs(kd,k_y,1) - subs(kd,k_y,0);
-                    cz = subs(kd,k_z,1) - subs(kd,k_z,0);
-                    kd_num = double([cx cy cz]);
+                    for d = 1:DIM
+                        cDim{d} = subs(kd,VarsUsing(d),1) - subs(kd,VarsUsing(d),0);
+                    end
+                    kd_num = double(fold(@horzcat,cDim));
                 end
                 % Factorlist_R $H_{i j}^{\mathbf{k}}=\left\langle\chi_{i}^{\mathbf{k}}|H| \chi_{j}^{\mathbf{k}}\right\rangle=\sum_{\mathbf{R}} e^{i \mathbf{k} \cdot\left(\mathbf{R}+\mathbf{t}_{j}-\mathbf{t}_{i}\right)} H_{i j}(\mathbf{R})$
                 % exp(i(R+tj-ti))
@@ -2053,9 +2055,9 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
                         if isequal(Hexp(i,j,n), sym(0))
                             continue               
                         end
-                        kji_num = reshape(tji_mat_r(i,j,:),[1,3]);
+                        kji_num = reshape(tji_mat_r(i,j,:),[1,DIM]);
                         kr =   kd_num-kji_num;
-                        vector = round(kr/rm);
+                        vector = round(kr/RM);
                         H_hr = H_hr.set_hop((Hexp(i,j,n)),i,j,vector,'symadd');
                     end
                 end
@@ -2192,7 +2194,7 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
                             %Hout(indL) = sumFactorlist;
                             Hout = (Hout+Hout')/2;
                         case 'sincos'
-                            Input = num3cell(klist_r_tmp(ki,:)); 
+                            Input = num2cell(klist_r_tmp(ki,:)); 
                             kL = HsymL_fun(Input{:});
                             Hout = H_htrig.HnumL;
                             for i =1:H_htrig.Kinds

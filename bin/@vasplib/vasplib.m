@@ -161,12 +161,13 @@ classdef vasplib < matlab.mixin.CustomDisplay
                 end
             end
             if strcmp(mode,'sym')
-                ExpInnerTerm = pagemtimes(vasplibobj.timtj{1},...
-                    reshape(vasplibobj.VarsSeqLcart(1:vasplibobj.Dim),[1 1 vasplibobj.Dim]));
+                ExpInnerTerm = vasplib.matrixtimespage(vasplibobj.VarsSeqLcart(1:vasplibobj.Dim),vasplibobj.timtj{1});
                 vasplibobj.timtj{3}(:,:) = exp(1i*(sum(ExpInnerTerm,3)));
-                ExpInnerTermFrac = pagemtimes(vasplibobj.timtj{2},...
-                    reshape(vasplibobj.VarsSeqLfrac(1:vasplibobj.Dim),[1 1 vasplibobj.Dim]));
+                ExpInnerTermFrac = vasplib.matrixtimespage(vasplibobj.VarsSeqLcart(1:vasplibobj.Dim),vasplibobj.timtj{2});
                 vasplibobj.timtj{4}(:,:) =  exp(1i*(sum(ExpInnerTermFrac,3)));
+            else
+                vasplibobj.timtj{3} = [];
+                vasplibobj.timtj{4} = [];
             end
         end
         function vasplibobj = tjmti_gen(vasplibobj,mode)
@@ -1412,33 +1413,40 @@ classdef vasplib < matlab.mixin.CustomDisplay
             end
             %-------- return --------
         end
-        function [klist_cart,klist_frac,klist_l,kpoints_l,kpoints_frac] = kpathgen(kpoints,nodes,Gk,Gk_)
+        function [klist_cart,klist_frac,klist_l,kpoints_l,kpoints_frac] = kpathgen(kpoints,nodes,Gk,Gk_,options)
+            arguments
+                kpoints;
+                nodes = 60;
+                Gk = [];
+                Gk_ = [];
+                options.Dim = 3;
+            end
             %-------- nargin --------
             if nargin > 3 && ~isequal(Gk,Gk_)
                 mode = 'return mode';
             else
                 mode = 'norm';
             end
+            Dim = options.Dim;
             %--------  init  --------
             kn = size(kpoints,1)/2;
-
             if length(nodes) == 1
-                klist_frac=zeros(kn*nodes,3);
+                klist_frac=zeros(kn*nodes,Dim);
                 nodes = ones(kn,1)*nodes;
             else
-                klist_frac=zeros(sum(nodes),3);
+                klist_frac=zeros(sum(nodes),Dim);
             end
             for i = 1:kn
-                klisttempX = linspace(kpoints(2*i-1,1),kpoints(2*i,1),nodes(i));
-                klisttempY = linspace(kpoints(2*i-1,2),kpoints(2*i,2),nodes(i));
-                klisttempZ = linspace(kpoints(2*i-1,3),kpoints(2*i,3),nodes(i));
+                for d = 1:Dim
+                    klisttemp{d} = linspace(kpoints(2*i-1,d),kpoints(2*i,d),nodes(i)).';
+                end
                 start_seq = sum(nodes(1:i-1))+1;
                 end_seq = sum(nodes(1:i));
-                klist_frac(start_seq :end_seq ,:)   = [klisttempX' klisttempY' klisttempZ'];
+                klist_frac(start_seq :end_seq ,:)   = fold(@horzcat,klisttemp);
             end
-            klist_cart=klist_frac*Gk;
+            klist_cart = klist_frac*Gk;
             %klist_liner & kpoints_liner
-            kpoints_l=zeros(kn+1,1);
+            kpoints_l = zeros(kn+1,1);
             kpoints_l(1) = 0;
             for i = 1:kn
                 lenghth = norm((kpoints(2*i,:)-kpoints(2*i-1,:))*Gk);
