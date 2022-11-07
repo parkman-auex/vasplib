@@ -99,19 +99,6 @@ tic;
 EIGENCAR = KaneMele_trig_n.EIGENCAR_gen();
 bandplot(EIGENCAR ,[-3,3]);
 toc;
-%% BC from haldane kubo semi-numerical Yang Fan test for list Htrig
-tic;
-sizes = 51;
-[klist_r,~,klist_r_plot,sizemesh,Gk_,Grid] = vasplib.kmesh2D(double(KaneMele_trig_n.Rm),...
-    'knum1',sizes,'knum2',sizes, ...
-    'kstart',[-1,-1,0],'kdir1',[2,0,0],'kdir2',[0,2,0]);
-BC_test =  BC_kubo_formula(KaneMele_trig_n ,klist_r_plot);
-BCCAR = reshape(BC_test(:,2),sizemesh);
-% A3 = zeros(size(klist_r_plot));A3(:,3) = BC_test(:,1);
-% [fig,ax] = BZplot(Haldane.Rm);
-% vasplib_tool.quiverplot(klist_r,real(A3)*10,'b','Haldane:kubo num',fig,ax);
-[fig,ax] = vasplib.BCplot2D(BCCAR,Grid,double(KaneMele_trig_n.Rm),'BZ',true);
-toc;
 %% faster small system solving fast
 KaneMele_trig = KaneMele.HR2Htrig('fast',true);
 KaneMele_trig_n = KaneMele_trig.Subsall();

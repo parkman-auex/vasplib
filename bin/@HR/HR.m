@@ -6051,8 +6051,9 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                     'Order',options.Order,...
                     'convention',options.convention);
             else
-                syms k_x k_y k_z real;
-                H_hk = HK(H_hr.WAN_NUM,options.Order);
+                VarsUsing = H_hr.VarsSeqLcart(1:H_hr.Dim);
+                %syms k_x k_y k_z real;
+                H_hk = HK(H_hr.WAN_NUM,options.Order,'Dim',H_hr.Dim);
                 H_hk = H_hk.vasplibCopy(H_hr);
                 %WANNUM = H_hr.WAN_NUM;
                 if  options.sym
@@ -6067,8 +6068,8 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                 if strcmp(options.convention,'II')
                     for n = 1:H_hr.NRPTS
                         kpoints_phase = exp(1i*2*pi*(vectorList(n,:))*kpoints_frac.');
-                        tmp_HsymL_trig = exp(1i*(vectorList(n,:))*H_hk.Rm*[k_x k_y k_z].');
-                        symbolic_polynomial = taylor(tmp_HsymL_trig,[k_x k_y k_z],'Order',options.Order);
+                        tmp_HsymL_trig = exp(1i*(vectorList(n,:))*H_hk.Rm*VarsUsing.');
+                        symbolic_polynomial = taylor(tmp_HsymL_trig,VarsUsing,'Order',options.Order);
                         % debug
                         H_hk = H_hk.setup_rough(symbolic_polynomial,H_hr.HcoeL(:,:,n)*kpoints_phase);
                     end
@@ -6082,11 +6083,11 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                     for n = 1:H_hr.NRPTS
                         for i = 1:H_hr.WAN_NUM
                             for j = 1:H_hr.WAN_NUM
-                                tjitmp = reshape(tji_mat(i,j,:),[1 3]);
+                                tjitmp = reshape(tji_mat(i,j,:),[1 H_hr.Dim]);
                                 R_add_t_vector = (vectorList(n,1:H_hr.Dim)*H_hr.Rm+tjitmp).';
                                 kpoints_phase = exp(1i*kpoints_r*(R_add_t_vector));
-                                tmp_HsymL_trig = exp(1i*[k_x k_y k_z]*(R_add_t_vector));
-                                symbolic_polynomial = taylor(tmp_HsymL_trig,[k_x k_y k_z],'Order',options.Order);
+                                tmp_HsymL_trig = exp(1i*VarsUsing*(R_add_t_vector));
+                                symbolic_polynomial = taylor(tmp_HsymL_trig,VarsUsing,'Order',options.Order);
                                 % debug
                                 H_hk = H_hk.setup_single(simplify(symbolic_polynomial*H_hr.HcoeL(i,j,n)*kpoints_phase),i,j);
                             end

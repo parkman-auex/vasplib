@@ -30,10 +30,10 @@ RCI = Htrig(4)
 %
 RCI = RCI ...
     +Trig(sin(k_x) ,  gamma_matric(1) )...
-    +Trig(sin(k_y) , gamma_matric(2))...
+    +Trig(sin(k_y) ,  gamma_matric(2))...
     +Trig(M-cos(k_x)-cos(k_y)   , gamma_matric(3) )...
     ;
-RCI_sym = disp(RCI);
+RCI_sym = sym(RCI);
 syms m_1 m_2 m_3 m_4;
 syms m_0 theta_0 theta_x theta_y m_x m_y  real;
 m_1 = m_y*sin(theta_y);
@@ -81,12 +81,14 @@ calculate =2;
 if calculate ==2
 % clear('theta_x');clear('theta_y')[sym('theta_x'),sym('theta_y')]
 clear('m_0');
+RCI_PT.HcoeL = subs(RCI_PT.HcoeL);
 RCI_n = RCI_PT.Subsall('para',sym('m_0'));
 EIGENCAR_cell = RCI_n.EIGENCAR_gen('paraname','m_0','para',(0:0.02:2).');
 bandplot(EIGENCAR_cell,[-3,3],klist_l,kpoints_l,kpoints_name,'title','RCIPT-m_0/M = 0:2 ','Color',@parula);
 colorbar(gca,'Ticks',[0 0.25 0.5 0.75 1],'TickLabels',{'0','1/2','1','3/2','2'});
 end
-% slab
+
+%% slab
 
 calculate =3;
 M =1.5;
@@ -95,7 +97,7 @@ theta_0 = 0*pi;
 syms theta_x theta_y real;
 if calculate ==3
 %RCI_d = RCI_PT;
-RCI_d = RCI.descritize([30 0 0]);
+RCI_d = RCI.discretize([30 0 0]);
 RCI_d.Htrig_sym
 RCI_d = RCI_d <'KPOINTS_slaby';
 [klist_l,kpoints_l,kpoints_name] = RCI_d.kpath_information();
@@ -104,7 +106,7 @@ RCI_d.HcoeL = subs(RCI_d.HcoeL);
 % [EIGENCAR_slab] = RCI_d.EIGENCAR_gen_slab('norb',-1,'paraname',[sym('theta_x'),sym('theta_y')],'para',[(0:0.1:1).',-(0:0.1:1).']);
 theta_x = pi/4;
 theta_y = pi/4;
-RCI_d = RCI_d.Subsall();
+RCI_d = RCI_d.Subsall('slab');
 [EIGENCAR_slab] = RCI_d.EIGENCAR_gen_slab();
 bandplot(EIGENCAR_slab,[-2,2],klist_l,kpoints_l,kpoints_name,'title','RCI-slab','Color',@jet);
 end
@@ -116,29 +118,18 @@ end
 % Corner
 % bugs here
 
+%%
 calculate =4;
 M =1;
-m_0 = 0;
+m_0 = 0.2;
 theta_0 = 0*pi;
 RCI_d = RCI;
-RCI_d = RCI_d.descritize([20 20 0])
-RCI_d = RCI_d <'KPOINTS_wire';M = 1;
-RCI_d = RCI_d.Subsall();
+RCI_d = RCI_d.discretize([20 20 0])
+RCI_d = RCI_d <'KPOINTS_wire';
+RCI_d = RCI_d.Subsall('disk');
 [EIGENCAR_disk,...
 WAVECAR_disk] = RCI_d.EIGENCAR_gen_wire('klist',[0,0,0]);
 figure();
 plot(EIGENCAR_disk,'-o')
-figure();
 PARCHG_gen(RCI_d.orbL,WAVECAR_disk(:,800:801)*3)
-syms theta_x theta_y real;
-if calculate ==5
-RCI_d.HcoeL = subs(RCI_d.HcoeL);
-RCI_d = RCI_d.Subsall('para',[sym('theta_x'),sym('theta_y')]);
-[EIGENCAR_disk,WAVECAR_disk,WEIGHTCAR_disk]= RCI_d.EIGENCAR_gen_wire('klist',[0,0,0],'norb',-1,'paraname',[sym('theta_x'),sym('theta_y')],'para',pi*[(0:0.02:2).',(0:0.02:2).']);
-% [klist_l,kpoints_l,kpoints_name] = RCI_d.kpath_information();
-pbandplot((WEIGHTCAR_disk),EIGENCAR_disk,[-0.5,0.5],'RCI-disk \theta_x = \theta_y =0:2\pi ',@turbo,(0:0.02:2),[0,0.5,1.0,1.5,2],["0","\pi/2","\pi","3\pi/4","2\pi"]);
-%pbandplot(sign(WEIGHTCAR_disk),EIGENCAR_disk,[-1,1],'RCI-disk \theta_x = \theta_y =0:1 ',@turbo,0:0.01:1,[0,1/3,1],['0','\pi/3','\pi']);
-%bandplot(EIGENCAR_disk,[-1,1],'RCI-slab \theta_x = - \theta_y =0:1 ',@turbo,0:0.01:1,[0,1/3,1],['0','\pi/3','\pi']);
-end
 
-% TEST FOR PERTUBATION FORM

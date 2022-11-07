@@ -103,7 +103,7 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
             if nargin < 4
                 silence = true;
             end
-            [coeff_trig,symvar_list_trig,H_htrig] = split_sym_eq(H_htrig,(simplify(symbolic_polynomial,'IgnoreAnalyticConstraints',true)));
+            [coeff_trig,symvar_list_trig,H_htrig] = H_htrig.split_sym_eq((simplify(symbolic_polynomial,'IgnoreAnalyticConstraints',true)));
             nc = length(coeff_trig);
             if nc >0
                 switch H_htrig.Type
@@ -286,7 +286,7 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
                 case {'exp','mat','list'}
                     k_symbol = combine(str2sym(k_symbol_str),'exp');
                 otherwise
-                    k_symbol = combine(str2sym(k_symbol_str),'sincos');
+                    k_symbol = expand(combine(str2sym(k_symbol_str),'sincos'));
             end
             % use children
             % an unexpected bug; when only one term;
@@ -295,8 +295,10 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
             if isequal(simplify(fold(@mtimes,[k_symbol_children1{:}])),k_symbol)
                 % only one term
                 k_symbol_children{1} = k_symbol;
-            else
+            elseif isequal(simplify(fold(@plus,[k_symbol_children1{:}])),k_symbol)
                  k_symbol_children = k_symbol_children1;
+            else
+                k_symbol_children{1} = k_symbol;
             end
             %
             switch H_htrig.Type
@@ -379,7 +381,7 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
                     % we cant solve the sin/cos(k_x)^n problem
                     %coeff_trig_str_list = split(coeff_trig_str,["*sin","*cos"]);
                     Type = 'sincos';
-                elseif isequal(H_htrig.seeds,["Sigma_x","Sigma_y","Sigma_z"]) && strcmp(H_htrig.Type,'slab')
+                elseif sum(contains(H_htrig.seeds,"Sigma_x"|"Sigma_y"|"Sigma_z"|"Sigma_w")) && strcmp(H_htrig.Type,'slab')
                     pat1 = "*"+"Sigma_";
                     
                     Type = 'slab';
@@ -912,7 +914,7 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
                         for i=1:H_htrig.N_Sparse_vector
                             Hout(H_htrig.Sparse_vector(i,1),H_htrig.Sparse_vector(i,2)) = sum(Hnum_list_ktmp(H_htrig.CutList(i,1):H_htrig.CutList(i,2)));
                         end
-                        %Factorlist = H_htrig.HnumL.*exp(1i*H_htrig.HsymL_numL(:,1:3)*klist_r_tmp(ki,:).');
+                        %Factorlist = H_htrig.HnumL.*exp(1i*H_htrig.HsymL_numL(:,1:3)*klist_cart_tmp(ki,:).');
                         %[ij_unique,sumFactorlist] = HollowKnight.generalcontractrow(H_htrig.HsymL_numL(:,4:5),Factorlist);
                         %indL = sub2ind(sizemesh,ij_unique(:,1),ij_unique(:,2));
                         %Hout(indL) = sumFactorlist;
@@ -1868,11 +1870,16 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
                     Rotation = inv(sym(H_htrig.Rm));
                 end
             end
-            syms k_x k_y k_z real;
-            k = Rotation*[k_x ;k_y ;k_z];
-            H_htrig = H_htrig.subs([k_x k_y k_z],[k(1) k(2) k(3)]);
+            % syms k_x k_y k_z real;
+            VarUsing = H_htrig.VarsSeqLcart(1:H_htrig.Dim);
+            k = Rotation * VarUsing.';
+            for i = 1:H_htrig.Dim
+                VarUsingCell{i} = VarUsing(i);
+                kCell{i} = k(i);
+            end
+            H_htrig = H_htrig.subs(VarUsingCell,kCell);
         end
-        function H_htrig2 = descritize(H_htrig,Nslab,options)
+        function H_htrig2 = discretize(H_htrig,Nslab,options)
             arguments
                 H_htrig Htrig;
                 Nslab double = [0,10,0];
@@ -1894,66 +1901,78 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
                 H_htrig = H_htrig.rotation(options.Rotation);
             end
             % replace seeds as Sigma_x Sigma_y Sigma_z
-            H_htrig2 = Htrig(H_htrig.Basis_num);
-            H_htrig2.seeds = ["Sigma_x","Sigma_y","Sigma_z"];
+            H_htrig2 = Htrig(H_htrig.Basis_num,'Dim',H_htrig.Dim);
+            H_htrig2.seeds = ["Sigma_x","Sigma_y","Sigma_z","Sigma_w"];
             H_htrig2.Type = 'slab';
             H_htrig2.Nslab = Nslab;
             NSLAB = (H_htrig2.Nslab ==0) + H_htrig2.Nslab;
-            NS = NSLAB(1)* NSLAB(2)* NSLAB(3);
-            % subs in three direction
-            if Nslab(1) > 1
-                case_x = true;
-            else
-                case_x = false;
-            end
-            if Nslab(2) > 1
-                case_y = true;
-            else
-                case_y = false;
-            end
-            if Nslab(3) > 1
-                case_z = true;
-            else
-                case_z = false;
-            end
-            syms Sigma_x_1__N Sigma_x_N__N real;
-            syms Sigma_y_1__N Sigma_y_N__N real;
-            syms Sigma_z_1__N Sigma_z_N__N real;
-            if case_x
-                H_htrig.HsymL_trig = subs(H_htrig.HsymL_trig,str2sym('sin(k_x)'),str2sym('1i*Sigma_x_1__N/2'));
-                H_htrig.HsymL_trig = subs(H_htrig.HsymL_trig,str2sym('cos(k_x)'),str2sym('Sigma_x_1__N/2'));
-                pat_x = "Sigma_x_"+digitsPattern(1)+"__N";
-                for i =1:length(H_htrig.HsymL_trig)
-                    if ~contains(string(H_htrig.HsymL_trig(i)),pat_x)
-                        H_htrig.HsymL_trig(i) = H_htrig.HsymL_trig(i)*str2sym('Sigma_x_N__N');
+            NS = fold(@times,NSLAB);
+            % subs in any(1-4) direction
+            case_d = Nslab>1;
+            % expand seeds for more dimension
+            seeds = ["x","y","z","w"];
+            StrSinUsing = "sin(k_" + seeds + ")";
+            StrCosUsing = "cos(k_" + seeds + ")";
+            StrSigma_1__N  = "Sigma_" + seeds + "_1__N";
+            StrSigma_N__N  = "Sigma_" + seeds + "_N__N";
+            pat_d_pre   = "Sigma_" + seeds + "_";
+
+            SymSinUsing = str2sym(StrSinUsing);
+            SymCosUsing = str2sym(StrCosUsing);
+            SymSigma_1__N = str2sym(StrSigma_1__N);
+            SymSigma_N__N = str2sym(StrSigma_N__N);
+            %syms Sigma_x_1__N Sigma_x_N__N real;
+            %syms Sigma_y_1__N Sigma_y_N__N real;
+            %syms Sigma_z_1__N Sigma_z_N__N real;
+            %syms Sigma_w_1__N Sigma_w_N__N real;
+            for d = 1:numel(case_d)
+                if case_d(d)
+                    H_htrig.HsymL_trig = subs(H_htrig.HsymL_trig,SymSinUsing(d),1i/2 * SymSigma_1__N(d));
+                    H_htrig.HsymL_trig = subs(H_htrig.HsymL_trig,SymCosUsing(d),1 /2 * SymSigma_1__N(d));
+                    pat_d = pat_d_pre(d)+digitsPattern(1)+"__N";
+                    for i =1:length(H_htrig.HsymL_trig)
+                        if ~contains(string(H_htrig.HsymL_trig(i)),pat_d)
+                            H_htrig.HsymL_trig(i) = H_htrig.HsymL_trig(i)*SymSigma_N__N(d);
+                        end
                     end
+                    H_htrig.Sigmas =[H_htrig.Sigmas;[SymSigma_N__N(d),SymSigma_1__N(d)]];
                 end
-                H_htrig.Sigmas =[H_htrig.Sigmas;[str2sym('Sigma_x_N__N'),str2sym('Sigma_x_1__N')]];
             end
-            if case_y
-                H_htrig.HsymL_trig = subs(H_htrig.HsymL_trig,str2sym('sin(k_y)'),str2sym('1i*Sigma_y_1__N/2'));
-                H_htrig.HsymL_trig = subs(H_htrig.HsymL_trig,str2sym('cos(k_y)'),str2sym('Sigma_y_1__N/2'));
-                pat_y = "Sigma_y_"+digitsPattern(1)+"__N";
-                for i =1:length(H_htrig.HsymL_trig)
-                    if ~contains(string(H_htrig.HsymL_trig(i)),pat_y)
-                        H_htrig.HsymL_trig(i) = H_htrig.HsymL_trig(i)*str2sym('Sigma_y_N__N');
-                    end
-                end
-                H_htrig.Sigmas =[H_htrig.Sigmas;[str2sym('Sigma_y_N__N'),str2sym('Sigma_y_1__N')]];
-            end
-            if case_z
-                H_htrig.HsymL_trig = subs(H_htrig.HsymL_trig,str2sym('sin(k_z)'),str2sym('1i*Sigma_z_1__N/2'));
-                H_htrig.HsymL_trig = subs(H_htrig.HsymL_trig,str2sym('cos(k_z)'),str2sym('Sigma_z_1__N/2'));
-                pat_z = "Sigma_z_"+digitsPattern(1)+"__N";
-                for i =1:length(H_htrig.HsymL_trig)
-                    if ~contains(string(H_htrig.HsymL_trig(i)),pat_z)
-                        H_htrig.HsymL_trig(i) = H_htrig.HsymL_trig(i)*str2sym('Sigma_z_N__N');
-                    end
-                end
-                H_htrig.Sigmas =[H_htrig.Sigmas;[str2sym('Sigma_z_N__N'),str2sym('Sigma_z_1__N')]];
-            end
+            %             if case_x
+            %                 H_htrig.HsymL_trig = subs(H_htrig.HsymL_trig,str2sym('sin(k_x)'),str2sym('1i*Sigma_x_1__N/2'));
+            %                 H_htrig.HsymL_trig = subs(H_htrig.HsymL_trig,str2sym('cos(k_x)'),str2sym('Sigma_x_1__N/2'));
+            %                 pat_x = "Sigma_x_"+digitsPattern(1)+"__N";
+            %                 for i =1:length(H_htrig.HsymL_trig)
+            %                     if ~contains(string(H_htrig.HsymL_trig(i)),pat_x)
+            %                         H_htrig.HsymL_trig(i) = H_htrig.HsymL_trig(i)*str2sym('Sigma_x_N__N');
+            %                     end
+            %                 end
+            %                 H_htrig.Sigmas =[H_htrig.Sigmas;[str2sym('Sigma_x_N__N'),str2sym('Sigma_x_1__N')]];
+            %             end
+            %             if case_y
+            %                 H_htrig.HsymL_trig = subs(H_htrig.HsymL_trig,str2sym('sin(k_y)'),str2sym('1i*Sigma_y_1__N/2'));
+            %                 H_htrig.HsymL_trig = subs(H_htrig.HsymL_trig,str2sym('cos(k_y)'),str2sym('Sigma_y_1__N/2'));
+            %                 pat_y = "Sigma_y_"+digitsPattern(1)+"__N";
+            %                 for i =1:length(H_htrig.HsymL_trig)
+            %                     if ~contains(string(H_htrig.HsymL_trig(i)),pat_y)
+            %                         H_htrig.HsymL_trig(i) = H_htrig.HsymL_trig(i)*str2sym('Sigma_y_N__N');
+            %                     end
+            %                 end
+            %                 H_htrig.Sigmas =[H_htrig.Sigmas;[str2sym('Sigma_y_N__N'),str2sym('Sigma_y_1__N')]];
+            %             end
+            %             if case_z
+            %                 H_htrig.HsymL_trig = subs(H_htrig.HsymL_trig,str2sym('sin(k_z)'),str2sym('1i*Sigma_z_1__N/2'));
+            %                 H_htrig.HsymL_trig = subs(H_htrig.HsymL_trig,str2sym('cos(k_z)'),str2sym('Sigma_z_1__N/2'));
+            %                 pat_z = "Sigma_z_"+digitsPattern(1)+"__N";
+            %                 for i =1:length(H_htrig.HsymL_trig)
+            %                     if ~contains(string(H_htrig.HsymL_trig(i)),pat_z)
+            %                         H_htrig.HsymL_trig(i) = H_htrig.HsymL_trig(i)*str2sym('Sigma_z_N__N');
+            %                     end
+            %                 end
+            %                 H_htrig.Sigmas =[H_htrig.Sigmas;[str2sym('Sigma_z_N__N'),str2sym('Sigma_z_1__N')]];
+            %             end
             % reset HcoeL
-            H_htrig2.HsymL_trig_bk = [Sigma_x_1__N Sigma_x_N__N Sigma_y_1__N Sigma_y_N__N Sigma_z_1__N Sigma_z_N__N ];
+            H_htrig2.HsymL_trig_bk = [SymSigma_1__N SymSigma_N__N];
             H_htrig2.HsymL_trig = sym([]);
             count = 0;
             for i = 1:H_htrig.Kinds
@@ -1967,27 +1986,45 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
             end
             H_htrig2 = H_htrig2.setup(Var_cell,k_cell,mat_cell);
             % supercell orb
-            orb_tmp = zeros(NS*H_htrig.Basis_num,3);
+            orb_tmp = zeros(NS*H_htrig.Basis_num,H_htrig.Dim);
             NWAVE  = NS*H_htrig.Basis_num;
             if isempty(H_htrig.orbL)
-                H_htrig.orbL = zeros(H_htrig.Basis_num,3);
+                H_htrig.orbL = zeros(H_htrig.Basis_num,H_htrig.Dim);
+            end
+            % General form need!!!
+            switch H_htrig.Dim
+                case 1
+                    [i1L            ] = ind2sub(NSLAB,1:NS);
+                    OrbAddL = i1L.' -1;
+                case 2
+                    [i1L,i2L        ] = ind2sub(NSLAB,1:NS);
+                    OrbAddL = [i1L.' i2L.'] -1;
+                case 3
+                    [i1L,i2L,i3L    ] = ind2sub(NSLAB,1:NS);
+                    OrbAddL = [i1L.' i2L.' i3L.'] -1;
+                case 4
+                    [i1L,i2L,i3L,i4L] = ind2sub(NSLAB,1:NS);
+                    OrbAddL = [i1L.' i2L.' i3L.' i4L.'] -1;
             end
             for i=1:NS
-                [i1,i2,i3] = ind2sub(NSLAB,i);
-                orb_tmp((i-1)*H_htrig.Basis_num+1:i*H_htrig.Basis_num,:) = H_htrig.orbL+[i1-1,i2-1,i3-1];
+                orb_tmp((i-1)*H_htrig.Basis_num+1:i*H_htrig.Basis_num,:) = H_htrig.orbL+OrbAddL(i,:);
             end
-            orb_tmp = orb_tmp./[NSLAB(1), NSLAB(2), NSLAB(3)];
+            orb_tmp = orb_tmp./NSLAB;
+            SizeOrb_tmp = size(orb_tmp);
             % if cut the final mode
             if rm_mode
                 try
-                    H_htrig2.rm_list = options.rmfunc(orb_tmp(:,1),orb_tmp(:,2),orb_tmp(:,3));
+                    for d = 1:SizeOrb_tmp(2)
+                        Input{d} = orb_tmp(:,d);
+                    end
+                    H_htrig2.rm_list = options.rmfunc(Input{:});
                 catch
                     H_htrig2.rm_list = false(1,NWAVE);
                     for i =1:NWAVE
-                        i1 = orb_tmp(i,1);
-                        i2 = orb_tmp(i,2);
-                        i3 = orb_tmp(i,3);
-                        H_htrig2.rm_list(i) = options.rmfunc(i1,i2,i3);
+                        for d = 1:SizeOrb_tmp(2)
+                            Input{d} = orb_tmp(i,d);
+                        end
+                        H_htrig2.rm_list(i) = options.rmfunc(Input{:});
                     end
                 end
             else
@@ -2121,9 +2158,9 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
             norb_enforce  = options.norb;
             if isempty(options.klist)
                 H_htrig = H_htrig.kpathgen3D('KPOINTS');
-                klist_r_tmp = H_htrig.klist_cart;
+                klist_cart_tmp = H_htrig.klist_cart;
             else
-                klist_r_tmp = options.klist;
+                klist_cart_tmp = options.klist;
             end
             if options.show
                 if isempty(options.ax)
@@ -2143,7 +2180,7 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
                 else
                     print_mode = 0;
                 end
-                [kn,~] = size(klist_r_tmp);
+                [kn,~] = size(klist_cart_tmp);
                 %--------  check  --------
                 if norb_enforce <0
                     NBANDS=H_htrig.Basis_num;
@@ -2168,9 +2205,9 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
                     
                 end
                 for ki =1:kn
-                    %k_x=klist_r_tmp(ki,1);
-                    %k_y=klist_r_tmp(ki,2);
-                    %k_z=klist_r_tmp(ki,3);
+                    %k_x=klist_cart_tmp(ki,1);
+                    %k_y=klist_cart_tmp(ki,2);
+                    %k_z=klist_cart_tmp(ki,3);
                     switch H_htrig.Type
                         case 'sparse'
                             Htemp=sparse(H_htrig.Basis_num ,H_htrig.Basis_num);
@@ -2179,22 +2216,22 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
                             end
                             Hout = Htemp;
                         case {'mat'}
-                            Factorlist = exp(1i*H_htrig.HsymL_numL*klist_r_tmp(ki,:).');
+                            Factorlist = exp(1i*H_htrig.HsymL_numL*klist_cart_tmp(ki,:).');
                             Hout = sum(vasplib.matrixtimespage(Factorlist,H_htrig.HnumL),3);
                             Hout = (Hout+Hout')/2;
                         case 'list'
                             Hout = zeros(sizemesh);
-                            Hnum_list_k = H_htrig.HnumL.*exp(1i*H_htrig.HsymL_numL(:,1:H_trig.Dim)*klist_r_tmp(ki,:).');
+                            Hnum_list_k = H_htrig.HnumL.*exp(1i*H_htrig.HsymL_numL(:,1:H_htrig.Dim)*klist_cart_tmp(ki,:).');
                             for i=1:H_htrig.N_Sparse_vector
                                 Hout(H_htrig.Sparse_vector(i,1),H_htrig.Sparse_vector(i,2)) = sum(Hnum_list_k(H_htrig.CutList(i,1):H_htrig.CutList(i,2)));
                             end
-                            %Factorlist = H_htrig.HnumL.*exp(1i*H_htrig.HsymL_numL(:,1:3)*klist_r_tmp(ki,:).');
+                            %Factorlist = H_htrig.HnumL.*exp(1i*H_htrig.HsymL_numL(:,1:3)*klist_cart_tmp(ki,:).');
                             %[ij_unique,sumFactorlist] = HollowKnight.generalcontractrow(H_htrig.HsymL_numL(:,4:5),Factorlist);
                             %indL = sub2ind(sizemesh,ij_unique(:,1),ij_unique(:,2));
                             %Hout(indL) = sumFactorlist;
                             Hout = (Hout+Hout')/2;
                         case 'sincos'
-                            Input = num2cell(klist_r_tmp(ki,:)); 
+                            Input = num2cell(klist_cart_tmp(ki,:)); 
                             kL = HsymL_fun(Input{:});
                             Hout = H_htrig.HnumL;
                             for i =1:H_htrig.Kinds
@@ -2204,7 +2241,7 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
                             %                 end
                             Hout = (Hout+Hout')/2;
                         otherwise
-                            Input = num3cell(klist_r_tmp(ki,:)); 
+                            Input = num3cell(klist_cart_tmp(ki,:)); 
                             Hout = H_htrig.Hfun(Input{:});
                             Hout = (Hout+Hout')/2;
                     end
@@ -2212,7 +2249,7 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
                         try
                             [A, U]=eig(full(Hout));
                         catch
-                            disp([ki,klist_r_tmp(ki,:)] );
+                            disp([ki,klist_cart_tmp(ki,:)] );
                             disp(Hout);
                             disp(H_htrig.Hfun);
                             error('check this k point');
@@ -2240,7 +2277,7 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
                 else
                     print_mode = 0;
                 end
-                [kn,~] = size(klist_r_tmp);
+                [kn,~] = size(klist_cart_tmp);
                 %--------  check  --------
                 if norb_enforce <0
                     NBANDS=H_htrig.Basis_num;
@@ -2251,7 +2288,7 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
                 end
                 WAVECAR  = [];
                 EIGENCAR{Npara} = zeros(NBANDS,kn);
-                Htrig_num_tmp = H_htrig.Htrig_num;
+                Htrig_sym = H_htrig.Hsym;
                 for j = 1:Npara
                     fprintf('**************************************************************************************\n');
                     for i = 1:paraN
@@ -2268,13 +2305,13 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
                             Hnum_list{i} = subs(H_htrig.HnumL{i},sym(options.paraname),options.para(j,:));
                         end
                     else
-                        H_fun_tmp = matlabFunction(subs(Htrig_num_tmp,sym(options.paraname),options.para(j,:)),'Vars',sym(["k_x","k_y","k_z"]));
+                        H_fun_tmp = matlabFunction(subs(Htrig_sym,sym(options.paraname),options.para(j,:)),'Vars',sym(["k_x","k_y","k_z"]));
                     end
                     
                     for ki =1:kn
-                        k_x=klist_r_tmp(ki,1);
-                        k_y=klist_r_tmp(ki,2);
-                        k_z=klist_r_tmp(ki,3);
+                        k_x=klist_cart_tmp(ki,1);
+                        k_y=klist_cart_tmp(ki,2);
+                        k_z=klist_cart_tmp(ki,3);
                         if strcmp(H_htrig.Type,'sparse')
                             Htemp=sparse(H_htrig.Basis_num ,H_htrig.Basis_num);
                             for i=1:H_htrig.Kinds
@@ -2318,7 +2355,7 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
             varargout{2} = WAVECAR;
             if options.show
                 [varargout{3}] = vasplib.klist_show(...
-                    'klist',klist_r_tmp,...
+                    'klist',klist_cart_tmp,...
                     'ax',ax);
             end
         end
@@ -2349,10 +2386,11 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
                 end 
                 options.klist = H_htrig.klist_cart;
             end
-            klist_r_tmp = options.klist;
+            klist_cart_tmp = options.klist;
             % -------------- nargin ------------------
             %disp("EIGENCAR gen for H_xyz(wt TB) Type: HR class ");
-            Hnum_list = H_htrig.HnumL ;
+            HcoeList = H_htrig.HcoeL ;
+            VarUsing = H_htrig.VarsSeqLcart(1:H_htrig.Dim);
             NSLAB = (H_htrig.Nslab ==0) + H_htrig.Nslab;
             NS = NSLAB(1)* NSLAB(2)* NSLAB(3);
             NWAVE = H_htrig.Basis_num* NS;
@@ -2367,6 +2405,9 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
             elseif H_htrig.Nslab(3) > 1
                 dir = 3;
                 signlist = sign((orb_list(:,3)-0.5));
+            elseif H_htrig.Nslab(4) > 1
+                dir = 4;
+                signlist = sign((orb_list(:,4)-0.5));
             end
             HSVCAR_slab = vasplib.HSVCAR_gen(orb_list,'slab',0.05,[0.5,0.5,0.5],dir);
             signlist(HSVCAR_slab(:,1) == 0) = 0;
@@ -2378,7 +2419,7 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
             if isempty(options.para)
                 %             Bassis_mat = H_htrig.Bassis_mat ;
 
-                [kn,~] = size(klist_r_tmp);
+                [kn,~] = size(klist_cart_tmp);
                 %--------  check  --------
                 if norb_enforce <0
                     NBANDS=NWAVE;
@@ -2392,38 +2433,29 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
                 EIGENCAR = zeros(NBANDS,kn);
                 WEIGHTCAR = zeros(NBANDS,kn);
                 for ki =1:kn
-                    k_x=klist_r_tmp(ki,1);
-                    k_y=klist_r_tmp(ki,2);
-                    k_z=klist_r_tmp(ki,3);
-                    
-                    if strcmp(H_htrig.Type,'sparse')
-                        Htemp=sparse(H_htrig.Basis_num ,H_htrig.Basis_num);
-                        for i=1:H_htrig.Kinds
-                            Htemp = Htemp +Hnum_list{i}*double(H_htrig.HsymL_trig(i));
+                    k_d=klist_cart_tmp(ki,:);
+                    Input = num2cell(k_d);
+                    Hmat = zeros(NWAVE,NWAVE,numel(H_htrig.HsymL_trig));
+                    for i = 1:numel(H_htrig.HsymL_trig)
+                        try
+                            Hfuntemp = matlabFunction(HcoeList(:,:,i),'Vars',VarUsing); %?
+                        catch
+                            error('You have not subs the function');
                         end
-                        Hout = Htemp;
-                    else
-                        Hmat = zeros(NWAVE,NWAVE,numel(H_htrig.HsymL_trig));
-                        for i = 1:numel(H_htrig.HsymL_trig)
-                            try
-                                Hfuntemp = H_htrig.Hfun{i};
-                            catch
-                                error('You have not subs the function');
-                            end
-                            %disp(Hfuntemp)
-                            %disp(Hfuntemp(k_x,k_y,k_z))
-                            %disp(Hmat_pre(:,:,i));
-                            Hmat(:,:,i) = kron(H_htrig.Hmat_pre{i},Hfuntemp(k_x,k_y,k_z));
-                        end
-                        Hout = sum(Hmat,3);
-                        %disp(tril(Hout,-1));
-                        Hout = tril(Hout,-1)+diag(real(diag((Hout))))+tril(Hout,-1)';
+                        %disp(Hfuntemp)
+                        %disp(Hfuntemp(k_x,k_y,k_z))
+                        %disp(Hmat_pre(:,:,i));
+                        Hmat(:,:,i) = kron(H_htrig.Hmat_pre{i},Hfuntemp(Input{:}));
                     end
+                    Hout = sum(Hmat,3);
+                    %disp(tril(Hout,-1));
+                    Hout = tril(Hout,-1)+diag(real(diag((Hout))))+tril(Hout,-1)';
+
                     if norb_enforce <0
                         try
                             [A, U]=eig(full(Hout));
                         catch
-                            disp([ki,k_x,k_y,k_z] );
+                            disp([ki,Input] );
                             disp(Hout);
                             disp(H_htrig.Hfun);
                             error('check this k point');
@@ -2445,7 +2477,7 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
                 Npara = size(options.para ,1);
                 paraN = size(options.para ,2);
                 %             Bassis_mat = H_htrig.Bassis_mat ;
-                [kn,~] = size(klist_r_tmp);
+                [kn,~] = size(klist_cart_tmp);
                 %--------  check  --------
                 if norb_enforce <0
                     NBANDS=NWAVE;
@@ -2475,7 +2507,7 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
                     %                     end
                     if strcmp(H_htrig.Type,'sparse')
                         for i = 1:H_htrig.Kinds
-                            Hnum_list{i} = subs(H_htrig.HnumL{i},sym(options.paraname),options.para(j,:));
+                            HcoeList{i} = subs(H_htrig.HnumL{i},sym(options.paraname),options.para(j,:));
                         end
                     else
                         
@@ -2493,14 +2525,14 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
                     end
                     
                     for ki =1:kn
-                        k_x=klist_r_tmp(ki,1);
-                        k_y=klist_r_tmp(ki,2);
-                        k_z=klist_r_tmp(ki,3);
+                        k_x=klist_cart_tmp(ki,1);
+                        k_y=klist_cart_tmp(ki,2);
+                        k_z=klist_cart_tmp(ki,3);
                         
                         if strcmp(H_htrig.Type,'sparse')
                             Htemp=sparse(H_htrig.Basis_num ,H_htrig.Basis_num);
                             for i=1:H_htrig.Kinds
-                                Htemp = Htemp +Hnum_list{i}*double(H_htrig.HsymL_trig(i));
+                                Htemp = Htemp +HcoeList{i}*double(H_htrig.HsymL_trig(i));
                             end
                             Hout = Htemp;
                         else
@@ -2590,15 +2622,17 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
                 end 
                 options.klist = H_htrig.klist_cart;
             end
-            klist_r_tmp = options.klist;
+            klist_cart_tmp = options.klist;
             % -------------- nargin ------------------
             %disp("EIGENCAR gen for H_xyz(wt TB) Type: HR class ");
             Hnum_list = H_htrig.HnumL ;
             NSLAB = (H_htrig.Nslab ==0) + H_htrig.Nslab;
-            NS = NSLAB(1)* NSLAB(2)* NSLAB(3);
+            NS = prod(NSLAB);
             NWAVE_origin =  H_htrig.Basis_num* NS;
             NWAVE = H_htrig.Basis_num* NS-sum(H_htrig.rm_list);
             orb_list  = H_htrig.orbL;
+            HcoeList = H_htrig.HcoeL ;
+            VarUsing = H_htrig.VarsSeqLcart(1:H_htrig.Dim);
             if isempty(H_htrig.rm_list)
                 HSVCAR_hinge = vasplib.HSVCAR_gen(orb_list,'hinge',0.05,[0.5,0.5,0.5],3);
             else
@@ -2612,7 +2646,7 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
                 else
                     print_mode = 0;
                 end
-                [kn,~] = size(klist_r_tmp);
+                [kn,~] = size(klist_cart_tmp);
                 %--------  check  --------
                 if norb_enforce <0
                     NBANDS=NWAVE;
@@ -2626,36 +2660,21 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
                 EIGENCAR = zeros(NBANDS,kn);
                 WEIGHTCAR = zeros(NBANDS,kn);
                 for ki =1:kn
-                    k_x=klist_r_tmp(ki,1);
-                    k_y=klist_r_tmp(ki,2);
-                    k_z=klist_r_tmp(ki,3);
-                    
-                    if strcmp(H_htrig.Type,'sparse')
-                        Htemp=sparse(H_htrig.Basis_num ,H_htrig.Basis_num);
-                        for i=1:H_htrig.Kinds
-                            Htemp = Htemp +Hnum_list{i}*double(H_htrig.HsymL_trig(i));
+                    k_d=klist_cart_tmp(ki,:);
+                    Input = num2cell(k_d);
+                    Hmat{numel(H_htrig.HsymL_trig)} = sparse(NWAVE_origin,NWAVE_origin);
+                    for i = 1:numel(H_htrig.HsymL_trig)
+                        try
+                            Hfuntemp = matlabFunction(HcoeList(:,:,i),'Vars',VarUsing); %?
+                        catch
+                            error('You have not subs the function');
                         end
-                        Hout = Htemp;
-                    else
-                        Hmat{numel(H_htrig.HsymL_trig)} = sparse(NWAVE_origin,NWAVE_origin);
-                        for i = 1:numel(H_htrig.HsymL_trig)
-                            try
-                                Hfuntemp = H_htrig.Hfun{i};
-                            catch
-                                error('You have not subs the function');
-                            end
-                            %disp(Hfuntemp)
-                            %disp(Hfuntemp(k_x,k_y,k_z))
-                            %disp(Hmat_pre(:,:,i));
-                            Hmat{i} = kron(H_htrig.Hmat_pre{i},Hfuntemp(k_x,k_y,k_z));
-                        end
-                        Hout = Hmat{1};
-                        for i = 2:numel(H_htrig.HsymL_trig)
-                            Hout =Hout +Hmat{i};
-                        end
-                        %disp(tril(Hout,-1));
-                        Hout = tril(Hout,-1)+diag(real(diag((Hout))))+tril(Hout,-1)';
+                        Hmat{i} = kron(H_htrig.Hmat_pre{i},Hfuntemp(Input{:}));
                     end
+                    Hout = fold(@plus,Hmat);
+                    %disp(tril(Hout,-1));
+                    Hout = tril(Hout,-1)+diag(real(diag((Hout))))+tril(Hout,-1)';
+
                     if ~isempty(H_htrig.rm_list)
                         Hout(H_htrig.rm_list,:) = [];
                         Hout(:,H_htrig.rm_list) = [];
@@ -2664,7 +2683,7 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
                         try
                             [A, U]=eig(full(Hout));
                         catch
-                            disp([ki,k_x,k_y,k_z] );
+                            disp([ki,Input] );
                             disp(Hout);
                             disp(H_htrig.Hfun);
                             error('check this k point');
@@ -2695,7 +2714,7 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
                 else
                     print_mode = 0;
                 end
-                [kn,~] = size(klist_r_tmp);
+                [kn,~] = size(klist_cart_tmp);
                 if kn ==1
                     tmpmode = 'para';
                 else
@@ -2751,9 +2770,9 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
                         end
                         
                         for ki =1:kn
-                            k_x=klist_r_tmp(ki,1);
-                            k_y=klist_r_tmp(ki,2);
-                            k_z=klist_r_tmp(ki,3);
+                            k_x=klist_cart_tmp(ki,1);
+                            k_y=klist_cart_tmp(ki,2);
+                            k_z=klist_cart_tmp(ki,3);
                             
                             if strcmp(H_htrig.Type,'sparse')
                                 Htemp=sparse(H_htrig.Basis_num ,H_htrig.Basis_num);
@@ -2822,9 +2841,9 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
                     WAVECAR  = zeros(NWAVE,NBANDS,Npara);
                     EIGENCAR = zeros(NBANDS,Npara);
                     WEIGHTCAR = zeros(NBANDS,Npara);
-                    k_x=klist_r_tmp(1);
-                    k_y=klist_r_tmp(2);
-                    k_z=klist_r_tmp(3);
+                    k_x=klist_cart_tmp(1);
+                    k_y=klist_cart_tmp(2);
+                    k_z=klist_cart_tmp(3);
                     for j = 1:Npara
                         for i = 1:paraN
                             fprintf('%s :',mat2str(string(sym(options.paraname(i)))));
@@ -2907,12 +2926,17 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
             %                 EIGENCARout.WAVECAR = WAVECAR;
             %             end
         end
-        function H_htrig = Subsall(H_htrig,mode,addition_var)
+        function H_htrig = Subsall(H_htrig,mode,AddtionVar)
+            arguments
+                H_htrig
+                mode {mustBeMember(mode,{'num','file','gen','para','sym','slab','disk'})}= 'num';
+                AddtionVar = sym([]);
+            end
             if nargin <2
                 mode = 'num';
             end
             if nargin < 3
-                addition_var = sym([]);
+                AddtionVar = sym([]);
             end
             % ------ init ------- load para form inner or outer
             if exist('para.mat','file') && strcmp(mode,'file')
@@ -2921,34 +2945,44 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
             else
 
             end
-            if ~isempty(addition_var)
-                varlist =[ H_htrig.VarsSeqLcart(1:H_htrig.Dim),addition_var];
+
+            if ~isempty(AddtionVar)
+                varlist = [ H_htrig.VarsSeqLcart(1:H_htrig.Dim),AddtionVar];%sym(AddtionVar);%
             else
-                varlist = H_htrig.VarsSeqLcart(1:H_htrig.Dim);
+                varlist = H_htrig.VarsSeqLcart(1:H_htrig.Dim);%sym([]);
             end
+            
             H_htrig.HcoeL = subs( H_htrig.HcoeL);
             H_htrig.HsymL_trig = subs(H_htrig.HsymL_trig);
             H_htrig.HsymL_coeL  = subs(H_htrig.HsymL_coeL);
             H_htrig.HsymL_trig_bk = subs(H_htrig.HsymL_trig_bk);
+            H_htrig.Htrig_num  = subs(H_htrig.Htrig_sym);
+            H_htrig.Hsym = H_htrig.Htrig_num;
+            SymvarListInHcoeL = symvar(H_htrig.HcoeL);
             switch mode
                 case {'num','file','gen','para'}
-                    HcoeL_temp = subs(H_htrig.HcoeL);
-                    symname = H_htrig.symvarL;
-                    if ~isempty(symname)
-                        for i = 1:length(symname)
-                            fprintf('this varible: %s is the extra parameter\n',string(symname(i)));
-                            if isempty(find(varlist == symname(i), 1))
-                                warning('please subs this varible, Subsall must return numerical obj!\n');
+                    HcoeL_temp = H_htrig.HcoeL;
+                    if ~isempty(SymvarListInHcoeL)
+                        for i = 1:length(SymvarListInHcoeL)
+                            fprintf('this varible: %s is the extra parameter\n',string(SymvarListInHcoeL(i)));
+                            if isempty(find(varlist == SymvarListInHcoeL(i), 1))
+                                try
+                                    HcoeL_temp = subs(HcoeL_temp,SymvarListInHcoeL(i),evalin('base',string(SymvarListInHcoeL(i))));
+                                catch
+                                    warning('please subs this varible, Subsall must return numerical obj!\n');
+                                end
                             end
                         end
                     else
                         H_htrig.HnumL = double(HcoeL_temp);
-                        %H_htrig2.HnumL = double(H_htrig2.HcoeL);
-                        %H_htrig2.HsymL_trig = double(H_htrig2.HsymL_trig);
-                        %H_htrig2.HsymL_numL = double(H_htrig2.HsymL_coeL);
                     end 
-                    H_htrig.HnumL = double(HcoeL_temp);
-                    H_htrig.HcoeL = sym([]);
+                    if strcmp(mode,'para')
+                        H_htrig.HcoeL = subs(H_htrig.HcoeL);
+                        return;
+                    else
+                        H_htrig.HnumL = double(HcoeL_temp);
+                        H_htrig.HcoeL = sym([]);
+                    end
                     H_htrig.num = true;
                     H_htrig.coe = false;
                     if strcmp(H_htrig.Type,'mat') ||strcmp(H_htrig.Type,'list')
@@ -2961,7 +2995,7 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
                     %                         H_htrig.Htrig_sym = H_htrig.Htrig_sym + H_htrig.HcoeL(:,:,i)*H_htrig.HsymL_k(i);
                     %                     end
                     if strcmp(mode,'gen')
-                        H_htrig.Htrig_num  = subs(H_htrig.Htrig_sym);
+                        % H_htrig.Htrig_num  = subs(H_htrig.Htrig_sym);
                         % H_htrig.Hfun = matlabFunction(H_htrig.Htrig_num,'Vars',varlist,'File','H_htrig.m');
                     elseif ~strcmp(H_htrig.Type,'slab')
                         H_htrig.Htrig_num  = subs(H_htrig.Htrig_sym);
@@ -2978,17 +3012,17 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
 
                         end
                     end
-
-                case 'sym'
+                case {'sym','slab','disk'}
                     H_htrig.HcoeL = subs(H_htrig.HcoeL);
             end
-            H_htrig.Hsym = H_htrig.Htrig_num;
         end
         function mat = HsymL_trig2mat(H_htrig,HsymL_trig)
             %? When shall we use this function? I forgot!
+            %Reply : For slab  
             NSLAB = (H_htrig.Nslab ==0)+H_htrig.Nslab;
-            NS = NSLAB(1)* NSLAB(2)* NSLAB(3);
+            NS = prod(NSLAB);
             %NWAVE = H_htrig.Basis_num* NS;
+            % We need to expand this function!
             Delta_ijk = Htrig.Delta_Oper(Htrig.coeff_extract(HsymL_trig));
             tmpmat = meshgrid((1:NS).',(1:NS).');
             NS1 = reshape(tmpmat,NS^2,1);

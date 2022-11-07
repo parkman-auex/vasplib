@@ -85,42 +85,41 @@ KaneMele_n = KaneMele_n <'KPOINTS';
 EIGENCAR = KaneMele_n.EIGENCAR_gen();
 [klist_l,kpoints_l,kpoints_name] = KaneMele_n.kpath_information();
 bandplot(EIGENCAR,[-3,3],klist_l,kpoints_l,kpoints_name,'title','KaneMele','Color','r');
+
 %% Descitize in C3
 % KaneMele-zigzag
-KaneMele.Rm = sym([1,0,0;-1/2,sqrt(3)/2,0;0 0 2/sqrt(3)])
+KaneMele.Rm = sym([1,0,0;-1/2,sqrt(3)/2,0;0 0 2/sqrt(3)]);
 KaneMele.orbL = [     0.333333333         0.666666667         0.50000000 ;...
     0.666666667         0.333333333         0.50000000;...
     0.333333333         0.666666667         0.50000000 ;...
     0.666666667         0.333333333         0.50000000...
     ];
 KaneMele.Htrig_sym
-KaneMele.rotation().Htrig_sym
-KaneMele_dy = KaneMele.descritize([0,30,0],'Rotation','auto');
+KaneMele_rotation = KaneMele.rotation();
+KaneMele_rotation.Htrig_sym
+KaneMele_dy = KaneMele.discretize([0,30,0],'Rotation','auto');
 KaneMele_dy.Htrig_sym
 %% 
-a = 1;t =1;lambda_SO =0.06;lambda_v=0.4;lambda_R = -0.2;
+a = 1;t =1;lambda_SO =0.06;lambda_v=0.0;lambda_R = -0.0;
 KaneMele_dy = KaneMele_dy<'KPOINTS_slab';
 
 [klist_l,kpoints_l,kpoints_name] = KaneMele_dy.kpath_information();
 %KaneMele_dy.HcoeL = subs(KaneMele_dy.HcoeL);
 % RCI_d = RCI_d.Subsall('para',[sym('theta_x'),sym('theta_y')]);
 % [EIGENCAR_slab] = RCI_d.EIGENCAR_gen_slab('norb',-1,'paraname',[sym('theta_x'),sym('theta_y')],'para',[(0:0.1:1).',-(0:0.1:1).']);
-KaneMele_dy_n = KaneMele_dy.Subsall();
+KaneMele_dy_n = KaneMele_dy.Subsall('sym');
 [EIGENCAR_slab,WAVECAR_slab,WEIGHTCAR_slab] = KaneMele_dy_n.EIGENCAR_gen_slab();
 %%
-[fig,ax] = vasplib_tool.creat_figure();
 vasplib.pbandplot(abs(WEIGHTCAR_slab),EIGENCAR_slab, ...
     'Ecut',[-2,2], ...
     'title','KaneMele-slab', ...
-    'KPOINTS','KPOINTS_slab','fig',fig,'ax',ax);
+    'KPOINTS','KPOINTS_slab');
 %%
-[fig,ax] = vasplib_tool.creat_figure();
 vasplib.pbandplot(WEIGHTCAR_slab,EIGENCAR_slab, ...
     'Ecut',[-2,2], ...
     'title','KaneMele-slab', ...
     'KPOINTS','KPOINTS_slab', ...
-    'cmap',ColorMap.Matplotlib('coolwarm'), ...
-    'fig',fig,'ax',ax);
+    'cmap',ColorMap.Matplotlib('coolwarm'));
 colorbar(ax);
 %%
 WaveFunc = WAVECAR_slab(:,59:60,60);
@@ -139,7 +138,7 @@ KaneMele.orbL = [     0.333333333         0.666666667         0.50000000 ;...
     ];
 KaneMele.Htrig_sym
 B = KaneMele.rotation().Htrig_sym
-%KaneMele_dy = KaneMele.descritize([0,30,0],'Rotation','auto');
+%KaneMele_dy = KaneMele.discretize([0,30,0],'Rotation','auto');
 %KaneMele_dy.Htrig_sym
 
 %% 参考文献
