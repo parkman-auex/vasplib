@@ -19,10 +19,6 @@ t2 = 1.0;
 t3 = 0.5;
 m = -1.0;
 QAH_n = QAH.Subsall();
-chern0 = chern_number(QAH_n);
-chern1 = chern_number(QAH_n,1);
-chern2 = chern_number(QAH_n,2);
-wilson_loop(QAH_n,"kx");
 %% vasplin inner function
 chern0 = QAH_n.Chern()
 chern1 = QAH_n.Chern('BAND_index',1)

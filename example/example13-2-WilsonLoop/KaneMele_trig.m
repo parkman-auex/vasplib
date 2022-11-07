@@ -24,9 +24,6 @@ t=0.8;
 KM_n = KM.Subsall();
 % EIGENCAR = KM_n.EIGENCAR_gen();
 % bandplot(EIGENCAR,[-3,3],"KaneMele");
-chern1 = chern_number(KM_n);
-chern2 = chern_number(KM_n,1:2);
-wilson_loop(KM_n,"kx");
 %% vasplin inner function
 chern0 = KM_n.Chern()
 chern1 = KM_n.Chern('BAND_index',1)

@@ -27,9 +27,6 @@ B_y =0.15;
 BHZ_n = BHZ.Subsall();
 % EIGENCAR = BHZ_n.EIGENCAR_gen();
 % bandplot(EIGENCAR,[-3,3],"BHZ");
-% !!! not support the spin Chern number of BHZ model
-% figure();
-% wilson_loop(BHZ_n,"kx"); 
 %% vasplin inner function
 chern0 = BHZ_n.Chern()
 chern1 = BHZ_n.Chern('BAND_index',1)

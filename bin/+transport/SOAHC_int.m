@@ -3,7 +3,7 @@ function Chi_abc_fermi = SOAHC_int(Ham_obj,kstruct,sub_index,opts)
 % ref: 10.1103/PhysRevLett.127.277202
 % in SI unit, Ampere*Volt^-2*meter for 2D case
 arguments
-    Ham_obj;
+    Ham_obj {mustBeA(Ham_obj,{'HR','HK','Htrig'})};
     kstruct struct;
     sub_index string = "xyy";
     opts.T double = 20; % temperature (Kelvin)
@@ -17,6 +17,7 @@ end
 %% kmesh info
 klist_s = kstruct.klist_s;
 klist_r = kstruct.klist_r;
+nk = kstruct.nk;
 
 nkpts = size(klist_s,1);
 %% index convert
@@ -134,9 +135,11 @@ for kn = 1:nkpts
     end
     Chi_abc_tmp = G_bc_tmp.*dEda-G_ac_tmp.*dEdb;
     
-    G_ac(kn,1:nbands) = G_ac_tmp;
-    G_bc(kn,1:nbands) = G_bc_tmp;
-    Chi_abc(kn,1:nbands) = Chi_abc_tmp;
+    dfdE_tmp = transport.Fermi_1(EIG_kn,opts.Ef,opts.T);
+    
+    G_ac(kn,1:nbands) = G_ac_tmp .*dfdE_tmp;
+    G_bc(kn,1:nbands) = G_bc_tmp .*dfdE_tmp;
+    Chi_abc(kn,1:nbands) = Chi_abc_tmp .*dfdE_tmp;
     
     for fi = 1:nef
         dfdE   = transport.Fermi_1(EIG_kn,Ef_list_real(fi),opts.T);
@@ -169,16 +172,36 @@ if opts.plotBZ
     else
         ib = opts.plotBZ_bands;
     end  
-    G_ac_reshape = reshape(sum(G_ac(:,ib),2),kstruct.nk);
-    G_bc_reshape = reshape(sum(G_bc(:,ib),2),kstruct.nk);
-    Chi_abc_reshape = reshape(sum(Chi_abc(:,ib),2),kstruct.nk);
+    G_ac_reshape = reshape(sum(G_ac(:,ib),2),nk);
+    G_bc_reshape = reshape(sum(G_bc(:,ib),2),nk);    
+    Chi_abc_reshape = reshape(sum(Chi_abc(:,ib),2),nk);
     
-    f13 = Figs(1,3);   
-    contourf(f13.axes(1,1),G_ac_reshape);
-    contourf(f13.axes(1,2),G_bc_reshape);
-    contourf(f13.axes(1,3),Chi_abc_reshape);
+    G_ac_reshape_2 = [G_ac_reshape, -G_ac_reshape];
+    G_bc_reshape_2 = [G_bc_reshape, -G_bc_reshape];
+    Chi_abc_reshape_2 = [Chi_abc_reshape, -Chi_abc_reshape];
+    
+    f13 = Figs(1,3);
+    colormap(ColorMap.redblue(101))
+    
+    surf(f13.axes(1,1),G_ac_reshape_2);
+    surf(f13.axes(1,2),G_bc_reshape_2);
+    surf(f13.axes(1,3),Chi_abc_reshape_2);
     title(f13.axes(1,1),"G_{"+a_index+c_index+"}")
     title(f13.axes(1,2),"G_{"+b_index+c_index+"}")
-    title(f13.axes(1,3),"\chi_{"+a_index+b_index+c_index+"}")    
+    title(f13.axes(1,3),"\chi_{"+a_index+b_index+c_index+"}")
+    
+    for i = 1:3
+        xlim(f13.axes(1,i),[1 nk(2)])
+        ylim(f13.axes(1,i),[1 nk(1)])
+        shading(f13.axes(1,i),'interp');
+        xticks(f13.axes(1,i),[]);
+        yticks(f13.axes(1,i),[]);
+        % xlabel(f13.axes(1,i),"k_y");
+        % ylabel(f13.axes(1,i),"k_x");
+        % xticks(f13.axes(1,i),[0 nk(1)/2 nk(1)])
+        % yticks(f13.axes(1,i),[0 nk(2)/2 nk(2)])
+        % xticklabels(f13.axes(1,i),["" "k_y" ""])
+        % yticklabels(f13.axes(1,i),["" "k_x" ""])
+    end
 end
 end

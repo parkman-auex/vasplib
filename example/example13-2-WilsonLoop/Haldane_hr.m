@@ -22,10 +22,6 @@ m = 0.1 * t;
 Hal_n = Hal.Subsall();
 EIGENCAR = Hal_n.EIGENCAR_gen();
 bandplot(EIGENCAR ,[-3,3],'title',"Haldane-HR");
-chern1 = chern_number(Hal_n,1);
-chern2 = chern_number(Hal_n,2);
-figure();
-wilson_loop(Hal_n,"kx"); % This function may be wrongly set, raw edition from fyang 
 %% vasplib inner function
 chern0 = Hal_n.Chern()
 chern1 = Hal_n.Chern('BAND_index',1)
