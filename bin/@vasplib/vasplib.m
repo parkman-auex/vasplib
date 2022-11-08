@@ -176,8 +176,17 @@ classdef vasplib < matlab.mixin.CustomDisplay
             end
             vasplibobj = vasplibobj.timtj_gen(mode);
             % Prepare tj - ti
-            for i = 1:4
+            for i = 1:2
                 vasplibobj.tjmti{i} = - vasplibobj.timtj{i};
+            end
+            if strcmp(mode,'sym')
+                ExpInnerTerm = vasplib.matrixtimespage(vasplibobj.VarsSeqLcart(1:vasplibobj.Dim),vasplibobj.tjmti{1});
+                vasplibobj.tjmti{3}(:,:) = exp(1i*(sum(ExpInnerTerm,3)));
+                ExpInnerTermFrac = vasplib.matrixtimespage(vasplibobj.VarsSeqLcart(1:vasplibobj.Dim),vasplibobj.tjmti{2});
+                vasplibobj.tjmti{4}(:,:) =  exp(1i*(sum(ExpInnerTermFrac,3)));
+            else
+                vasplibobj.tjmti{3} = [];
+                vasplibobj.tjmti{4} = [];
             end
         end
         function vasplibobj = SliceGen(vasplibobj)
@@ -4562,6 +4571,41 @@ classdef vasplib < matlab.mixin.CustomDisplay
     end
     %% tools 大杂烩
     methods(Static,Hidden)
+        function [ChirdrenCell,Type] = fixedchildren(SymVar,mode)
+            arguments
+                SymVar sym;
+                mode = 'exp_inner';
+            end
+            if strcmp(mode,'exp_inner')
+                subexpr = children(combine(SymVar,'exp'));
+                if isequal(simplify(fold(@plus,subexpr)-SymVar),sym(0))
+                    ChirdrenCell = subexpr;
+                    Type = 'sum';
+                    return;
+                end
+                if isequal(simplify(fold(@times,subexpr)-SymVar),sym(0))
+                    ChirdrenCell{1} = SymVar;
+                    Type = 'prod';
+                    return;
+                end
+                ChirdrenCell = subexpr;
+                Type = 'inner';
+            else
+                subexpr = children(SymVar);
+                if isequal(simplify(fold(@plus,subexpr)-SymVar),sym(0))
+                    ChirdrenCell = subexpr;
+                    Type = 'sum';
+                    return;
+                end
+                if isequal(simplify(fold(@times,subexpr)-SymVar),sym(0))
+                    ChirdrenCell{1} = SymVar;
+                    Type = 'prod';
+                    return;
+                end
+                ChirdrenCell{1} = SymVar;
+                Type = 'inner';
+            end
+        end
         function [Asort,Usort] = sorteig(U,A)
             if nargin <2
                 mode = 'eigenval';

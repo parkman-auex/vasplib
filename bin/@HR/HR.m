@@ -2364,9 +2364,10 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             end
             if options.cartesian
                 tij_mat_k = H_hr.tjmti{3};
-                syms k_x k_y k_z real;
+                VarsUsing = H_hr.VarsSeqLcart(1:H_hr.Dim);
+                %syms k_x k_y k_z real;
                 exp_pre = exp(1i... % 1i possible
-                    *[k_x k_y k_z]*(...
+                    *VarsUsing*(...
                     vectorList*H_hr.Rm)');
                 for i = 1:H_hr.NRPTS
                     Hsym = Hsym+H_hr.HcoeL(:,:,i)*exp_pre(i);
@@ -2377,9 +2378,10 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                 end
             else
                 tij_mat_s = H_hr.tjmti{4};
-                syms k_1 k_2 k_3 real;
+                VarsUsing = H_hr.VarsSeqLfrac(1:H_hr.Dim);
+                %syms k_1 k_2 k_3 real;
                 exp_pre = exp(1i*2*pi... % 1i possible
-                    *[k_1 k_2 k_3]*(...
+                    *VarsUsing*(...
                     vectorList)');
                 for i = 1:H_hr.NRPTS
                     Hsym = Hsym+H_hr.HcoeL(:,:,i)*exp_pre(i);

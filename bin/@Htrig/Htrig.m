@@ -2056,7 +2056,6 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
             %                 warning('wrong type of trig class')
             %             end
             %%
-
             Hexp = Htrig_exp.HcoeL;
             WAN_NUM = Htrig_exp.Basis_num;
             %% empty HR class
@@ -2078,8 +2077,13 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
                 if isequal(hsym(n), sym(1))
                     kd_num = zeros(1,DIM);
                 else
-                    ikd = children(hsym(n));
-                    kd = ikd{1,1}/1i;
+                    %ikd = children(hsym(n));
+                    [ChirdrenCell,Type] = vasplib.fixedchildren(hsym(n),'exp_inner');
+                    if strcmp(Type,'sum') || strcmp(Type,'prod') % combine
+                        error('? something wrong? You should Debug here!');
+                    elseif strcmp(Type,'inner')
+                        kd = ChirdrenCell{1}/1i;
+                    end
                     for d = 1:DIM
                         cDim{d} = subs(kd,VarsUsing(d),1) - subs(kd,VarsUsing(d),0);
                     end
