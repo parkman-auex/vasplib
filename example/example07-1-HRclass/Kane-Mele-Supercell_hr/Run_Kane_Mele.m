@@ -91,24 +91,37 @@ fin_dir     =  2;
 glue_edges  = false;
 vacuum_mode = 1;
 % Gen Slab
-Kane_Mele_armchair_n_slab = Kane_Mele_armchair_n.cut_piece(repeatnum,fin_dir,glue_edges,vacuum_mode);
+Kane_Mele_n_slab = Kane_Mele_armchair_n.cut_piece(repeatnum,fin_dir,glue_edges,vacuum_mode);
 % load KPOINTS
-Kane_Mele_armchair_n_slab = Kane_Mele_armchair_n_slab < 'KPOINTS_slab';
+Kane_Mele_n_slab = Kane_Mele_n_slab < 'KPOINTS_slab';
 % slab band
 Efermi = 0.0;
 % compare speed
 tic;
-EIGENCAR_slab = Kane_Mele_armchair_n_slab.EIGENCAR_gen();
+EIGENCAR_slab = Kane_Mele_n_slab.EIGENCAR_gen();
 toc;
-Kane_Mele_armchair_n_slab_list = Kane_Mele_armchair_n_slab.rewrite();
+Kane_Mele_armchair_n_slab_list = Kane_Mele_n_slab.rewrite();
 tic
 EIGENCAR_slab = Kane_Mele_armchair_n_slab_list.EIGENCAR_gen();
 toc;
 % plot
 bandplot(EIGENCAR_slab,[-3,3],...
 'KPOINTS','KPOINTS_slab',...
-'title','KaneMele-Armchair-sla', ...
+'title','KaneMele-Armchair-slab', ...
 'Color','g');
+%% Slab边缘态（using supercell_hr with OBC）
+% Gen Slab
+Kane_Mele_n_slab = Kane_Mele_n.supercell_hr(diag([1 20 1]),'Accuracy',1e-5,'OBC',[0 1 0]);
+% load KPOINTS
+Kane_Mele_n_slab = Kane_Mele_n_slab < 'KPOINTS_slab';
+EIGENCAR_slab = Kane_Mele_n_slab.EIGENCAR_gen();
+toc;
+% plot
+bandplot(EIGENCAR_slab,[-3,3],...
+'KPOINTS','KPOINTS_slab',...
+'title','KaneMele-slab(By supercell\_hr)', ...
+'Color','r');
+
 %% 能态与角落态
 % 最后，我们将展现Kane-Mele的Armchair 边缘态；并使用 norb_enforce使用eigs加速
 
@@ -124,7 +137,7 @@ figure();
 plot(EIGENCAR_disk,'-o');
 ylim([-1 1]);
 %% 
-% armchair 边的边缘态有一点点问题
+% armchair 边的边缘态有一点点问题?
 WaveFunc = WAVECAR_disk(:,length(EIGENCAR_disk)/2:length(EIGENCAR_disk)/2+1);
 orb_list = n_disk.orbL;
 vasplib.waveplot(orb_list,WaveFunc);

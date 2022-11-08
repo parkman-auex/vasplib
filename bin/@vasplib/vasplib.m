@@ -5010,8 +5010,6 @@ classdef vasplib < matlab.mixin.CustomDisplay
             else
                 rc_plus =rc;
             end
-
-
         end
         function To_red_sc=to_red_sc(red_vec_orig ,Ns)
             To_red_sc=red_vec_orig/Ns;

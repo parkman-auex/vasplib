@@ -2666,6 +2666,34 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                     error('Not support yet.');
             end
         end
+        function H_hr = ForceToType(H_hr,Type)
+             switch Type
+                case 'sparse'
+                    H_hr = H_hr.ForceTosparse();
+                case 'mat'
+                    H_hr = H_hr.ForceToMat();
+                 case 'list'
+                    H_hr = H_hr.ForceTolist();
+                otherwise
+                    error('Not support yet.');
+            end
+        end
+        function H_hr = OpenBoundary(H_hr,OBC_list)
+            arguments
+                H_hr ;
+                OBC_list = zeros(1,H_hr.Dim);
+            end
+            if isequal(OBC_list,zeros(1,H_hr.Dim))
+                return;
+            end
+            Type = H_hr.Type;
+            H_hr =H_hr.ForceToMat();
+            vectorList = H_hr.vectorL;
+            ABSvectorList = abs(vectorList);
+            KeepVectorL = find(~logical(sum(ABSvectorList(:,logical(OBC_list))>0,2)));
+            H_hr = H_hr.reseq(':',KeepVectorL);
+            H_hr = H_hr.ForceToType(Type);
+        end
     end
     % ----------------  add something --------------------
     methods
@@ -3110,7 +3138,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             %             orbitals in the original model).
             %
             %         Example usage::
-            %           Out_H_xyz = cut_piece(H_xyz,repeatnum,fin_dir,glue_edgs,orbital_init)
+            %           Out_H_xyz = cut_piece(H_hr,repeatnum,fin_dir,glue_edgs,orbital_init)
             
             %           A = tb_model(3, 3, ...)
             %           % Construct two-dimensional model B out of three-dimensional
@@ -3125,7 +3153,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             arguments
                 H_hr HR;
                 repeatnum double{mustBeInteger} =  10;
-                fin_dir double{mustBeMember(fin_dir,[1,2,3])} = 3;
+                fin_dir double{mustBeMember(fin_dir,[1,2,3,4])} = 3;
                 glue_edges logical = false;
                 vacuum_mode logical = false;
             end
@@ -3501,15 +3529,16 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             % Returns tight-binding model representing a super-cell of a current object.
             % This function can be used together with *cut_piece* in order to create slabs with arbitrary surfaces.
             %
-            % * Label: play_hr
+            % * Label: 
             %
             %--------  init  --------
             %import vasplib_tool.*
             arguments
                 H_hr HR;
-                Ns double = eye(3);
+                Ns double = eye(H_hr.Dim); % For any Dimension
                 options.Accuracy double = 1e-6;
                 options.force_list = false;
+                options.OBC = zeros(1,H_hr.Dim); % For addtional OBC support
             end
             %--------  init  --------
             V= abs(round(det(Ns)));% intger forcely
@@ -3521,8 +3550,6 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             % checks on super-lattice Ns
             [sc_orb,sc_vec,sc_elementL,sc_quantumL] = H_hr.supercell_orb(Ns,Accuracy);
             % create super-cell tb_model object to be returned
-            %OUT_H_hr_ = struct('seq',[],'vector',[],'Degen',[],'key',[],'nokey',[],'Hstr',[],'Hsym',[],'Hcoe',[],'Hnum',[]);
-            % OUT_H_xyz = repmat(H_xyz_ ,[NRPTS,1]);    % Hamiltonian of every cell;
             OUT_H_hr = H_hr;
             OUT_H_hr = OUT_H_hr.clean(OUT_WAN_NUM);
             OUT_H_hr.orbL = sc_orb; % update orbL
@@ -3533,20 +3560,19 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             if H_hr.overlap
                 NRPTS_S = size(H_hr.vectorL_overlap,1);
             end
-            fprintf('Search done; begin set hoppings\n');
-            fprintf('We can improve the perfomance later\n');
-            %             t1=clock;
+            fprintf('Search done; begin to set hoppings\n');
+            fprintf('We may improve the perfomance later\n');
             num_sc = size(sc_vec,1);
             %set hopping terms
             Accuracy_roundn = round(log(Accuracy)/log(10));
             % define orb_sc_L
             pc_orb_super = repmat(pc_orb,[num_sc,1]);
-            orb_sc_vevL = sc_orb*Ns - pc_orb_super;
-            Leak_L = ~ismember(orb_sc_vevL,sc_vec,'rows');
+            orb_sc_vevL = roundn(sc_orb*Ns - pc_orb_super,Accuracy_roundn);
+            Leak_L = ~ismembertol(orb_sc_vevL,sc_vec,Accuracy,'ByRows',true);
             orb_sc_labelL = find(Leak_L,1);
             %Leak_orb_sc_vecL = orb_sc_vevL(Leak_L,:);
-            if isempty(orb_sc_labelL) && strcmp(H_hr.Type,'mat') ||options.force_list
-                fprintf("supercell has leak sites, enforce list mode!");
+            if ~isempty(orb_sc_labelL) && strcmp(H_hr.Type,'mat') ||options.force_list
+                fprintf("supercell has leak sites, use list mode enforcely!");
                 H_hr = H_hr.rewrite();
                 OUT_H_hr = OUT_H_hr.rewrite();
                 %options.force_list = true;
@@ -3667,7 +3693,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                             %                         icur_sc_vec,num_sc,ih,H_hr.NRPTS,etime(clock,t1));
                         end
                         pb.delete();
-                        % overlap
+                        % We will remove all overlap function soon!!;
                         if H_hr.overlap
                             pb = vasplib_tool_outer.CmdLineProgressBar(...
                                 ['Generate process: SUPERCELL(S mat)(',...
@@ -3789,6 +3815,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             end
             H_hr = OUT_H_hr;
             H_hr.Basis_num = OUT_WAN_NUM;
+            H_hr = OpenBoundary(H_hr,options.OBC);
             if options.force_list
                 if strcmp(H_hr.Type,'mat')
                     H_hr = H_hr.rewrite();
@@ -3997,10 +4024,10 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
         end
         function [sc_orb,sc_vec,sc_elementL,sc_quantumL] = supercell_orb(H_hr,Ns,Accuracy)
             %--------  init  --------
-            %import vasplib_tool.*
+            %
             arguments
                 H_hr HR;
-                Ns double = eye(3);
+                Ns double = eye(H_hr.Dim);
                 Accuracy double = 1e-6;
             end
             %--------  init  --------
@@ -4020,21 +4047,26 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             %--------  init  --------
             % Ns = round(Ns);
             orb_init = H_hr.orbL;
+            DIM = H_hr.Dim;
             %OUT_WAN_NUM = H_hr.WAN_NUM*V ;
             % conservative estimate on range of search for super-cell vectors
             max_R=max(abs(Ns))*3;
             % candidates for super-cell vectors
             % this is hard-coded and can be improved!
-            sc_cands = zeros( (2*max_R(1)+1) * (2*max_R(2)+1) * (2*max_R(3)+1) ,3 );
-            count_tmp = 1;
-            for i = -max_R(1):max_R(1)
-                for j = -max_R(2):max_R(2)
-                    for k = -max_R(3):max_R(3)
-                        sc_cands(count_tmp,:)=[i,j,k];
-                        count_tmp = count_tmp +1;
-                    end
-                end
+            %sc_cands = zeros( prod(2*max_R+1)  ,3 );
+            %count_tmp = 1;
+            for d = 1:DIM
+                dL{d} = (-max_R(d):max_R(d)).'; 
             end
+            sc_cands = fold(@park.SemiProductVector,dL); 
+            %for i = -max_R(1):max_R(1)
+            %    for j = -max_R(2):max_R(2)
+            %        for k = -max_R(3):max_R(3)
+            %            sc_cands(count_tmp,:)=[i,j,k];
+            %            count_tmp = count_tmp +1;
+            %        end
+            %    end
+            %end
             % find all vectors inside super-cell
             % store them here
             sc_vec=([]);
@@ -4042,7 +4074,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             %
             for ivec = 1:length(sc_cands)
                 % compute reduced coordinates of this candidate vector in the super-cell frame
-                tmp_red=HR.to_red_sc(sc_cands(ivec,:),Ns);
+                tmp_red = vasplib.to_red_sc(sc_cands(ivec,:),Ns);
                 % check if in the interior
                 inside = 1;
                 for it = 1:length(tmp_red)
@@ -4072,7 +4104,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             % cartesian vectors of the super lattice
             % sc_cart_lat=Ns*Rm; %must Ns Rm
             % orbitals of the super-cell tight-binding model
-            sc_orb=zeros(num_sc*WANNUM,3);
+            sc_orb=zeros(num_sc*WANNUM,H_hr.Dim);
             sc_elementL = repmat(H_hr.elementL,[num_sc,1]);
             sc_quantumL = repmat(H_hr.quantumL,[num_sc,1]);
             count_tmp = 1;
@@ -4083,18 +4115,19 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                     % shift orbital and compute coordinates in
                     % reduced coordinates of super-cell
                     sc_orb(count_tmp,:) = roundn((orb_init(iorb,:)+cur_sc_vec)/Ns,nAccuracy);
-                    if sc_orb(count_tmp,1) ==1
-                        sc_orb(count_tmp,1)=0;
-                    end
-                    if sc_orb(count_tmp,2) ==1
-                        sc_orb(count_tmp,2)=0;
-                    end
-                    if sc_orb(count_tmp,3) ==1
-                        sc_orb(count_tmp,3)=0;
-                    end
+                    %if sc_orb(count_tmp,1) ==1
+                    %    sc_orb(count_tmp,1)=0;
+                    %end
+                    %if sc_orb(count_tmp,2) ==1
+                    %    sc_orb(count_tmp,2)=0;
+                    %end
+                    %if sc_orb(count_tmp,3) ==1
+                    %    sc_orb(count_tmp,3)=0;
+                    %end
                     count_tmp =  count_tmp +1;
                 end
             end
+            sc_orb(sc_orb==1) = 0;
             sc_vec = (sc_vec);
             sc_orb = mod(sc_orb,1);% attention this may wrongly set!
         end
@@ -4302,7 +4335,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
         function orbital_out = nanowire_orb(H_hr,fin_dir,vacuum_mode,options)
             arguments
                 H_hr HR;
-                fin_dir = [1 1 0];
+                fin_dir = [10 10 1];
                 vacuum_mode = false;
                 options.fast = true;
             end
@@ -4311,100 +4344,99 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             else
                 orbital_init = H_hr.orbL;
             end
-            
-            switch vacuum_mode
-                case 0
-                    orbital_out = orbital_init;
-                    % orb
-                    for i = H_hr.Dim
-                        Nslab = fin_dir(i);
-                        if  Nslab == 0
-                            Nslab = 1;
-                        end
-                        count = 0;
-                        WAN_NUM_tmp = size(orbital_out,1);
-                        fin_orb = zeros(WAN_NUM_tmp*Nslab,3);
-                        for inum = 1:Nslab     % go over all cells in finite direction
-                            for j = 1:WAN_NUM_tmp  % go over all orbitals in one cell
-                                count =count +1;
-                                % make a copy of j-th orbital
-                                orb_tmp=orbital_out(j,:);
-                                % change coordinate along finite direction ; fractional
-                                orb_tmp(i)= (orb_tmp(i) + double(inum-1)) / Nslab;
-                                % add to the list
-                                fin_orb(count,:)=orb_tmp;
-                                % do the onsite energies at the same time
-                            end
-                        end
-                        orbital_out = fin_orb;
+
+            if ~vacuum_mode
+                orbital_out = orbital_init;
+                % orb
+                for i = 1:H_hr.Dim
+                    Nslab = fin_dir(i);
+                    if  Nslab == 0
+                        Nslab = 1;
                     end
-                    % POSCAR
-                    Ns = [1 0 0;0 1 0;0 0 1];
-                    Ns = Ns.*fin_dir;
-                    fin_dir_list = [0 0 0];
-                    %disp(fin_dir_list);
-                    if ~options.fast
-                        [Rm_tmp,sites_tmp,Atom_name_tmp,Atom_num_tmp]=HR.POSCAR_readin();
-                        H_hr.supercell(Ns,'POSCAR_super_fin',Rm_tmp,sites_tmp,Atom_name_tmp,Atom_num_tmp,fin_dir_list);
-                    end
-                case 1
-                    orbital_out = orbital_init;
-                    % orb
-                    for i = H_hr.Dim
-                        Nslab = fin_dir(i);
-                        if  Nslab == 0
-                            Nslab = 1;
+                    count = 0;
+                    WAN_NUM_tmp = size(orbital_out,1);
+                    fin_orb = zeros(WAN_NUM_tmp*Nslab,3);
+                    for inum = 1:Nslab     % go over all cells in finite direction
+                        for j = 1:WAN_NUM_tmp  % go over all orbitals in one cell
+                            count =count +1;
+                            % make a copy of j-th orbital
+                            orb_tmp=orbital_out(j,:);
+                            % change coordinate along finite direction ; fractional
+                            orb_tmp(i)= (orb_tmp(i) + double(inum-1)) / Nslab;
+                            % add to the list
+                            fin_orb(count,:)=orb_tmp;
+                            % do the onsite energies at the same time
                         end
-                        count = 0;
-                        WAN_NUM_tmp = size(orbital_out,1);
-                        fin_orb = zeros(WAN_NUM_tmp*Nslab,3);
-                        for inum = 1:Nslab % go over all cells in finite direction
-                            for j = 1:WAN_NUM_tmp  % go over all orbitals in one cell
-                                count =count +1;
-                                % make a copy of j-th orbital
-                                orb_tmp=orbital_out(j,:);
-                                % change coordinate along finite direction ; fractional
-                                orb_tmp(i)= (orb_tmp(i) + double(inum-1))/Nslab;
-                                % add to the list
-                                fin_orb(count,:)=orb_tmp;
-                                % do the onsite energies at the same time
-                            end
-                        end
-                        orbital_out = fin_orb;
-                    end
-                    
-                    Ns = [1 0 0;0 1 0;0 0 1];
-                    Ns = Ns.*fin_dir;
-                    fin_dir_list = double(fin_dir>1);
-                    if ~options.fast
-                        %disp(fin_dir_list);
-                        [Rm_tmp,sites_tmp,Atom_name_tmp,Atom_num_tmp]=HR.POSCAR_readin();
-                        % gen POSCAR
-                        H_hr.supercell(Ns,'POSCAR_super_fin',Rm_tmp,sites_tmp,Atom_name_tmp,Atom_num_tmp,fin_dir_list);
-                    else
-                        [Rm_tmp,sites_tmp,Atom_name_tmp,Atom_num_tmp]=HR.POSCAR_readin();
-                    end
-                    % rebuild fin_orb
-                    Rm_tmp = Ns*Rm_tmp;
-                    Rmlength1 = norm (Rm_tmp(1,:));
-                    Rmlength2 = norm (Rm_tmp(2,:));
-                    Rmlength3 = norm (Rm_tmp(3,:));
-                    Rm_s_fin_add = [10*Rm_tmp(1,:)*fin_dir_list(1)/Rmlength1;...
-                        10*Rm_tmp(2,:)*fin_dir_list(2)/Rmlength2;...
-                        10*Rm_tmp(3,:)*fin_dir_list(3)/Rmlength3];
-                    Rm_s_fin = Rm_tmp + Rm_s_fin_add ;
-                    Rc_s_fin_add = [1/2, 1/2 ,1/2] ;
-                    Rr_s_fin_add = Rc_s_fin_add * Rm_s_fin_add;
-                    [nfinorb,~ ]= size(fin_orb);
-                    for  i = 1:nfinorb
-                        Rr_orb = fin_orb(i,:)*Rm_tmp;
-                        Rr_s_fin = Rr_orb + Rr_s_fin_add;
-                        Rc_s_fin = Rr_s_fin / Rm_s_fin;
-                        fin_orb(i,:) = Rc_s_fin ;
                     end
                     orbital_out = fin_orb;
+                end
+                % POSCAR
+                Ns = [1 0 0;0 1 0;0 0 1];
+                Ns = Ns.*fin_dir;
+                fin_dir_list = [0 0 0];
+                %disp(fin_dir_list);
+                if ~options.fast
+                    [Rm_tmp,sites_tmp,Atom_name_tmp,Atom_num_tmp]=HR.POSCAR_readin();
+                    H_hr.supercell(Ns,'POSCAR_super_fin',Rm_tmp,sites_tmp,Atom_name_tmp,Atom_num_tmp,fin_dir_list);
+                end
+            else
+                orbital_out = orbital_init;
+                % orb
+                for i = 1:H_hr.Dim
+                    Nslab = fin_dir(i);
+                    if  Nslab == 0
+                        Nslab = 1;
+                    end
+                    count = 0;
+                    WAN_NUM_tmp = size(orbital_out,1);
+                    fin_orb = zeros(WAN_NUM_tmp*Nslab,3);
+                    for inum = 1:Nslab % go over all cells in finite direction
+                        for j = 1:WAN_NUM_tmp  % go over all orbitals in one cell
+                            count =count +1;
+                            % make a copy of j-th orbital
+                            orb_tmp=orbital_out(j,:);
+                            % change coordinate along finite direction ; fractional
+                            orb_tmp(i)= (orb_tmp(i) + double(inum-1))/Nslab;
+                            % add to the list
+                            fin_orb(count,:)=orb_tmp;
+                            % do the onsite energies at the same time
+                        end
+                    end
+                    orbital_out = fin_orb;
+                end
+
+                Ns = [1 0 0;0 1 0;0 0 1];
+                Ns = Ns.*fin_dir;
+                fin_dir_list = double(fin_dir>1);
+                if ~options.fast
+                    %disp(fin_dir_list);
+                    [Rm_tmp,sites_tmp,Atom_name_tmp,Atom_num_tmp]=HR.POSCAR_readin();
+                    % gen POSCAR
+                    H_hr.supercell(Ns,'POSCAR_super_fin',Rm_tmp,sites_tmp,Atom_name_tmp,Atom_num_tmp,fin_dir_list);
+                else
+                    [Rm_tmp,sites_tmp,Atom_name_tmp,Atom_num_tmp]=HR.POSCAR_readin();
+                end
+                % rebuild fin_orb
+                Rm_tmp = Ns*Rm_tmp;
+                Rmlength1 = norm (Rm_tmp(1,:));
+                Rmlength2 = norm (Rm_tmp(2,:));
+                Rmlength3 = norm (Rm_tmp(3,:));
+                Rm_s_fin_add = [10*Rm_tmp(1,:)*fin_dir_list(1)/Rmlength1;...
+                    10*Rm_tmp(2,:)*fin_dir_list(2)/Rmlength2;...
+                    10*Rm_tmp(3,:)*fin_dir_list(3)/Rmlength3];
+                Rm_s_fin = Rm_tmp + Rm_s_fin_add ;
+                Rc_s_fin_add = [1/2, 1/2 ,1/2] ;
+                Rr_s_fin_add = Rc_s_fin_add * Rm_s_fin_add;
+                [nfinorb,~ ]= size(fin_orb);
+                for  i = 1:nfinorb
+                    Rr_orb = fin_orb(i,:)*Rm_tmp;
+                    Rr_s_fin = Rr_orb + Rr_s_fin_add;
+                    Rc_s_fin = Rr_s_fin / Rm_s_fin;
+                    fin_orb(i,:) = Rc_s_fin ;
+                end
+                orbital_out = fin_orb;
             end
-            
+
         end
         function H_hr = supercell(H_hr,Ns,filename,Rm,sites,Atom_name,Atom_num,findir)
             % usage: [sites]=supercell(Ns)
@@ -9047,7 +9079,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             %                         +" real;";
             %                     eval(EVALstring);
             %                     % enforce onsite = 0
-            %                     %H_xyz = set_hop(-sym(H(j,j)),j,j,[0 0 0],H_xyz,'sym');
+            %                     %H_hr = set_hop(-sym(H(j,j)),j,j,[0 0 0],H_hr,'sym');
             %                     H_hr = H_hr.set_hop(str2sym(onsite_sym_name),j,j,[0 0 0],'sym');
             %                 end
             %             end
@@ -9159,7 +9191,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                     %                         +" real;";
                     %                     eval(EVALstring);
                     % enforce onsite = 0
-                    %H_xyz = set_hop(-sym(H(j,j)),j,j,[0 0 0],H_xyz,'sym');
+                    %H_hr = set_hop(-sym(H(j,j)),j,j,[0 0 0],H_hr,'sym');
                     H_hr.HnumL{i}(j,j) = subs(str2sym(onsite_sym_name));
                 end
             end
