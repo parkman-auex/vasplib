@@ -273,7 +273,11 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 num_var=find(isnan(str2double(content_str(1:data_start_ind-2))),1)-1;
                 simulation_result = Hckt.save_signal_names(num_var,data_start_ind,content_str,file_extension);
                 % data read
-                fileID = fopen(filename);
+                if exist(filename+".data",'file')
+                    fileID = fopen(filename+".data");
+                elseif exist(filename,'file')
+                    fileID = fopen(filename);
+                end
                 formatSpec = '%13f%13f%13f%13f%13f%13f%[^\n\r]';
                 %formatSpec = '%13c%13c%13c%13c%13c%13c%[^\n\r]';
                 dataArray = textscan(fileID, formatSpec);
@@ -315,8 +319,17 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 end
                 fclose(fileID);
             else
-                [simulation_result]= Hckt.read_hspice_tr_sw_ac(filename);
-
+                try
+                    if  ~isunix
+                        win_matlab.hspiceACTR(filename);
+                    else
+                    end
+                    options.fast = true;
+                    optionsCell = namedargs2cell(options);
+                    [simulation_result]= Hckt.read_hspice_tr(filename,optionsCell{:});
+                catch
+                    [simulation_result]= Hckt.read_hspice_tr_sw_ac(filename);
+                end
             end
         end
         function [simulation_result]=read_hspice_tr_sw_ac(filename)
@@ -973,7 +986,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 end
             end
             % 
-            ChooseL = SpectrumL>OmegaCut(1) & SpectrumL<OmegaCut(2);
+            ChooseL = SpectrumL>=OmegaCut(1) & SpectrumL<=OmegaCut(2);
             Y = SpectrumL(ChooseL);
             if options.shift
                 Z = EIGNECAR(ChooseL,[1:size(EIGNECAR,2),1]);
