@@ -2,7 +2,7 @@
 TITLE = '4D_TI';
 Dim = 4;
 %meshs = [3,3,3,3];
-meshs = [20,12,3,3];
+meshs = [3,3,3,3];
 magnitude = 'p';
 workdir = pwd;
 Analysis = 'ac';
@@ -48,13 +48,14 @@ if isunix && ~ismac
 simulation_result = Hckt.read_hspice_ac(DATAname);
 [VectorList,ObservationsMat,~,SpectrumX,TimeL] = Hckt.extractObservations(simulation_result,'analysis',Analysis);
 %% grid
-if 1 == 1
+if 1 == 2
 SelectL = VectorList(:,end)==2;
 ObservationsMat2 = ObservationsMat(SelectL,:);
 VectorList2 = VectorList(SelectL,:);
 else
     VectorList2 = VectorList;
-    VectorList2(:,end) = 1;
+    VectorList2(:,end) = 2;
+    %ObservationsMat2 = ObservationsMat(SelectL,:);
     [VectorList2,ObservationsMat2] = HollowKnight.generalcontractrow2(VectorList2,ObservationsMat);
 end
 %% 

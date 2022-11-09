@@ -798,13 +798,13 @@ classdef Hckt < matlab.mixin.CustomDisplay
             if Dim < 4 && ~options.cellmode 
                 switch Dim
                     case 1
-                        [DOSCAR_ND,klist1,OmgL] = CollectVstruct1D(ObservationsMat,VectorList,OmegaCut,SpectrumX);
+                        [DOSCAR_ND,klist1,OmgL] = Hckt.CollectVstruct1D(ObservationsMat,VectorList,OmegaCut,SpectrumX);
                         klistCell{1} = klist1;
                     case 2
-                        [DOSCAR_ND,klist1,klist2,OmgL] = CollectVstruct2D(VectorList,ObservationsMat,OmegaCut,SpectrumX);
+                        [DOSCAR_ND,klist1,klist2,OmgL] = Hckt.CollectVstruct2D(VectorList,ObservationsMat,OmegaCut,SpectrumX);
                         klistCell{1} = klist1; klistCell{2} = klist2;
                     case 3
-                        [DOSCAR_ND,klist1,klist2,klist3,OmgL] = CollectVstruct3D(VectorList,ObservationsMat,OmegaCut,SpectrumX);
+                        [DOSCAR_ND,klist1,klist2,klist3,OmgL] = Hckt.CollectVstruct3D(VectorList,ObservationsMat,OmegaCut,SpectrumX);
                         klistCell{1} = klist1; klistCell{2} = klist2; klistCell{3} = klist3;
                 end
                 return;
@@ -1155,8 +1155,8 @@ classdef Hckt < matlab.mixin.CustomDisplay
                         IpulseSTRING = [IpulseSTRING;string(['Ipulse ',NodeStrList{i},' GND PU 0 1 5n 5n 50u'])];
                 end
                 % Vac
-                VacSTRING = "Vac source GND AC 1 0";
-                VacSTRING = [VacSTRING;string(['R_for_ac ',NodeStrList{i},' source 100'])];
+                VacSTRING = [VacSTRING;"Vac"+num2str(i)+" source"+ num2str(i)+" GND AC 1 0"];
+                VacSTRING = [VacSTRING;string(['R_for_ac ',NodeStrList{i},' source',num2str(i),' 100'])];
             end
             % 
             if strcmp(HcktObj.Vac,"")
