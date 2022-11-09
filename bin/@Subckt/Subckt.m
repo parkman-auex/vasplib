@@ -216,6 +216,7 @@ classdef Subckt < matlab.mixin.CustomDisplay
                 options.magnitude = 'p';
                 options.parameters = [];
                 options.name = 'Pri';
+                options.Dim = 3;
             end
             if isempty(options.parameters)
                 options.parameters = ['VarL0 = 1u C0 = 100',options.magnitude,' InitV = 0V'];
@@ -229,7 +230,10 @@ classdef Subckt < matlab.mixin.CustomDisplay
                     DefaultC = '100p';
                     error('Not support yet');
                 case 'HR'
-                    ScktObj = Subckt.FromHomecellList(HnumL.HnumL,HnumL.vectorL,HnumL.WAN_NUM,optionsCell{:});
+                    H_hr = HnumL;
+                    options.Dim = H_hr.Dim;
+                    optionsCell = namedargs2cell(options);
+                    ScktObj = Subckt.FromHomecellList(H_hr.HnumL,H_hr.vectorL,H_hr.WAN_NUM,optionsCell{:});
                     sym_mode = false;
                     return;
                 otherwise
@@ -239,7 +243,7 @@ classdef Subckt < matlab.mixin.CustomDisplay
             ScktObjDevice = 'X';
             ScktObjName = options.name;
             ScktObjNode = [string(1:WAN_NUM),'TOGND'];
-            ScktObjNetlist = Subckt.GenNetlistFromHList(HnumL,vectorL,'sym_mode',sym_mode,'magnitude',options.magnitude);
+            ScktObjNetlist = Subckt.GenNetlistFromHList(HnumL,vectorL,'sym_mode',sym_mode,'magnitude',options.magnitude,'Dim',options.Dim);
             ScktObjDescription = options.parameters;
             ScktObj = Subckt(ScktObjDevice,ScktObjName,ScktObjNode,ScktObjDescription,ScktObjNetlist);% 
         end
@@ -249,18 +253,23 @@ classdef Subckt < matlab.mixin.CustomDisplay
                 vectorL
                 options.magnitude = 'p';
                 options.sym_mode = false;
+                options.Dim = 3;
                 options.vectorL = [0,0,0];
             end
+            DIM = options.Dim;
+            if size(options.vectorL ,2) ~= DIM
+                options.vectorL = zeros(1,DIM);
+            end
             % Select vector default is homecell
-            [SelectL] = ismember(double(vectorL(:,1:3)),options.vectorL,'rows');
+            [SelectL] = ismember(double(vectorL(:,1:DIM)),options.vectorL,'rows');
             vectorL = vectorL(SelectL,:);
             HnumL = HnumL(SelectL);
             nComponents = size(vectorL,1);
             Netlist{nComponents} = '';
             selectL = logical(1:nComponents);
             for n = 1:nComponents
-                i = vectorL(n,4);
-                j = vectorL(n,5);
+                i = vectorL(n,DIM+1);
+                j = vectorL(n,DIM+2);
                 Name = string(['X',num2str(i),num2str(j)]);
                 if i == j
                     PortL = string(i);

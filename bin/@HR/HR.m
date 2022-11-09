@@ -753,7 +753,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                             zeros_num_mat = zeros(H_hr.WAN_NUM);
                             if H_hr.HnumL(:,:,seq) ~= zeros_num_mat
                                 warning('May be you should use add mode on this NRPT');
-                                Format = repmat("%d ",[1 H_hr.Dim]);
+                                Format = fold(@strcat,repmat("%d ",[1 H_hr.Dim]));
                                 Input = num2cell(vector(1,:));
                                 fprintf(strcat(Format," \n"),Input{:});
                             end
@@ -764,7 +764,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                             zeros_coe_mat = sym(zeros(H_hr.WAN_NUM));
                             if H_hr.HcoeL(:,:,seq) ~= zeros_coe_mat
                                 warning('May be you should use symadd mode on this NRPT ');
-                                Format = repmat("%d ",[1 H_hr.Dim]);
+                                Format = fold(@strcat,repmat("%d ",[1 H_hr.Dim]));
                                 Input = num2cell(vector(1,:));
                                 fprintf(strcat(Format," \n"),Input{:});
                             end
@@ -798,7 +798,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                         case 'set'
                             if H_hr.HnumL(seq) ~= 0
                                 warning('May be you should use add mode on this NRPT and hi hj');
-                                Format = repmat("%d ",[1 H_hr.Dim+2]);
+                                Format = fold(@strcat,repmat("%d ",[1 H_hr.Dim+2]));
                                 Input = num2cell(vector(1,:));
                                 fprintf(strcat(Format," \n"),Input{:});
                             end
@@ -808,7 +808,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                         case 'sym'
                             if H_hr.HcoeL(seq) ~= sym(0)
                                 warning('May be you should use symadd mode on this NRPT and hi hj');
-                                Format = repmat("%d ",[1 H_hr.Dim+2]);
+                                Format = fold(@strcat,repmat("%d ",[1 H_hr.Dim+2]));
                                 Input = num2cell(vector(1,:));
                                 fprintf(strcat(Format," \n"),Input{:});
                             end
@@ -821,7 +821,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                         case 'set'
                             if H_hr.HnumL{seq}(hi,hj) ~= 0
                                 warning('May be you should use add mode on this NRPT and hi hj');
-                                Format = repmat("%d ",[1 H_hr.Dim+2]);
+                                Format = fold(@strcat,repmat("%d ",[1 H_hr.Dim+2]));
                                 Input = num2cell([vector(1,:),hi,hj]);
                                 fprintf(strcat(Format," \n"),Input{:});
                             end
@@ -831,7 +831,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                         case 'sym'
                             if H_hr.HcoeL{seq}(hi,hj) ~= sym(0)
                                 warning('May be you should use symadd mode on this NRPT and hi hj');
-                                Format = repmat("%d ",[1 H_hr.Dim+2]);
+                                Format = fold(@strcat,repmat("%d ",[1 H_hr.Dim+2]));
                                 Input = num2cell([vector(1,:),hi,hj]);
                                 fprintf(strcat(Format," \n"),Input{:});
                             end
@@ -844,7 +844,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                         case 'set'
                             if H_hr.HnumL(hi,hj,seq) ~= 0
                                 warning('May be you should use add mode on this NRPT and hi hj');
-                                Format = repmat("%d ",[1 H_hr.Dim+2]);
+                                Format = fold(@strcat,repmat("%d ",[1 H_hr.Dim+2]));
                                 Input = num2cell([vector(1,:),hi,hj]);
                                 fprintf(strcat(Format," \n"),Input{:});
                             end
@@ -854,7 +854,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                         case 'sym'
                             if H_hr.HcoeL(hi,hj,seq) ~= sym(0)
                                 warning('May be you should use symadd mode on this NRPT and hi hj');
-                                Format = repmat("%d ",[1 H_hr.Dim+2]);
+                                Format = fold(@strcat,repmat("%d ",[1 H_hr.Dim+2]));
                                 Input = num2cell([vector(1,:),hi,hj]);
                                 fprintf(strcat(Format," \n"),Input{:});
                             end
@@ -5722,7 +5722,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
     end
     %% ChangeClass
     methods
-        function HcktObj = HR2Hckt(H_hr,options,options_homecell)
+        function HcktObj = HR2Hckt(H_hr,options,options_homecell,options_para)
             arguments
                 H_hr
                 options.title = 'HcktFromHR';
@@ -5732,6 +5732,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                 options.mode {mustBeMember(options.mode,{'real','sigma'})}= 'real';
                 options_homecell.homecell = "normal";
                 options_homecell.defaultparameters = false;
+                options_para.prefix = 100;
             end
             %
             VarC0=1;
@@ -5771,7 +5772,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                         for i = 1:H_hr.WAN_NUM
                             BaseOnsite = sum(H_hr.HnumL(H_hr.vectorL(:,H_hr.Dim+1)==i));%H_hr.HnumL(ismember(H_hr.vectorL,[0,0,0,i,i],'rows')) +
                             H_hr = H_hr.set_hop(BaseOnsite,...
-                                i,i,[0,0,0],'set');
+                                i,i,zeros(1,H_hr.Dim),'set');
                         end
                     end
                     HcktObj = Hckt('title',TITLE,'Nports',NBAND,'vectorL',HomeVector,'magnitude',options.magnitude);
@@ -5796,7 +5797,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                         elseif H_hr.HnumL(n) < 0
                             HoppingSckt = Cplus;
                         end
-                        HcktObj = HcktObj.set_hop(Rvector,HoppingSckt,i,j,['C_hopping = ',num2str(abs(H_hr.HnumL(n)*100)),options.magnitude]);
+                        HcktObj = HcktObj.set_hop(Rvector,HoppingSckt,i,j,['C_hopping = ',num2str(abs(H_hr.HnumL(n)*options_para.prefix )),options.magnitude]);
                     end
                 case 'sigma'
                     H_hr = H_hr.ForceToMat();
@@ -5934,7 +5935,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                 for i = 1:H_hr_forHckt.WAN_NUM
                     BaseOnsiteL(i) = maxOnsite + sum(H_hr_forHckt.HcoeL(H_hr_forHckt.vectorL(:,H_hr.Dim+1)==i));
                     H_hr_forHckt = H_hr_forHckt.set_hop(maxOnsite,...
-                        i,i,[0,0,0],'symadd');
+                        i,i,zeros(1,H_hr.Dim),'symadd');
                 end
             else
                 H_hr_forHckt.HnumL = options.coefficient * H_hr_forHckt.HnumL;
@@ -5949,7 +5950,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                 for i = 1:H_hr_forHckt.WAN_NUM
                     BaseOnsiteL(i) = maxOnsite + sum(H_hr_forHckt.HnumL(H_hr_forHckt.vectorL(:,H_hr.Dim+1)==i));
                     H_hr_forHckt = H_hr_forHckt.set_hop(maxOnsite,...
-                        i,i,[0,0,0],'add');
+                        i,i,zeros(1,H_hr.Dim),'add');
                 end
             end
         end

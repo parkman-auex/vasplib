@@ -38,6 +38,8 @@ classdef Hckt < matlab.mixin.CustomDisplay
             ".option post=2 probe";...
             "*.option parhier=global";...
             ".option accurate=1";...
+            ".option MTTHRESH=2";...
+            ".option FAST";...
             "*.option INTERP";]
     end
     % Vectorise
@@ -526,20 +528,69 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 options.POSCAR = 'POSCAR';
                 options.KPOINTS = 'KPOINTS';
                 options.dir_seq = [1,2,3];
+                options.klist_frac = [];
+                options.method{mustBeMember(options.method,{'linear','nearest','pchip','cubic','makima','spline'})} = 'linear';
             end
             %
             if exist(options.KPOINTS,'file') && exist(options.POSCAR,'file')
                 Rm=POSCAR_readin(options.POSCAR);
-                [~,klist_l,klist_s,~,~]=kpathgen3D(Rm,options.KPOINTS);
+                [~,~,klist_frac,~,~]=kpathgen3D(Rm,options.KPOINTS);
                 %[~,klist_l,~,kpoints_l,kpoints_name]=kpathgen3D(Rm,options.KPOINTS);
             else
-                error('No KPOINTS POSCAR');
+                if isempty(options.klist_frac)
+                    if length(size(DOSCAR)) >2
+                        error('No KPOINTS POSCAR');
+                    else
+                        klist_frac = zeros(size(DOSCAR,2),1);
+                    end              
+                else
+                    klist_frac = options.klist_frac;
+                end
+
             end
-            sizemesh = size(DOSCAR);
-            Dim = length(sizemesh)-1;
-            klist_s = mod(klist_s,1);
-            if Dim == 1
-                EIGENCAR = zeros(sizemesh(1),length(klist_l));
+            if isa(DOSCAR,'cell')
+                NBANDS = length(DOSCAR);
+                sizemesh = size(DOSCAR{1});
+                Dim = length(sizemesh);
+                cellmode = true;
+            else
+                sizemesh = size(DOSCAR);
+                Dim = length(sizemesh)-1;
+                if Dim == 1
+                    NBANDS = sizemesh(1);
+                else
+                    NBANDS = sizemesh(Dim+1);
+                end
+                cellmode = false;
+            end
+            if length(options.dir_seq) ~= Dim
+                options.dir_seq = 1:Dim;
+            end
+            klist_frac = mod(klist_frac,1);
+            nklist = size(klist_frac,1);
+            if Dim > 3 || cellmode
+                EIGENCAR = zeros(NBANDS,nklist);
+                klistd_frac{Dim} = linspace(0,1,sizemesh(Dim)); 
+                KNgrid{Dim} = []; 
+                klist_fracCell{Dim} = []; 
+                for d = 1:Dim
+                    klistd_frac{d} = linspace(0,1,sizemesh(d));
+                    klist_fracCell{d} = klist_frac(:,options.dir_seq(d));
+                end
+                [KNgrid{:}] = ndgrid(klistd_frac{:});
+                %P = [2 1 3];
+                %K1grid = permute(K1grid, P);
+                %K2grid = permute(K2grid, P);
+                %K3grid = permute(K3grid, P);
+                for i = 1:NBANDS
+                    %V = permute(DOSCAR(:,:,:,i), P);
+                    %V = permute(DOSCAR(:,:,:,i),[1,2,3]);
+                    V = DOSCAR{i};
+                    EIGENCAR(i,:) = interpn(KNgrid{:},V,klist_fracCell{:},options.method).';
+                    %EIGENCAR(i,:) = interpn(K1grid,K2grid,K3grid,V,klist_s(:,1),klist_s(:,2),klist_s(:,3));
+                end
+            elseif Dim == 1
+                EIGENCAR = zeros(NBANDS,nklist);
                 klist1_s = linspace(0,1,sizemesh(2));
                 %[K1grid,K2grid] = meshgrid(klist1_s,klist2_s);
                 TargetMat = normalize(DOSCAR,'scale');
@@ -561,54 +612,76 @@ classdef Hckt < matlab.mixin.CustomDisplay
 %                 [K2grid,OmergeNgrid2] = meshgrid(klist_s(:,options.dir_seq(1)),OmergeN);
                 %EIGENCAR = interp2(K1grid,OmergeNgrid,TargetMat,K2grid,OmergeNgrid2,"linear");
                 for i = 1:sizemesh(1)
-                   EIGENCAR(i,:) = interp1(klist1_s,TargetMat(i,:),klist_s(:,options.dir_seq(1)));
+                   EIGENCAR(i,:) = interp1(klist1_s,TargetMat(i,:),klist_frac(:,options.dir_seq(1)),options.method);
                 end
             elseif Dim == 2
-                EIGENCAR = zeros(sizemesh(3),length(klist_l));
+                EIGENCAR = zeros(NBANDS,nklist);
                 klist1_s = linspace(0,1,sizemesh(1));
                 klist2_s = linspace(0,1,sizemesh(2));
                 [K1grid,K2grid] = meshgrid(klist1_s,klist2_s);
-                for i = 1:sizemesh(3)
-                    EIGENCAR(i,:) = interp2(K1grid,K2grid,DOSCAR(:,:,i),klist_s(:,options.dir_seq(1)),klist_s(:,options.dir_seq(2)));
+                for i = 1:NBANDS
+                    EIGENCAR(i,:) = interp2(K1grid,K2grid,DOSCAR(:,:,i),klist_frac(:,options.dir_seq(1)),klist_frac(:,options.dir_seq(2)),options.method);
                 end
             elseif Dim == 3
-                EIGENCAR = zeros(sizemesh(4),length(klist_l));
-                klist1_s = linspace(0,1,sizemesh(1));
-                klist2_s = linspace(0,1,sizemesh(2));
-                klist3_s = linspace(0,1,sizemesh(3));
-                [K1grid,K2grid,K3grid] = meshgrid(klist1_s,klist2_s,klist3_s);
+                EIGENCAR = zeros(NBANDS,nklist);
+                klistd_frac{Dim} = linspace(0,1,sizemesh(Dim));
+                KNgrid{Dim} = [];
+                klist_fracCell{Dim} = [];
+                for d = 1:Dim
+                    klistd_frac{d} = linspace(0,1,sizemesh(d));
+                    klist_fracCell{d} = klist_frac(:,options.dir_seq(d));
+                end
+                [KNgrid{:}] = ndgrid(klistd_frac{:});
+                %                 EIGENCAR = zeros(NBANDS,nklist);
+                %                 klist1_s = linspace(0,1,sizemesh(1));
+                %                 klist2_s = linspace(0,1,sizemesh(2));
+                %                 klist3_s = linspace(0,1,sizemesh(3));
+                %                 [K1grid,K2grid,K3grid] = meshgrid(klist1_s,klist2_s,klist3_s);
                 %P = [2 1 3];
                 %K1grid = permute(K1grid, P);
                 %K2grid = permute(K2grid, P);
                 %K3grid = permute(K3grid, P);
-                for i = 1:sizemesh(4)
+                for i = 1:NBANDS
                     %V = permute(DOSCAR(:,:,:,i), P);
                     %V = permute(DOSCAR(:,:,:,i),[1,2,3]);
                     V = DOSCAR(:,:,:,i);
-                    EIGENCAR(i,:) = interp3(klist1_s,klist2_s,klist3_s,V,klist_s(:,options.dir_seq(1)),klist_s(:,options.dir_seq(2)),klist_s(:,options.dir_seq(3))).';
-                    %EIGENCAR(i,:) = interpn(K1grid,K2grid,K3grid,V,klist_s(:,1),klist_s(:,2),klist_s(:,3));
+                    EIGENCAR(i,:) = interpn(KNgrid{:},V,klist_fracCell{:},options.method).';
+                    %EIGENCAR(i,:) = interp3(K1grid,K2grid,K3grid,V,klist_frac(:,options.dir_seq(1)),klist_frac(:,options.dir_seq(2)),klist_frac(:,options.dir_seq(3)),options.method).';
+                    %EIGENCAR(i,:) = interpn(K1grid,K2grid,K3grid,V,klist_s(:,1),klist_s(:,2),klist_s(:,3));??
                 end
             else
-
             end
         end
-        function [EIGENCAR] = CollectVstruct1D(ObservationsMat)
+        function [DOSCAR_2D,klist1,OmgL] = CollectVstruct1D(ObservationsMat,VectorList,OmegaCut,SpectrumX)
             % need fix
-            %[VectorList,ObservationsMat]=HollowKnight.generalcontractrow2(VectorList(:,1:end-1),ObservationsMat);
-            %DurationTime = max(TimeL);
-            %redundancy = 1;
-            %TimeListN = round(TimeL*(1/DurationTime)*length(TimeL)*redundancy);
-            %SpectrumX = (1:length(length(TimeL)))/(DurationTime);
-            %Xlist = 1:length(SelectL);
-            %TkCar = fft(ObservationsMat(SelectL,:).',[],2);
-            OmegaCar = ObservationsMat.';
-            %EIGNECAR = abs(nufftn(ObservationsMat(SelectL,:).',{TimeListN,Xlist}));
-            %EIGNECAR = reshape(EIGNECAR,[],length(SelectL));
-            EIGENCAR = abs(fft((OmegaCar),[],2));
-            %EIGNECAR = abs(fft(real(OmegaCar),[],2) +ifft(imag(OmegaCar),[],2));
-            %EIGNECAR = abs(OmegaCar);
-            %EIGNECAR = abs(fft2(ObservationsMat(SelectL,:))).';
-            EIGENCAR = EIGENCAR(:,[1:end,1]);
+            if nargin < 2
+                %[VectorList,ObservationsMat]=HollowKnight.generalcontractrow2(VectorList(:,1:end-1),ObservationsMat);
+                %DurationTime = max(TimeL);
+                %redundancy = 1;
+                %TimeListN = round(TimeL*(1/DurationTime)*length(TimeL)*redundancy);
+                %SpectrumX = (1:length(length(TimeL)))/(DurationTime);
+                %Xlist = 1:length(SelectL);
+                %TkCar = fft(ObservationsMat(SelectL,:).',[],2);
+                OmegaCar = ObservationsMat.';
+                %EIGNECAR = abs(nufftn(ObservationsMat(SelectL,:).',{TimeListN,Xlist}));
+                %EIGNECAR = reshape(EIGNECAR,[],length(SelectL));
+                EIGENCAR = abs(fft((OmegaCar),[],2));
+                %EIGNECAR = abs(fft(real(OmegaCar),[],2) +ifft(imag(OmegaCar),[],2));
+                %EIGNECAR = abs(OmegaCar);
+                %EIGNECAR = abs(fft2(ObservationsMat(SelectL,:))).';
+                DOSCAR_2D = EIGENCAR(:,[1:end,1]);
+                klist1 = [];
+                OmgL = [];
+            else
+                VectorList1 =  VectorList;
+                ObservationsMat = VectorList;
+                VectorList = ObservationsMat;
+                OmegaCar = ObservationsMat.';
+                EIGENCAR = abs(fft((OmegaCar),[],2));
+                DOSCAR_2D = EIGENCAR(:,[1:end,1]);
+                klist1 = [];
+                OmgL = [];
+            end
         end
         function [DOSCAR_3D,klist1,klist2,OmgL] = CollectVstruct2D(VectorList,ObservationsMat,OmegaCut,SpectrumX)
             SelectOmegaL = find(SpectrumX >= OmegaCut(1) & SpectrumX <= OmegaCut(2));
@@ -690,6 +763,73 @@ classdef Hckt < matlab.mixin.CustomDisplay
             %
             % R = [Vstruct
         end
+        function [DOSCAR_ND,klistCell,OmgL] = CollectVstruct(VectorList,ObservationsMat,OmegaCut,SpectrumX,options)
+            arguments
+                VectorList
+                ObservationsMat
+                OmegaCut
+                SpectrumX
+                options.fin_dir = [0,0,0];
+                options.cellmode = false;
+            end
+            SelectOmegaL = find(SpectrumX >= OmegaCut(1) & SpectrumX <= OmegaCut(2));
+            % mesh X & Y
+            %NSizeMesh = size(VectorList,1);
+            Rvector = VectorList(:,1:end-1);
+            Dim = size(Rvector,2);
+            if Dim ~= size(options.fin_dir,2)
+                findir = zeros(1,Dim);
+            else
+                findir = options.fin_dir;
+            end
+            if Dim < 4 && ~options.cellmode 
+                switch Dim
+                    case 1
+                        [DOSCAR_ND,klist1,OmgL] = CollectVstruct1D(ObservationsMat,VectorList,OmegaCut,SpectrumX);
+                        klistCell{1} = klist1;
+                    case 2
+                        [DOSCAR_ND,klist1,klist2,OmgL] = CollectVstruct2D(VectorList,ObservationsMat,OmegaCut,SpectrumX);
+                        klistCell{1} = klist1; klistCell{2} = klist2;
+                    case 3
+                        [DOSCAR_ND,klist1,klist2,klist3,OmgL] = CollectVstruct3D(VectorList,ObservationsMat,OmegaCut,SpectrumX);
+                        klistCell{1} = klist1; klistCell{2} = klist2; klistCell{3} = klist3;
+                end
+                return;
+            end
+            % for arbitrary dim 
+            
+            %init
+            count = Dim;
+            ND{count}=1;
+            klistCell{count} = 1;
+            for LNxyzw = flip(logical(findir))
+                if LNxyzw
+                    ND{count} = 1;
+                    klistCell{count} = 1;
+                else
+                    ND{count}  = max(Rvector(:,count));
+                    klistCell{count} = 1:ND{count}+1;
+                end
+                 count = count - 1;
+            end
+            sizemesh = fold(@horzcat,ND);
+            %flipsizemesh = flip(sizemesh);
+            flipND       = flip(ND);
+            permuteList = Dim:-1:1;
+            % Todo: compatible with Cell
+            OmgL = SpectrumX(SelectOmegaL);
+            ObservationsMat = ObservationsMat(:,SelectOmegaL);
+            DOSCAR_ND{length(OmgL)} = zeros(ND{:});% ?
+            for i = 1:numel(SelectOmegaL)
+                tmpDATA = abs(fftn(reshape(ObservationsMat(:,i),flipND{:})));
+                DOSCAR_ND{i} = permute(tmpDATA,permuteList);
+            end
+            % for fin_dir part, waiting 
+
+            %
+            % R = [Vstruct
+        end
+    
     end
     %% plot
     methods(Static)
@@ -776,7 +916,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
             % 
             ax = vasplib_plot.waveplot(ORBL,WaveFunc,optionscell{:});
         end
-        function [ax] = bandplot(EIGNECAR,OmegaCut,SpectrumL,options)
+        function [ax] = bandplot(EIGNECAR,OmegaCut,SpectrumL,options,optionskpath)
             arguments
                 EIGNECAR = [];
                 OmegaCut = [0 20000];
@@ -794,6 +934,9 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 options.KPOINTS = 'KPOINTS';
                 options.POSCAR = 'POSCAR';
                 options.shift = false;
+                optionskpath.klist_l = [];
+                optionskpath.kpoints_l = [];
+                optionskpath.kpoints_name = [];
             end
             if isempty(options.ax)
                 Fig = vasplib_plot.create_figure('Position',options.Position);
@@ -802,9 +945,19 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 ax = options.ax;
             end
             %
-            if exist(options.KPOINTS,'file') && exist(options.POSCAR,'file')
+            if exist(options.KPOINTS,'file') && exist(options.POSCAR,'file') && isempty(optionskpath.kpoints_name )
                 Rm=POSCAR_readin(options.POSCAR);
                 [~,klist_l,~,kpoints_l,kpoints_name]=kpathgen3D(Rm,options.KPOINTS);
+                UseKpath = true;
+                if options.shift
+                    X = linspace(min(klist_l),max(klist_l),size(EIGNECAR,2)+1);
+                else
+                    X = klist_l;
+                end
+            elseif ~isempty(optionskpath.kpoints_name) && ~isempty(optionskpath.kpoints_l) 
+                klist_l = optionskpath.klist_l;
+                kpoints_name = optionskpath.kpoints_name;
+                kpoints_l = optionskpath.kpoints_l;
                 UseKpath = true;
                 if options.shift
                     X = linspace(min(klist_l),max(klist_l),size(EIGNECAR,2)+1);
@@ -2412,8 +2565,9 @@ classdef Hckt < matlab.mixin.CustomDisplay
             if nargin < 2
                 checkcommute = false;
             end
-            
-            vectorLcheck = HcktObj.dim2vectorL(HcktObj.dim);
+            MaxR = max(abs(HcktObj.vectorAll),[],'all');
+
+            vectorLcheck = HcktObj.dim2vectorL(HcktObj.dim,MaxR);
             [whichexist,~] = ismember(HcktObj.vectorAll ,vectorLcheck,'rows') ;
             ToKeepRef = find(whichexist);
             ToKeepL = ismember(HcktObj.vectorL,ToKeepRef);
@@ -2438,42 +2592,52 @@ classdef Hckt < matlab.mixin.CustomDisplay
     end
     %%
     methods(Static)
-        function vectorL = dim2vectorL(dim)
-            switch dim
-                case 1
-                    vectorL= [0;1];
-                case 2
-                    vectorL= [0,0;1,0;0,1;1,1;1,-1];
-                case 3
-                    vectorL= [...
-                        0,0,0;...
-                        1,0,0;...
-                        0,1,0;...
-                        0,0,1;...
-                        1,1,0;...
-                        0,1,1;...
-                        1,0,1;...
-                        -1,1,0;...
-                        0,-1,1;...
-                        1,0,-1;...
-                        1,1,1;...
-                        ];
-                case 4
-                    % Todo sb. fix it
-                    vectorL= [...
-                        0,0,0;...
-                        1,0,0;...
-                        0,1,0;...
-                        0,0,1;...
-                        1,1,0;...
-                        0,1,1;...
-                        1,0,1;...
-                        -1,1,0;...
-                        0,-1,1;...
-                        1,0,-1;...
-                        1,1,1;...
-                        ];
-                case 5
+        function vectorL = dim2vectorL(dim,maxR)
+            if dim < 4 && maxR <= 1
+                switch dim
+                    case 1
+                        vectorL= [0;1];
+                    case 2
+                        vectorL= [0,0;1,0;0,1;1,1;1,-1];
+                    case 3
+                        vectorL= [...
+                            0,0,0;...
+                            1,0,0;...
+                            0,1,0;...
+                            0,0,1;...
+                            1,1,0;...
+                            0,1,1;...
+                            1,0,1;...
+                            -1,1,0;...
+                            0,-1,1;...
+                            1,0,-1;...
+                            1,1,1;...
+                            ];
+
+                    case 5
+                end
+            else
+                for i = 1:dim
+                    VectorPre{i} = (-maxR:maxR).';
+                end
+                VectorStore = fold(@park.SemiProductVector,VectorPre);
+                VectorStore = sortrows(VectorStore,'descend');
+                AvectorL = zeros(1,dim);
+                BvectorL = AvectorL;
+                countA = 1;
+                countB = 1;
+                for i = 1:size(VectorStore,1)
+                    vector = VectorStore(i,:);
+                    if ismember(-vector,BvectorL,'row')
+
+                    else
+                        countA = countA + 1;
+                        countB = countB + 1;
+                        AvectorL(countA,:) = vector;
+                        BvectorL(countB,:) = -vector;
+                    end
+                end
+                vectorL = AvectorL;
             end
         end
     end

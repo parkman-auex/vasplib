@@ -42,3 +42,9 @@ example/example18-Hckt/HR2Hckt/Hckt.lib
 example/example18-Hckt/SSH/log
 
 example/example18-Hckt/SSH/Hckt.lib
+
+*.ac0
+
+*.fig
+
+*.lib
