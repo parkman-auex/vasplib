@@ -34,6 +34,8 @@ classdef Hckt < matlab.mixin.CustomDisplay
         IC = ["";];
         Ipulse = ["";];
         Vac =["";];
+        TRAN = "";
+        AC = "";
         Options = [...
             ".option post=2 probe";...
             "*.option parhier=global";...
@@ -1156,7 +1158,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 end
                 % Vac
                 VacSTRING = [VacSTRING;"Vac"+num2str(i)+" source"+ num2str(i)+" GND AC 1 0"];
-                VacSTRING = [VacSTRING;string(['R_for_ac ',NodeStrList{i},' source',num2str(i),' 100'])];
+                VacSTRING = [VacSTRING;string(['R_for_ac',num2str(i),' ',NodeStrList{i},' source',num2str(i),' 100'])];
             end
             % 
             if strcmp(HcktObj.Vac,"")
@@ -1211,25 +1213,37 @@ classdef Hckt < matlab.mixin.CustomDisplay
             fprintf(fid,"* -------- OPTIONS --------\n");
             switch  HcktObj.magnitude
                 case 'p'
-                    TRAN =".tran 1ns 10us";
-                    AC = ".AC LIN 1000 0.5e07 2e07";
+                    if strcmp(HcktObj.TRAN,"")
+                        HcktObj.TRAN =".tran 1ns 10us";
+                    end
+                    if strcmp(HcktObj.AC,"")
+                        HcktObj.AC = ".AC LIN 1000 0.5e07 2e07";
+                    end
                     DEFAULT_PARM = "%.PARAM InitV =0V CA = 100p C_hopping = 100p C_v = 100p";
                 case 'n'
-                    TRAN =".tran 50ns 500us";
-                    AC = ".AC LIN 1000 0.1e06 5e06";
+                    if strcmp(HcktObj.TRAN,"")
+                        HcktObj.TRAN =".tran 50ns 500us";
+                    end
+                    if strcmp(HcktObj.AC,"")
+                        HcktObj.AC =".AC LIN 1000 0.1e06 5e06";
+                    end
                     DEFAULT_PARM = "%.PARAM InitV =0V CA = 1n C_hopping = 2.7n C_v = 2.7n";
                 case 'u'
-                    TRAN =".tran 1us 10ms";
-                    AC = ".AC LIN 1000 0.5e04 2e04";
+                    if strcmp(HcktObj.TRAN,"")
+                        HcktObj.TRAN =".tran 1us 10ms";
+                    end
+                    if strcmp(HcktObj.AC,"")
+                        HcktObj.AC = ".AC LIN 1000 0.5e04 2e04";
+                    end
                     DEFAULT_PARM = "%.PARAM InitV =0V CA = 100u C_hopping = 100u C_v = 100u";
             end
             switch options5.analysis
                 case 'ac'
-                    OPTcase = [AC;HcktObj.Options;DEFAULT_PARM];
+                    OPTcase = [HcktObj.AC;HcktObj.Options;DEFAULT_PARM];
                 case 'tran'
-                    OPTcase = [TRAN;HcktObj.Options;DEFAULT_PARM];
+                    OPTcase = [HcktObj.TRAN;HcktObj.Options;DEFAULT_PARM];
                 otherwise
-                    OPTcase = [TRAN;HcktObj.Options;DEFAULT_PARM];
+                    OPTcase = [HcktObj.TRAN;HcktObj.Options;DEFAULT_PARM];
             end
             for i = 1:size(OPTcase,1)
                 fprintf(fid,(OPTcase(i,:)));fprintf(fid,"\n");
@@ -2579,8 +2593,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 checkcommute = false;
             end
             MaxR = max(abs(HcktObj.vectorAll),[],'all');
-
-            vectorLcheck = HcktObj.dim2vectorL(HcktObj.dim,MaxR);
+            vectorLcheck = Hckt.dim2vectorL(HcktObj.dim,MaxR);
             [whichexist,~] = ismember(HcktObj.vectorAll ,vectorLcheck,'rows') ;
             ToKeepRef = find(whichexist);
             ToKeepL = ismember(HcktObj.vectorL,ToKeepRef);
@@ -2693,8 +2706,9 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 countB = 1;
                 for i = 1:size(VectorStore,1)
                     vector = VectorStore(i,:);
-                    if ismember(-vector,BvectorL,'row')
+                    if ismember(-vector,BvectorL,'row') || ismember(vector,BvectorL,'row')
 
+                        continue
                     else
                         countA = countA + 1;
                         countB = countB + 1;

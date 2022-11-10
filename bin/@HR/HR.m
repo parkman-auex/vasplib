@@ -5896,11 +5896,11 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                                         ];
                                 end
                                 HcktObj = HcktObj.set_hop(Rvector,HoppingDist{i},[1 2 3],[1 2 3],Parameters);
-;
                             end
                             
                         end
                     end
+                case 'Gell_Mann'
             end
 
         end
