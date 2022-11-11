@@ -50,7 +50,7 @@ HcktTB = H_4D.Htrig2HR();
     60,HcktTB.Gk,'Dim',4);
 kpoints_name = ["\Gamma","\Gamma_x|\Gamma","\Gamma_y|\Gamma","\Gamma_z|\Gamma","\Gamma_w"];
 %% prepare
-Hcktpre = HcktTB.HRforHckt();
+Hcktpre = HcktTB.HRforHckt("coefficient",1);
 %% Add Unit
 L_0 = 1e-6;
 MU = 100;
@@ -69,10 +69,10 @@ catch
     Cfactor = MU*1E-06;% 100 uF
 end
 OmegaFactor = (Cfactor*L_0*100)^(-1/2);
-t = 1;
+t = -1;
 m = 0.0;
-C_0 = 9;
-epsilon = 0;
+C_0 = 0;
+epsilon = 9;
 %%
 FigTest = Figs(1,2);
 
@@ -80,7 +80,7 @@ Hcktpre_n = Hcktpre.Subsall();
 %
 EIGENCAR = Hcktpre_n.EIGENCAR_gen();
 F0CAR = (EIGENCAR*L_0*Cfactor).^(-1/2)./(2*pi);
-OMEGACUTpre = [0.3,0.8];
+OMEGACUTpre = [0.4,0.8];
 OMEGACUT = OMEGACUTpre*OmegaFactor;
 %
 bandplot(F0CAR,OMEGACUTpre*OmegaFactor,klist_l,kpoints_l,kpoints_name,'ylabel','Frequency (Hz)','ax',FigTest.axes(1));
@@ -89,7 +89,8 @@ bandplot(F0CAR,OMEGACUTpre*OmegaFactor,klist_l,kpoints_l,kpoints_name,'ylabel','
 H_4D_hr_slab_n = Hcktpre_n.supercell_hr(diag([30,1,1,1]),'OBC',[1 0 0 0]);
 EIGENCAR_slab = H_4D_hr_slab_n.EIGENCAR_gen();
 % plot
+OMEGACUTpre = [0.4,0.7];
 F0CAR_slab = (EIGENCAR_slab*L_0*Cfactor).^(-1/2)./(2*pi);
-bandplot(F0CAR_slab,OMEGACUTpre*OmegaFactor,klist_l,kpoints_l,kpoints_name,'ylabel','Energy','title','slab','ax',FigTest.axes(2));
-savefig(gcf,'Fig1.fig');
+bandplot(F0CAR_slab,OMEGACUTpre*OmegaFactor,klist_l,kpoints_l,kpoints_name,'ylabel','Energy','title','slab');
+savefig(gcf,'Fig2.fig');
 delete(gcf);

@@ -162,9 +162,9 @@ classdef vasplib < matlab.mixin.CustomDisplay
             end
             if strcmp(mode,'sym')
                 ExpInnerTerm = vasplib.matrixtimespage(vasplibobj.VarsSeqLcart(1:vasplibobj.Dim),vasplibobj.timtj{1});
-                vasplibobj.timtj{3}(:,:) = exp(1i*(sum(ExpInnerTerm,3)));
+                vasplibobj.timtj{3} = exp(1i*(sum(ExpInnerTerm,3)));
                 ExpInnerTermFrac = vasplib.matrixtimespage(vasplibobj.VarsSeqLcart(1:vasplibobj.Dim),vasplibobj.timtj{2});
-                vasplibobj.timtj{4}(:,:) =  exp(1i*(sum(ExpInnerTermFrac,3)));
+                vasplibobj.timtj{4} =  exp(1i*(sum(ExpInnerTermFrac,3)));
             else
                 vasplibobj.timtj{3} = [];
                 vasplibobj.timtj{4} = [];
@@ -181,9 +181,9 @@ classdef vasplib < matlab.mixin.CustomDisplay
             end
             if strcmp(mode,'sym')
                 ExpInnerTerm = vasplib.matrixtimespage(vasplibobj.VarsSeqLcart(1:vasplibobj.Dim),vasplibobj.tjmti{1});
-                vasplibobj.tjmti{3}(:,:) = exp(1i*(sum(ExpInnerTerm,3)));
+                vasplibobj.tjmti{3} = exp(1i*(sum(ExpInnerTerm,3)));
                 ExpInnerTermFrac = vasplib.matrixtimespage(vasplibobj.VarsSeqLcart(1:vasplibobj.Dim),vasplibobj.tjmti{2});
-                vasplibobj.tjmti{4}(:,:) =  exp(1i*(sum(ExpInnerTermFrac,3)));
+                vasplibobj.tjmti{4} =  exp(1i*(sum(ExpInnerTermFrac,3)));
             else
                 vasplibobj.tjmti{3} = [];
                 vasplibobj.tjmti{4} = [];

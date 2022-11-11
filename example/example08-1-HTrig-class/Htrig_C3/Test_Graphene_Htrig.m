@@ -30,6 +30,13 @@ Graphene_n = Graphene_n <'KPOINTS';
 EIGENCAR = Graphene_n.EIGENCAR_gen();
 [klist_l,kpoints_l,kpoints_name] = Graphene_n.kpath_information();
 bandplot(EIGENCAR,[-3,3],klist_l,kpoints_l,kpoints_name,'title','Graphene','Color','r');
+%%
+% the primitive and orbL are not right!s
+% Graphene = Graphene<'POSCAR';
+% Graphene.orbL = [1/3,2/3,1/2;2/3,1/3,1/2]; 
+% Graphene.HsymL_trig = subs(Graphene.HsymL_trig);
+% simplify(Graphene.Htrig2HR.sym - Graphene.sym)
+%%
 %% Kane-Mele
 %
 % \begin{equation}

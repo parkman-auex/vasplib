@@ -272,7 +272,11 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 % find number of the variables
                 content_str=string(content_file{1,1});
                 data_start_ind=find(content_str==('$&%#'))+1;
-                num_var=find(isnan(str2double(content_str(1:data_start_ind-2))),1)-1;
+                FirstUsefulStrLogicalIndex = find(isnan(str2double(content_str(1:data_start_ind-2))),1);
+                FirstUsefulLabel = (FirstUsefulStrLogicalIndex);
+                content_str(1:FirstUsefulLabel-1) = [];
+                num_var=FirstUsefulLabel-1;
+                data_start_ind = data_start_ind +1 -FirstUsefulLabel;
                 simulation_result = Hckt.save_signal_names(num_var,data_start_ind,content_str,file_extension);
                 % data read
                 if exist(filename+".data",'file')
@@ -377,38 +381,49 @@ classdef Hckt < matlab.mixin.CustomDisplay
     end
     methods(Static)
         function simulation_result = save_signal_names(num_var,data_start_ind,content_str,file_extension)
-            var_name_raw_ind=num_var+2:data_start_ind-2;
-            temp=find(max(max((char(content_str(var_name_raw_ind))=='(')*2,1),[],2)>1);
-            var_name_1st_part=content_str(num_var+1+temp);
-            var_name_special=setdiff(var_name_raw_ind,var_name_raw_ind(temp));
-            var_name_last_part(1:length(temp),1)="";
-            for iii=1:length(var_name_special)
-                tt=find(~(var_name_special(iii)>var_name_raw_ind(temp)),1)-1;
-                var_name_last_part(tt)=content_str(var_name_raw_ind(tt+1));
+            expression = '[a-z]+(';
+            TotalString = fold(@strcat,content_str);
+            content_char = char(TotalString);
+            CharIndex = regexp(content_char,expression);
+            InitIndex = [1,CharIndex];
+            EndIndex = [CharIndex-1,length(content_char)-4];
+            var_name_raw = repmat("",[num_var 1]);
+            for i = 1:num_var
+                var_name_raw(i) = string(content_char(InitIndex(i):EndIndex(i)));
             end
-            var_name_raw=[content_str(num_var+1) var_name_1st_part'+var_name_last_part'+")"]';
+            var_name_raw(2:end) = var_name_raw(2:end) + ")";
+            % var_name_raw_ind=num_var+2:data_start_ind-2;
+            % temp=find(max(max((char(content_str(var_name_raw_ind))=='(')*2,1),[],2)>1);
+            % var_name_1st_part=content_str(num_var+1+temp);
+            % var_name_special=setdiff(var_name_raw_ind,var_name_raw_ind(temp));
+            % var_name_last_part(1:length(temp),1)="";
+            % for iii=1:length(var_name_special)
+            %     tt=find(~(var_name_special(iii)>var_name_raw_ind(temp)),1)-1;
+            %     var_name_last_part(tt)=content_str(var_name_raw_ind(tt+1));
+            % end
+            % var_name_raw=[content_str(num_var+1) var_name_1st_part'+var_name_last_part'+")"]';
 
             % add _real and _imag with the relevant variable names from .ac#
             % files
             if file_extension == '.tr' | file_extension == '.sw'
-                simulation_result=cell2struct(cellstr(var_name_raw'),'var_name',1);
+                simulation_result=cell2struct(cellstr(var_name_raw)','var_name',1);
             elseif file_extension == '.ac'
-                var_real_imag=find(rem(str2double(content_str(1:num_var)),7)==1);
-                if isempty(var_real_imag)
-                    var_name=var_name_raw;
-                else
-                    count=1;
-                    for iii=1:length(var_name_raw)
-                        if any(iii==var_real_imag)
-                            var_name(count)=var_name_raw(iii)+"_real";count=count+1;
-                            var_name(count)=var_name_raw(iii)+"_imag";
-                        else
-                            var_name(count)=var_name_raw(iii);
-                        end
-                        count=count+1;
-                    end
-                end
-                simulation_result=cell2struct(cellstr(var_name'),'var_name',1);
+                %var_real_imag=find(rem(str2double(content_str(1:num_var)),7)==1);
+                %if isempty(var_real_imag)
+                %    var_name=var_name_raw;
+                %else
+                %    count=1;
+                %    for iii=1:length(var_name_raw)
+                %        if any(iii==var_real_imag)
+                %            var_name(count)=var_name_raw(iii)+"_real";count=count+1;
+                %            var_name(count)=var_name_raw(iii)+"_imag";
+                %        else
+                %            var_name(count)=var_name_raw(iii);
+                %        end
+                %        count=count+1;
+                %    end
+                %end
+                simulation_result=cell2struct(cellstr(var_name_raw)','var_name',1);
             else
                 error(['The toolbox cannot handle' file_extension '# files']);
             end
@@ -544,7 +559,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 options.KPOINTS = 'KPOINTS';
                 options.dir_seq = [1,2,3];
                 options.klist_frac = [];
-                options.method{mustBeMember(options.method,{'linear','nearest','pchip','cubic','makima','spline'})} = 'linear';
+                options.method{mustBeMember(options.method,{'linear','nearest','pchip','cubic','makima','spline'})} = 'nearest';
             end
             %
             if exist(options.KPOINTS,'file') && exist(options.POSCAR,'file')
