@@ -1163,13 +1163,13 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 % Ipulse
                 switch HcktObj.magnitude
                     case 'p'
-                        IpulseSTRING = [IpulseSTRING;string(['Ipulse ',NodeStrList{i},' GND PU 0 1 5n 5n 50u'])];
+                        IpulseSTRING = [IpulseSTRING;string(['Ipulse',num2str(i),' ',NodeStrList{i},' GND PU 0 1 5n 5n 50u'])];
                     case 'u'
-                        IpulseSTRING = [IpulseSTRING;string(['Ipulse ',NodeStrList{i},' GND PU 0 1 5n 5n 50m'])];
+                        IpulseSTRING = [IpulseSTRING;string(['Ipulse',num2str(i),' ',NodeStrList{i},' GND PU 0 1 5n 5n 50m'])];
                     case 'm'
-                        IpulseSTRING = [IpulseSTRING;string(['Ipulse ',NodeStrList{i},' GND PU 0 1 5n 5n 500m'])];
+                        IpulseSTRING = [IpulseSTRING;string(['Ipulse',num2str(i),' ',NodeStrList{i},' GND PU 0 1 5n 5n 500m'])];
                     case 'n'
-                        IpulseSTRING = [IpulseSTRING;string(['Ipulse ',NodeStrList{i},' GND PU 0 1 5n 5n 50u'])];
+                        IpulseSTRING = [IpulseSTRING;string(['Ipulse',num2str(i),' ',NodeStrList{i},' GND PU 0 1 5n 5n 50u'])];
                 end
                 % Vac
                 VacSTRING = [VacSTRING;"Vac"+num2str(i)+" source"+ num2str(i)+" GND AC 1 0"];

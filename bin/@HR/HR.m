@@ -5808,7 +5808,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                     HoppingDist{3}   =Subckt('XPlusiSigma0      l1 l2 l3 r1 r2 r3 TOGND PlusiSigma0     ','magicnumber',9);
                     HoppingDist{4}   =Subckt('XMinusiSigma0     l1 l2 l3 r1 r2 r3 TOGND MinusiSigma0    ','magicnumber',9);
                     HoppingDist{5}   =Subckt('XPlusSigma1       l1 l2 l3 r1 r2 r3 TOGND PlusSigma1      ','magicnumber',9);
-                    HoppingDist{6}   =Subckt('XMinusSigam1      l1 l2 l3 r1 r2 r3 TOGND MinusSigam1     ','magicnumber',9);
+                    HoppingDist{6}   =Subckt('XMinusSigam1      l1 l2 l3 r1 r2 r3 TOGND MinusSigma1     ','magicnumber',9);
                     HoppingDist{7}   =Subckt('XPlusiSigma1      l1 l2 l3 r1 r2 r3 TOGND PlusiSigma1     ','magicnumber',9);
                     HoppingDist{8}   =Subckt('XMinusiSigma1     l1 l2 l3 r1 r2 r3 TOGND MinusiSigma1    ','magicnumber',9);
                     HoppingDist{9}   =Subckt('XPlusGen3Sigma2   l1 l2 l3 r1 r2 r3 TOGND PlusGen3Sigma2  ','magicnumber',9);
