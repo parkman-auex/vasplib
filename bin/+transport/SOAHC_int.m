@@ -148,7 +148,7 @@ for kn = 1:nkpts
 end
 toc
 %%
-Area = cross(Ham_obj.Rm(:,1),Ham_obj.Rm(:,2));
+Area = cross(Ham_obj.Rm(1,:),Ham_obj.Rm(2,:));
 Area = Area(3);
 
 Chi_abc_fermi = -2 * charge/hbar * (1e-10 /Area /nkpts) * Chi_abc_fermi;
