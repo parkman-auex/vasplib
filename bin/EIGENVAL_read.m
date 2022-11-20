@@ -5,9 +5,9 @@
 %
 %% Usage: 
 %
-% * [EIGENCAR,EIGENCAR2,Efermi]=EIGENVAl_read(mode,EIGENVAL,Efermi)
-% * [EIGENCAR,EIGENCAR2,Efermi]=EIGENVAl_read(mode,EIGENVAL)
-% *  [EIGENCAR,EIGENCAR2,Efermi]=EIGENVAl_read(mode)
+% * [EIGENCAR,EIGENCAR2,Efermi]=EIGENVAL_read(mode,EIGENVAL,Efermi)
+% * [EIGENCAR,EIGENCAR2,Efermi]=EIGENVAL_read(mode,EIGENVAL)
+% *  [EIGENCAR,EIGENCAR2,Efermi]=EIGENVAL_read(mode)
 %
 %% Input:
 %  
@@ -23,11 +23,11 @@
 %
 %% example:
 %%% for VASP_spinless/SOC:
-%   EIGENCAR=EIGENVAl_read()
+%   EIGENCAR=EIGENVAL_read()
 %%% for VASP_spinful: 
-%   [EIGENCAR,EIGENCAR] = EIGENVAl_read()
+%   [EIGENCAR,EIGENCAR] = EIGENVAL_read()
 %%% for vaspkit:
-%   EIGENCAR = EIGENVAl_read('vaspkit','BAND.dat',0)
+%   EIGENCAR = EIGENVAL_read('vaspkit','BAND.dat',0)
 %   
 %% Note: 
 %
@@ -46,7 +46,7 @@
 %
 %% Source code : 
 %
-function [EIGENCAR,EIGENCAR2,Efermi]=EIGENVAl_read(mode,EIGENVAL,Efermi)
+function [EIGENCAR,EIGENCAR2,Efermi]=EIGENVAL_read(mode,EIGENVAL,Efermi)
     %--------  init  --------
     %I = 1i;
     %--------  narg  --------
@@ -67,9 +67,9 @@ function [EIGENCAR,EIGENCAR2,Efermi]=EIGENVAl_read(mode,EIGENVAL,Efermi)
             Efermi = 0;
         elseif exist('Efermi','file')
             Efermi = double(textscan('Efermi'));
-        elseif exist('DOSCAR','file') & strcmp(mode,'vasp')
+        elseif exist('DOSCAR','file') && strcmp(mode,'vasp')
             Efermi = GetFermi('vasp');
-        elseif exist('scf.out','file') & strcmp(mode,'qe')
+        elseif exist('scf.out','file') && strcmp(mode,'qe')
             Efermi = GetFermi('qe');
         else
             Efermi = 0;
@@ -93,8 +93,8 @@ function [EIGENCAR,EIGENCAR2,Efermi]=EIGENVAl_read(mode,EIGENVAL,Efermi)
             EIGENCAR2(i,:)=Pdown(:,2)';
         end
     elseif strcmp(mode,'qe')
-        import linux_matlab.*;
-        [~,num_list] = grep(EIGENVAL,'    0.0000','silence');
+        % import linux_matlab.*;
+        [~,num_list] = linux_matlab.grep(EIGENVAL,'    0.0000','silence');
         NBands = length(num_list)  ;
         data = load(EIGENVAL)    ;
         [tot_row,~] = size(data );
@@ -102,8 +102,8 @@ function [EIGENCAR,EIGENCAR2,Efermi]=EIGENVAl_read(mode,EIGENVAL,Efermi)
         EIGENCAR = reshape(data(:,2),Ktotal,NBands);
         EIGENCAR = EIGENCAR.' - Efermi*ones(NBands,Ktotal);
     elseif strcmp(mode,'vaspkit')
-        import linux_matlab.*;
-        [~,num_list] = grep(EIGENVAL,'    0.0000','silence');
+        % import linux_matlab.*;
+        [~,num_list] = linux_matlab.grep(EIGENVAL,'    0.0000','silence');
         NBands = length(num_list)  ;
         data = importdata(EIGENVAL)    ;
         [tot_row,~] = size(data );

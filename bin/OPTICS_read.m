@@ -25,7 +25,7 @@ function [re_diag, im_diag] = OPTICS_read(opts)
 % INCAR, and we will read it from OUTCAR check list of tags.
 %%
 arguments
-    opts.plot {mustBeMember(opts.plot,{'all','inter','intra'})} = 'all'
+    opts.plot_mode {mustBeMember(opts.plot_mode,{'all','inter','intra'})} = 'all'
 end
 %% a modification of optics.sh
 system("cp vasprun.xml vasprun.xml.bk");
@@ -91,7 +91,7 @@ para_freq = (freq.^2 + gamma^2).^-1;
 re_intra_diag = 1 - para_freq * plasma2;
 im_intra_diag = (gamma./freq.*para_freq) * plasma2;
 %% plot
-switch opts.plot
+switch opts.plot_mode
     case 'all'
         re_diag = re_inter_diag + re_intra_diag;
         im_diag = im_inter_diag + im_intra_diag;
@@ -124,5 +124,5 @@ ylabel('Dielectric Constant');
 set(gca,'FontSize',21);
 set(gca,'LineWidth',1.5);
 
-saveas(gcf,"optics_"+opts.plot+".pdf");
+% saveas(gcf,"optics_"+opts.plot_mode+".pdf");
 end
