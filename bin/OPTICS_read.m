@@ -26,6 +26,8 @@ function [re_diag, im_diag] = OPTICS_read(opts)
 %%
 arguments
     opts.plot_mode {mustBeMember(opts.plot_mode,{'all','inter','intra'})} = 'all'
+    opts.ax handle = handle([])
+    opts.title = ''
 end
 %% a modification of optics.sh
 system("cp vasprun.xml vasprun.xml.bk");
@@ -70,7 +72,7 @@ im_inter_diag=im_inter(3:end,2:4);
 [~,tmp_char] = system("sed -n '/RTIME/p' OUTCAR | awk '{print $3}'");
 tmp_str = split(string(tmp_char));
 tau = str2double(tmp_str(1));
-disp("The relaxation time is "+tau+" fs");
+disp("The relaxation time is "+tau+" fs (auto read from OUTCAR)");
 if tau == -0.1
     disp('It is the default value, We will use 10 fs instead !!!');
     tau = 1e-14;
@@ -103,26 +105,40 @@ switch opts.plot_mode
         im_diag = im_intra_diag;        
 end
 
-figure()
+if isempty(opts.ax)
+    figure();
+    ax = gca;
+else
+    if isvalid(opts.ax)
+        ax = opts.ax;
+    else
+        figure();
+        ax = gca;
+    end
+end
+
 hold on
-plot(freq, re_diag(:,1),'-','LineWidth',1.5);
-plot(freq, re_diag(:,2),'-','LineWidth',1.5);
-plot(freq, re_diag(:,3),'-','LineWidth',1.5);
+plot(ax, freq, re_diag(:,1),'-','LineWidth',1.5);
+plot(ax, freq, re_diag(:,2),'-','LineWidth',1.5);
+plot(ax, freq, re_diag(:,3),'-','LineWidth',1.5);
 
-plot(freq, im_diag(:,1),'--','LineWidth',1.5);
-plot(freq, im_diag(:,2),'--','LineWidth',1.5);
-plot(freq, im_diag(:,3),'--','LineWidth',1.5);
+plot(ax, freq, im_diag(:,1),'--','LineWidth',1.5);
+plot(ax, freq, im_diag(:,2),'--','LineWidth',1.5);
+plot(ax, freq, im_diag(:,3),'--','LineWidth',1.5);
 
-plot(freq, 0, 'Color','black','LineWidth',1);
+plot(ax, freq, 0, 'Color','black','LineWidth',1);
 hold off
 
-legend('RE ε_x','RE ε_y','RE ε_z','IM ε_x','IM ε_y','IM ε_z');
-xlabel('Energy/eV');
-xlim([0 6]);
-ylim([-20 20]);
-ylabel('Dielectric Constant');
-set(gca,'FontSize',21);
-set(gca,'LineWidth',1.5);
+legend(ax, 'RE \epsilon_x','RE \epsilon_y','RE \epsilon_z',...
+    'IM \epsilon_x','IM \epsilon_y','IM \epsilon_z');
+xlabel(ax, 'Energy/eV');
+ylabel(ax, 'Dielectric Constant');
+title(ax, opts.title);
+
+xlim(ax, [0 6]);
+ylim(ax, [-20 20]);
+set(ax, 'FontSize',21);
+set(ax, 'LineWidth',1.5);
 
 % saveas(gcf,"optics_"+opts.plot_mode+".pdf");
 end
