@@ -28,6 +28,7 @@ arguments
     opts.plot_mode {mustBeMember(opts.plot_mode,{'all','inter','intra'})} = 'all'
     opts.ax handle = handle([])
     opts.title = ''
+    opts.Xlim double = [0 6]
 end
 %% a modification of optics.sh
 system("cp vasprun.xml vasprun.xml.bk");
@@ -118,6 +119,8 @@ else
 end
 
 hold on
+plot(ax, opts.Xlim, [0 0],':k','LineWidth',1.5,'HandleVisibility','off');
+
 plot(ax, freq, re_diag(:,1),'-','LineWidth',1.5);
 plot(ax, freq, re_diag(:,2),'-','LineWidth',1.5);
 plot(ax, freq, re_diag(:,3),'-','LineWidth',1.5);
@@ -125,8 +128,6 @@ plot(ax, freq, re_diag(:,3),'-','LineWidth',1.5);
 plot(ax, freq, im_diag(:,1),'--','LineWidth',1.5);
 plot(ax, freq, im_diag(:,2),'--','LineWidth',1.5);
 plot(ax, freq, im_diag(:,3),'--','LineWidth',1.5);
-
-plot(ax, freq, 0, 'Color','black','LineWidth',1);
 hold off
 
 legend(ax, 'RE \epsilon_x','RE \epsilon_y','RE \epsilon_z',...
@@ -135,7 +136,7 @@ xlabel(ax, 'Energy/eV');
 ylabel(ax, 'Dielectric Constant');
 title(ax, opts.title);
 
-xlim(ax, [0 6]);
+xlim(ax, opts.Xlim);
 ylim(ax, [-20 20]);
 set(ax, 'FontSize',21);
 set(ax, 'LineWidth',1.5);
