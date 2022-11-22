@@ -21,10 +21,11 @@ function [re_diag, im_diag] = OPTICS_read(opts)
 % in vaspwiki website. But a large RTIME does cause divergence near
 % zero-point.
 % And The default value of RTIME (-0.1 fs) is much smaller that common metals. 
-% For robustness we recommend you to manually set it in
-% INCAR, and we will read it from OUTCAR check list of tags.
+% For robustness we recommend you to manually set RTIME in INCAR,
+% and this function will read it from INCAR.
 %%
 arguments
+    opts.RTIME double = 0
     opts.plot_mode {mustBeMember(opts.plot_mode,{'all','inter','intra'})} = 'all'
     opts.ax handle = handle([])
     opts.title = ''
@@ -70,16 +71,18 @@ freq=re_inter(3:end,1); % hbar * freq
 re_inter_diag=re_inter(3:end,2:4);
 im_inter_diag=im_inter(3:end,2:4);
 %% intraband
-[~,tmp_char] = system("sed -n '/RTIME/p' OUTCAR | awk '{print $3}'");
-tmp_str = split(string(tmp_char));
-tau = str2double(tmp_str(1));
-disp("The relaxation time is "+tau+" fs (auto read from OUTCAR)");
-if tau == -0.1
-    disp('It is the default value, We will use 10 fs instead !!!');
-    tau = 1e-14;
+if opts.RTIME == 0
+    [~,tmp_char] = system("grep RTIME INCAR");
+    tmp_str = split(string(tmp_char(1:end-1)));
+    tmp_db  = split(tmp_str(end), "=");
+    tau = str2double(tmp_db(end));
+    disp("The relaxation time is "+tau+" fs (auto read from INCAR)");
 else
-    tau = tau*1e-15;
+    tau = opts.RTIME;
+    disp("The relaxation time is "+tau+" fs (manually set)");
 end
+tau = tau*1e-15;
+
 h_eV_s = 4.1357e-15; % eV.s
 gamma = h_eV_s * 1/tau;
 
