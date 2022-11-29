@@ -1,14 +1,14 @@
 function [re_diag, im_diag] = OPTICS_read(opts)
 %%
-% Needed: OUTCAR, vasprun.xml
+% Needed: INCAR OUTCAR, vasprun.xml
 %
 % ref: DOi: 10.1038/srep12285, Sec. Methods
 %
 % For metals, the frequency dependent dielectric function consists of 
 % interband and Drude-like intraband contributions.
 %
-% The interband part is calculated with LOPTICS = T. 
-% The "optics.sh" script given by vaspwiki only collects the
+% The interband part is calculated with LOPTICS = T (IPA) or ALGO=Chi(RPA). 
+% For IPA, the "optics.sh" script given by vaspwiki only collects the
 % "density-density" response functions. Here we also collect the
 % "current-current" response functions and take it in postprocessing.
 % 
@@ -25,46 +25,47 @@ function [re_diag, im_diag] = OPTICS_read(opts)
 % and this function will read it from INCAR.
 %%
 arguments
+    opts.mode {mustBeMember(opts.mode,{'ipa','rpa'})} = 'ipa'
     opts.RTIME double = 0
-    opts.plot_mode {mustBeMember(opts.plot_mode,{'all','inter','intra'})} = 'all'
+    opts.count {mustBeMember(opts.count,{'all','inter','intra'})} = 'all'
     opts.ax handle = handle([])
     opts.title = ''
     opts.Xlim double = [0 6]
 end
-%% a modification of optics.sh
+%% draw all the blocks of frequency dependent data from vasprun.xml
 system("cp vasprun.xml vasprun.xml.bk");
-% label the "density-density" and the "velocity-velocity" response function
-system("sed -i '0,/<imag>/{ s/<imag>/<ima-g>/;}' vasprun.xml.bk");
-system("sed -i '0,/<\/imag>/{ s/<\/imag>/<\/ima-g>/;}' vasprun.xml.bk");
-system("sed -i '0,/<real>/{ s/<real>/<rea-l>/;}' vasprun.xml.bk");
-system("sed -i '0,/<\/real>/{ s/<\/real>/<\/rea-l>/;}' vasprun.xml.bk");
+[~, end_of_blocks] = system("grep '/imag' vasprun.xml");
+endlines = splitlines(end_of_blocks);
+nblock = length(endlines) - 1;
+for ii = 1:nblock
+    system("sed -i '0,/<imag>/{ s/<imag>/<I"+ii+">/;}' vasprun.xml.bk");
+    system("sed -i '0,/<real>/{ s/<real>/<R"+ii+">/;}' vasprun.xml.bk");
+    
+    system("awk 'BEGIN{i=1} /I"+ii+"/,"+...
+                    "/\/imag/ "+...
+                    "{a[i]=$2 ; b[i]=$3 ; c[i]=$4; d[i]=$5 ; e[i]=$6 ; f[i]=$7; g[i]=$8; i=i+1} "+...
+        "END{for (j=12;j<i-3;j++) print a[j],b[j],c[j],d[j],e[j],f[j],g[j]}' vasprun.xml.bk > IMAG"+ii+".dat");
 
-% extract image and real parts of dielectric function from vasprun.xml
-% the "density-density" response function
-system("awk 'BEGIN{i=1} /ima-g/,"+...
-                "/\/ima-g/ "+...
-                "{a[i]=$2 ; b[i]=$3 ; c[i]=$4; d[i]=$5 ; e[i]=$6 ; f[i]=$7; g[i]=$8; i=i+1} "+...
-    "END{for (j=12;j<i-3;j++) print a[j],b[j],c[j],d[j],e[j],f[j],g[j]}' vasprun.xml.bk > IMAG-D.dat");
-
-system("awk 'BEGIN{i=1} /rea-l/,"+...
-                "/\/rea-l/ "+...
-                "{a[i]=$2 ; b[i]=$3 ; c[i]=$4; d[i]=$5 ; e[i]=$6 ; f[i]=$7; g[i]=$8; i=i+1} "+...
-    "END{for (j=12;j<i-3;j++) print a[j],b[j],c[j],d[j],e[j],f[j],g[j]}' vasprun.xml.bk > REAL-D.dat");
-
-% the "velocity-velocity" or "current-current" response function
-system("awk 'BEGIN{i=1} /imag/,"+...
-                "/\/imag/ "+...
-                "{a[i]=$2 ; b[i]=$3 ; c[i]=$4; d[i]=$5 ; e[i]=$6 ; f[i]=$7; g[i]=$8; i=i+1} "+...
-    "END{for (j=12;j<i-3;j++) print a[j],b[j],c[j],d[j],e[j],f[j],g[j]}' vasprun.xml.bk > IMAG-C.dat");
-
-system("awk 'BEGIN{i=1} /real/,"+...
-                "/\/real/ "+...
-                "{a[i]=$2 ; b[i]=$3 ; c[i]=$4; d[i]=$5 ; e[i]=$6 ; f[i]=$7; g[i]=$8; i=i+1} "+...
-    "END{for (j=12;j<i-3;j++) print a[j],b[j],c[j],d[j],e[j],f[j],g[j]}' vasprun.xml.bk > REAL-C.dat");
+    system("awk 'BEGIN{i=1} /R"+ii+"/,"+...
+                    "/\/real/ "+...
+                    "{a[i]=$2 ; b[i]=$3 ; c[i]=$4; d[i]=$5 ; e[i]=$6 ; f[i]=$7; g[i]=$8; i=i+1} "+...
+        "END{for (j=12;j<i-3;j++) print a[j],b[j],c[j],d[j],e[j],f[j],g[j]}' vasprun.xml.bk > REAL"+ii+".dat");
+end
 %% interband
-re_inter = readmatrix('REAL-C.dat');
-im_inter = readmatrix('IMAG-C.dat');
-
+switch opts.mode
+    case 'ipa'
+        disp("mode = IPA (indpendent particle approximation)")
+        
+        re_inter = readmatrix("REAL2.dat");
+        im_inter = readmatrix("IMAG2.dat");
+    case 'rpa'
+        disp("mode = RPA (random phase approximation)")
+        disp("Mention: LRPA=.FALSE. do not change the form of OUTCAR,");
+        disp("         so you can still use OPTICS_read('mode','rpa') to read it.");
+        
+        re_inter = readmatrix("REAL3.dat");
+        im_inter = readmatrix("IMAG3.dat");
+end
 % 3:end to avoid *** values
 freq=re_inter(3:end,1); % hbar * freq
 
@@ -73,10 +74,14 @@ im_inter_diag=im_inter(3:end,2:4);
 %% intraband
 if opts.RTIME == 0
     [~,tmp_char] = system("grep RTIME INCAR");
-    tmp_str = split(string(tmp_char(1:end-1)));
-    tmp_db  = split(tmp_str(end), "=");
-    tau = str2double(tmp_db(end));
-    disp("The relaxation time is "+tau+" fs (auto read from INCAR)");
+    if isempty(tmp_char)
+        tau = -0.1; % fs, vasp default
+    else
+        tmp_str = split(string(tmp_char(1:end-1)));
+        tmp_db  = split(tmp_str(end), "=");
+        tau = str2double(tmp_db(end));
+    end
+    disp("The relaxation time is "+tau+" fs");
 else
     tau = opts.RTIME;
     disp("The relaxation time is "+tau+" fs (manually set)");
@@ -88,16 +93,21 @@ gamma = h_eV_s * 1/tau;
 
 plasma2 = zeros(1,3);
 [~,tmp_char] = system("grep -A4 'intraband' OUTCAR");
-tmp_str = split(string(tmp_char));
-plasma2(1) = str2double(tmp_str(10));
-plasma2(2) = str2double(tmp_str(14));
-plasma2(3) = str2double(tmp_str(18));
+if isempty(tmp_char)
+    disp("Do not find 'plasma frequency squared' in OUTCAR! Auto changing opts.count");
+    opts.count = 'inter';
+else
+    tmp_str = split(string(tmp_char));
+    plasma2(1) = str2double(tmp_str(10));
+    plasma2(2) = str2double(tmp_str(14));
+    plasma2(3) = str2double(tmp_str(18));
 
-para_freq = (freq.^2 + gamma^2).^-1;
-re_intra_diag = 1 - para_freq * plasma2;
-im_intra_diag = (gamma./freq.*para_freq) * plasma2;
-%% plot
-switch opts.plot_mode
+    para_freq = (freq.^2 + gamma^2).^-1;
+    re_intra_diag = 1 - para_freq * plasma2;
+    im_intra_diag = (gamma./freq.*para_freq) * plasma2;
+end
+%% choose
+switch opts.count
     case 'all'
         re_diag = re_inter_diag + re_intra_diag;
         im_diag = im_inter_diag + im_intra_diag;
@@ -107,8 +117,8 @@ switch opts.plot_mode
     case 'intra'
         re_diag = re_intra_diag;
         im_diag = im_intra_diag;        
-end
-
+end    
+%% plot
 if isempty(opts.ax)
     figure();
     ax = gca;
@@ -144,5 +154,5 @@ ylim(ax, [-20 20]);
 set(ax, 'FontSize',21);
 set(ax, 'LineWidth',1.5);
 
-% saveas(gcf,"optics_"+opts.plot_mode+".pdf");
+saveas(gcf,"optics_"+opts.mode+"_"+opts.count+".pdf");
 end
