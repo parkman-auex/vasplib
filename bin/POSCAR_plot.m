@@ -329,7 +329,7 @@ end
 %%
 function elements_table=element_table()
 %% Initialize variables.
-filename = 'elements.dat';
+filename = 'elements_plot.txt';
 delimiter = ' ';
 
 %% Format for each line of text:
