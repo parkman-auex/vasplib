@@ -1,10 +1,10 @@
 function varargout =   OUTCAR_read(filename,mode)
     %
-    if nargin < 2
+    arguments
+        filename = "OUTCAR";
         mode = 'MAG';
     end
-
-
+    import park.*;
     % SYSTEM
     [~,SYSTEM_str] = system("grep SYSTEM "+ filename);
     SYSTEM_str = strsplit(SYSTEM_str,'SYSTEM = ');
