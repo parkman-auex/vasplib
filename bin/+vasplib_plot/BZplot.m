@@ -142,7 +142,7 @@ switch options.mode
         % V = V*Gk_2d_Pmat;
         % V = V + options.baseOrigin;
         ax = plotPolyhedron(V,color,alpha,'ax',ax,...
-            'OriginPoint', options.OriginPoint,'Oriention',Gk_2d_Pmat);
+            'OriginPoint', options.OriginPoint,'Orientation',Gk_2d_Pmat);
         scatter3(ax,X0,Y0,Z0,'filled','LineWidth',300);
         text(ax,X0,Y0,Z0,"\Gamma",'FontSize',24);
         xlabel('k_x');

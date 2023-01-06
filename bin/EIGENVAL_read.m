@@ -46,23 +46,29 @@
 %
 %% Source code : 
 %
-function [EIGENCAR,EIGENCAR2,Efermi]=EIGENVAL_read(mode,EIGENVAL,Efermi)
+function [EIGENCAR,EIGENCAR2,Efermi,klist_l]=EIGENVAL_read(mode,EIGENVAL,Efermi)
     %--------  init  --------
     %I = 1i;
-    %--------  narg  --------
-    if nargin <1
-        mode = 'vasp';
+    arguments
+        mode {mustBeMember(mode,{'vasp','qe','vaspkit','vaspkit2'})} = 'vasp';
+        EIGENVAL = '';
+        Efermi = nan;
     end
-    if nargin < 2
+    %--------  narg  --------
+    if strcmp(EIGENVAL,'')
         if strcmp(mode,'vasp')
             EIGENVAL = 'EIGENVAL';
         elseif strcmp(mode,'qe')
             EIGENVAL = 'BAND.dat';
-        else
+        elseif strcmp(mode,'vaspkit')
             EIGENVAL = 'BAND.dat';
+        elseif strcmp(mode,'vaspkit2')
+            EIGENVAL = 'REFORMATTED_BAND.dat';
         end
     end
-    if nargin <3
+    klist_l = [];
+    EIGENCAR2 = [];
+    if isnan(Efermi)
         if strcmp(mode,'vaspkit')
             Efermi = 0;
         elseif exist('Efermi','file')
@@ -110,6 +116,11 @@ function [EIGENCAR,EIGENCAR2,Efermi]=EIGENVAL_read(mode,EIGENVAL,Efermi)
         Ktotal = tot_row/NBands  ;
         EIGENCAR = reshape(data(:,2),Ktotal,NBands);
         EIGENCAR = EIGENCAR.' - Efermi*ones(NBands,Ktotal);
+    elseif strcmp(mode,'vaspkit2')
+        data = importdata(EIGENVAL)    ;
+        data = data.data;
+        klist_l = data(:,1).';
+        EIGENCAR = data(:,2:end).';
     end
 
 end

@@ -5,7 +5,7 @@ arguments
     alpha = 0.2;
     options.ax = handle([]);
     options.OriginPoint = [0 0 0];
-    options.Oriention = eye(3);
+    options.Orientation = eye(3);
 end
 import vasplib_plot.*
 if isempty(options.ax)
@@ -25,7 +25,7 @@ end
 % end
 if size(V,2) == 3
     %
-%     V = V*options.Oriention;
+%     V = V*options.Orientation;
     V = V + options.OriginPoint;
     %
     % https://zhuanlan.zhihu.com/p/357836869
@@ -51,7 +51,7 @@ if size(V,2) == 3
     axis(ax,'equal');
     view(ax,3);
 elseif size(V,2) == 2
-    if isequal(options.OriginPoint,[0 0 0]) && isequal(options.Oriention ,eye(3))
+    if isequal(options.OriginPoint,[0 0 0]) && isequal(options.Orientation ,eye(3))
         % https://zhuanlan.zhihu.com/p/357836869
         x = V(:,1);
         y = V(:,2);
@@ -70,7 +70,7 @@ elseif size(V,2) == 2
         axis(ax,'equal');
         view(ax,2);
     else
-        V = V *options.Oriention;
+        V = V *options.Orientation;
         V = V + options.OriginPoint;
         patch(ax,V(:,1),V(:,2),V(:,3),'FaceColor',color,'FaceAlpha',alpha);
         axis(ax,'equal');

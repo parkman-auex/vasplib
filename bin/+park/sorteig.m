@@ -15,14 +15,26 @@ else
     vec = true;
 end
 if strcmp(mode,'whole')
+    if size(U,2) ~= size(A,2)
+        % Non-Hermitian
+        % if EP !
+        % abandon at present
+        [Usort,IJ]=sort(SortTmp,1,'ComparisonMethod','real');
+        if ~vec
+            Usort = diag(Usort);
+        end
+        Asort=zeros(NUM_WAN ,NBANDS );
+    else
     % 按从大到小的特征值顺序排序重新组合对应的特征向量
     Asort=zeros(NUM_WAN ,NBANDS );
     [Usort,IJ]=sort(SortTmp,1,'ComparisonMethod','real');
+
     for jj=1:NBANDS
         Asort(:,jj)=A(:,IJ(jj));%取特征向量的列向量
     end
     if ~vec
         Usort = diag(Usort);
+    end
     end
 elseif strcmp(mode,'eigenval')
     % 按从大到小的特征值顺序排序重新组合对应的特征向量

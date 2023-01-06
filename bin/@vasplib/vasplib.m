@@ -113,7 +113,7 @@ classdef vasplib < matlab.mixin.CustomDisplay
     %% get
     methods
         function Hfun = get.Hfun(vasplibobj)
-            Hfun = matlabFunction(vasplibobj.Hsym,'Vars',vasplibobj.VarsSeqL(1:vasplibobj.Dim));
+            Hfun = matlabFunction(vasplibobj.Hsym,'Vars',vasplibobj.VarsSeqLcart(1:vasplibobj.Dim));
         end
         function Gk = get.Gk(vasplibobj)
             Gk = (eye(length(vasplibobj.Rm))*2*pi/(vasplibobj.Rm)).';
@@ -915,6 +915,8 @@ classdef vasplib < matlab.mixin.CustomDisplay
                 opt.Gk = [];
                 opt.inputCar logical= false
                 opt.enforceCar logical= false
+                opt.theta_0 = 0;
+                opt.anticlockwise = true;
             end
             if isempty(opt.Gk)
                 Rm = vasplib.POSCAR_readin;
@@ -938,10 +940,14 @@ classdef vasplib < matlab.mixin.CustomDisplay
             n=Orientation_cart; %法向量n
             r=radius_cart; %圆的半径为1
             c=kpoint_cart; %圆心的坐标
-            theta=linspace(0,2*pi,opt.nk)'; %theta角从0到2*pi
-            a=cross(n,[1 0 0]); %n与i叉乘，求取a向量
+            if opt.anticlockwise
+                theta=linspace(opt.theta_0,opt.theta_0+2*pi,opt.nk)'; %theta角从0到2*pi
+            else
+                theta=linspace(opt.theta_0,opt.theta_0-2*pi,opt.nk)'; %theta角从0到2*pi
+            end
+            a=cross([0 1 0],n); %n与j叉乘，求取a向量
             if ~any(a) %如果a为零向量，将n与j叉乘
-                a=cross(n,[0 1 0]);
+                a=cross(n,[1 0 0]);
             end
             b=cross(n,a); %求取b向量
             a=a/norm(a); %单位化a向量
@@ -3829,29 +3835,137 @@ classdef vasplib < matlab.mixin.CustomDisplay
                 HoutL(:,:,i) = Hfun(Input{:});
             end
         end
-        function [EIGENCAR,WAVECAR,HoutL] = EIGENSOLVE(Hfun,klist_cart,Norb)
-            if nargin < 3
-                Norb = size(Hfun(0,0,0),1);
+        function [EIGENCAR,WAVECAR,HoutL] = EIGENSOLVE(Hfun,klist_cart,Norb,opt)
+            arguments
+                Hfun
+                klist_cart = [];
+                Norb = -1;
+                opt.Hermitian = true;
+            end
+            if isa(Hfun,'vasplib')
+                if ~isempty(Hfun.klist_cart)
+                    klist_cart = Hfun.klist_cart;
+                end
+                Norb = Hfun.Basis_num;
+                Hfun = Hfun.Hfun;
+            end
+            if Norb < 0
+                Norb = length(Hfun(0,0,0));
             end
             %HoutL = vasplib.HCAR_gen(Hfun,klist_cart,Norb);
+            if isempty(klist_cart)
+                warning('Empty klist!');
+                EIGENCAR = [];
+                WAVECAR = [];
+                HoutL = [];
+                return;
+            end
             kn = size(klist_cart,1);
             EIGENCAR = zeros(Norb,kn);
-            WAVECAR  = zeros(Norb,Norb,kn);
+            if nargout >1
+                WAVECAR  = zeros(Norb,Norb,kn);
+            end
             if nargout >2
                 HoutL = zeros(Norb,Norb,kn);
             end
             for i = 1:kn
                 Input = num2cell(klist_cart(i,:));
-                HoutL(:,:,i) = Hfun(Input{:});
-                Hout = (Hout+Hout')/2;
+                Hout= Hfun(Input{:});
+                if opt.Hermitian
+                    Hout = (Hout+Hout')/2;
+                end
                 [A, U]=eig(Hout);
                 [A, U]= park.sorteig(U,A);
-                WAVECAR(:,:,i)=A;
                 EIGENCAR(:,i) = diag(U);
+                if nargout >1
+                    WAVECAR(:,:,i)=A;
+                end
                 if nargout >2
                     HoutL(:,:,i) = Hout;
                 end
             end
+            
+        end
+        function EIGENCAR = arrangeEIGENCAR(EIGENCAR,REFCAR,method,opt)
+            arguments
+                EIGENCAR ;
+                REFCAR = EIGENCAR; 
+                method {mustBeMember(method,{'NonHermitian','PBAND_single'})} = 'NonHermitian';
+                opt.SelectL = [];
+                opt.Ecut = [-3,3];
+            end
+            switch  method
+                case 'NonHermitian'
+                    %XList = real(REFCAR);
+                    %YList = imag(REFCAR);
+                    Nbands = size(EIGENCAR,1);
+                    Nk = size(EIGENCAR,2);
+                    EIGENCAR_OUT = EIGENCAR;
+                    NormelSeq = (1:Nbands).';
+                    % dsearchn
+                    for i = 2:Nk
+                        XListTemp = real(EIGENCAR_OUT(:,i-1:i));
+                        YListTemp = imag(EIGENCAR_OUT(:,i-1:i));
+                        
+                        PQ = [XListTemp(:,1),YListTemp(:,1)];
+                        P  = [XListTemp(:,2),YListTemp(:,2)];
+                        [k,dist] = dsearchn(P,PQ);
+                        
+                        if ~isequal(k,NormelSeq)
+                            disp(i);
+                            disp(k);
+                            for j = i:Nk
+                                EIGENCAR_OUT(:,j) = EIGENCAR_OUT(k,j);
+                            end
+                        else
+
+                        end
+                    end
+                    EIGENCAR = EIGENCAR_OUT;
+                case 'PBAND_single'
+                    %WEIGHTCAR  = REFCAR;
+                    Nbands = size(EIGENCAR,1);
+                    Nk = size(EIGENCAR,2);
+                    EIGENCAR_OUT = EIGENCAR;
+                    NormelSeq = (1:Nbands).';
+                    [NBANDS,NK,NPROJECTION]= size(REFCAR);
+                    if NBANDS ~= Nbands || Nk ~= NK
+                        error('REFCAR and EIGENCAR mismatch!');
+                    end
+                    if isempty(opt.SelectL)
+                        SelectL = 1:NPROJECTION;
+                    else
+                        SelectL = opt.SelectL;
+                    end
+                    Ecut =  opt.Ecut;
+                    % dsearchn
+                    for i = 2:Nk
+                        %XListTemp = real(EIGENCAR_OUT(:,i-1:i));
+                        %YListTemp = imag(EIGENCAR_OUT(:,i-1:i));
+                        PQ = reshape(REFCAR(:,i-1,:),NBANDS,NPROJECTION);
+                        P  = reshape(REFCAR(:,i,:),NBANDS,NPROJECTION);
+                        Eselect1 = Ecut(1) < EIGENCAR_OUT(:,i-1) & EIGENCAR_OUT(:,i-1) < Ecut(2) ;
+                        Eselect2 = Ecut(1) < EIGENCAR_OUT(:,i) & EIGENCAR_OUT(:,i) < Ecut(2) ;
+                        Eselect = find(Eselect1 & Eselect2);
+                        PQ = PQ(Eselect,SelectL);
+                        P = P(Eselect,SelectL);
+                        [k,~] = dsearchn(P,PQ);
+                        realk = [(1:min(Eselect)-1),k'+min(Eselect)-1,(max(Eselect)+1):NBANDS];
+                        if ~isequal(realk,NormelSeq)
+                            %disp(i);
+                            %disp(k);
+                            %for j = i:Nk
+                            %    EIGENCAR_OUT(:,j) = EIGENCAR_OUT(k,j);
+                            %end
+                             EIGENCAR_OUT(:,i:Nk) = EIGENCAR_OUT(realk,i:Nk);
+                        else
+
+                        end
+                    end
+                    EIGENCAR = EIGENCAR_OUT;
+            end
+
+
         end
     end
     %% math tools
