@@ -26,6 +26,7 @@ arguments
     options.set_plane = true;
     options.Units = 'pixels';
     options.Position = [];
+    options.flip = true;
 end
 
 %--------  init  --------
@@ -56,6 +57,9 @@ end
         for i = 1:Nbands
             colorL(i,:) = [rand,rand,rand];
         end
+    end
+    if options.flip
+        colorL = flip(colorL,1);
     end
     if isempty(options.MarkerEdgeColor)
         MarkerEdgeColor = colorL;

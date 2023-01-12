@@ -3893,6 +3893,7 @@ classdef vasplib < matlab.mixin.CustomDisplay
                 method {mustBeMember(method,{'NonHermitian','PBAND_single'})} = 'NonHermitian';
                 opt.SelectL = [];
                 opt.Ecut = [-3,3];
+                opt.Disp = false;
             end
             switch  method
                 case 'NonHermitian'
@@ -3912,8 +3913,10 @@ classdef vasplib < matlab.mixin.CustomDisplay
                         [k,dist] = dsearchn(P,PQ);
                         
                         if ~isequal(k,NormelSeq)
-                            disp(i);
-                            disp(k);
+                            if opt.Disp
+                                disp(i);
+                                disp(k);
+                            end
                             for j = i:Nk
                                 EIGENCAR_OUT(:,j) = EIGENCAR_OUT(k,j);
                             end

@@ -26,6 +26,8 @@ arguments
     options.set_plane = true;
     options.Units = 'pixels';
     options.Position = [];
+    options.flip = true;
+    options.Mirror = -1;
 end
 
 %--------  init  --------
@@ -56,6 +58,9 @@ end
         for i = 1:Nbands
             colorL(i,:) = [rand,rand,rand];
         end
+    end
+    if options.flip
+        colorL = flip(colorL,1);
     end
     if isempty(options.MarkerEdgeColor)
         MarkerEdgeColor = colorL;
@@ -157,7 +162,7 @@ end
     ImagEIGENCAR = imag(EIGENCAR);
     nKinEIGENCAR = size(EIGENCAR,2);
     for Ei=1:Nbands
-        plot3(ax,klist(1:nKinEIGENCAR),RealEIGENCAR(Ei,:),ImagEIGENCAR(Ei,:),options.LineSpec,...
+        plot3(ax,klist(1:nKinEIGENCAR),RealEIGENCAR(Ei,:),options.Mirror*ImagEIGENCAR(Ei,:),options.LineSpec,...
             'LineWidth',options.LineWidth,...
             'Color',colorL(Ei,:),...
             'MarkerSize',options.MarkerSize,...
