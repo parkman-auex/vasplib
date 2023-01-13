@@ -5406,8 +5406,8 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             fprintf(fileID,"%s\n",options.title);
             fprintf(fileID,"%d\n",options.a_crystal_constance);
             %fprintf(fileID,"  ",Rm(i,j));
-            for i=H_hr.Dim
-                for j=H_hr.Dim
+            for i=1:H_hr.Dim
+                for j=1:H_hr.Dim
                     fprintf(fileID,"  %f",Rm(i,j));
                 end
                 fprintf(fileID,"\n");

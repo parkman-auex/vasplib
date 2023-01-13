@@ -181,58 +181,88 @@ classdef Braid < matlab.mixin.CustomDisplay
             %Cross = BraidObj.Crossings;
             %kCross = linspace(0,2*sym(pi),Cross + 2);
             %kCrossInterval = 
-            %kCross([1,end]) = [];
+            %kCross([1,end]) = [];BraidObj.nStrings
+            %
+            Falljn_label = [];
+            count = 0;
             for n = 1:numel(BraidObj.Fjnk)
+                ln = length(BraidObj.Fjnk{n});
+                for j = 1:ln
+                    count = count + 1;
+                    Falljn{count} = BraidObj.Fjnk{n}{j};
+                    Falljn_label = [Falljn_label;[n,j,ln]];
+                end
+            end
+            %
+            kcross{n} = [];
+            Fkcross{n} = [];
+            kp{n} = [];
+            Gkp{n} = [];
+            nF = count;
+            %
+            for i = 1:nF
+                TargetFjnk_left = Falljn{i};
+                n = Falljn_label(i,1);
                 CycleLiftn = CycleLift{n};
-                TargetFjnk = BraidObj.Fjnk{n};
-                ln = length(TargetFjnk);
-                kcross{n} = [];
-                Fkcross{n} = [];
-                kp{n} = [];
-                Gkp{n} = [];
-                % try symbolick
-                for i = 1:ln
-                    iString = CycleLiftn(i);
-                    for j = i:ln
-                        jString = CycleLiftn(j);
-                        if iString == jString
-                            continue;
-                        end
-                        EQtmpZero = simplify(TargetFjnk{i} - TargetFjnk{j});
-                        EQtmp = EQtmpZero == 0;
-                        % numerical
-                        EQtmpF = matlabFunction(EQtmpZero);
-                        EQtmpL = EQtmpF(kL);
-                        EQtmpsignL = sign(EQtmpL);
-                        EQtmpsigndiffL = diff(EQtmpsignL);
-                        CrossLocation = find(EQtmpsigndiffL); 
-                        if ~isempty(CrossLocation)
-                            for d = CrossLocation
-                                syms k real;
-                                EQtmp2 = (k>sym(kL(d-1)));
-                                EQtmp3 = (k<sym(kL(d+1)));
-                                kcrosstmp = solve([EQtmp,EQtmp2,EQtmp3],k);
-                                Fkcrosstmp = subs(TargetFjnk{i},k,kcrosstmp);
-                                [TmpSign,k_index] =  BraidObj.CheckCrossSign(kcrosstmp);
-                                StringSeq = NaiveEIGENCAR([iString,jString],k_index);
-                                StringSeqSign = sign(StringSeq(2)-StringSeq(1));
-                                kp_i = (kcrosstmp+2*pi*(i-1))/ln;
-                                kp_j = (kcrosstmp+2*pi*(j-1))/ln;
-                                if TmpSign*StringSeqSign < 0
-                                    Gkp_i = 1;
-                                    Gkp_j = -1;
-                                else
-                                    Gkp_i = -1;
-                                    Gkp_j = 1;
-                                end
-                                kcross{n} = [kcross{n},kcrosstmp];
-                                Fkcross{n} = [Fkcross{n},Fkcrosstmp];
-                                kp{n} = [kp{n},[kp_i kp_j]];
-                                Gkp{n} = [Gkp{n},[Gkp_i Gkp_j]];
+                jforstring = Falljn_label(i,2);
+                iString = CycleLiftn(jforstring);
+                n_using = n;
+                ln_using = Falljn_label(i,3);
+                j_using = jforstring;
+                for j = 1:nF
+                    if i == j
+                        continue;
+                    end
+                    TargetFjnk_right = Falljn{j};
+                    n = Falljn_label(j,1);
+                    CycleLiftn = CycleLift{n};
+                    jforstring = Falljn_label(j,2);
+                    jString = CycleLiftn(jforstring);
+                    %
+                    EQtmpZero = simplify(TargetFjnk_left - TargetFjnk_right);
+                    EQtmp = EQtmpZero == 0;
+                    % numerical
+                    EQtmpF = matlabFunction(EQtmpZero);
+                    EQtmpL = EQtmpF(kL);
+                    EQtmpsignL = sign(EQtmpL);
+                    EQtmpsigndiffL = diff(EQtmpsignL);
+                    CrossLocation = find(EQtmpsigndiffL);
+                    if ~isempty(CrossLocation)
+                        for d = CrossLocation
+                            syms k real;
+                            EQtmp2 = (k>sym(kL(d-1)));
+                            EQtmp3 = (k<sym(kL(d+1)));
+                            kcrosstmp = solve([EQtmp,EQtmp2,EQtmp3],k);
+                            try
+                                double(kcrosstmp);
+                            catch 
+                                kcrosstmp = [];
                             end
+                            if isempty(kcrosstmp)
+                                kcrosstmp = vpasolve(EQtmp,k,[kL(d-1),kL(d+1)]);
+                            end
+                            Fkcrosstmp = subs(TargetFjnk_left,k,kcrosstmp);
+                            [TmpSign,k_index] =  BraidObj.CheckCrossSign(kcrosstmp);
+                            StringSeq = NaiveEIGENCAR([iString,jString],k_index);
+                            StringSeqSign = sign(StringSeq(2)-StringSeq(1));
+                            kp_left = (kcrosstmp+2*pi*(j_using-1))/ln_using;
+                            %kp_j = (kcrosstmp+2*pi*(j-1))/ln;
+                            if TmpSign*StringSeqSign < 0
+                                Gkp_left = 1;
+                                %Gkp_j = -1;
+                            else
+                                Gkp_left = -1;
+                                %Gkp_j = 1;
+                            end
+                            kcross{n_using} = [kcross{n_using},kcrosstmp];
+                            Fkcross{n_using} = [Fkcross{n_using},Fkcrosstmp];
+                            kp{n_using} = [kp{n_using},[kp_left ]];
+                            Gkp{n_using} = [Gkp{n_using},[Gkp_left ]];
                         end
                     end
                 end
+            end
+            for n = 1:numel(BraidObj.Fjnk)
                 [~,order] =  sort(double(kcross{n}));
                 Fkcross{n} = Fkcross{n}(order);
                 kcross{n} = kcross{n}(order);
@@ -240,6 +270,67 @@ classdef Braid < matlab.mixin.CustomDisplay
                 kp{n} = kp{n}(order2);
                 Gkp{n} = Gkp{n}(order2);
             end
+            % for n = 1:numel(BraidObj.Fjnk)
+            %     CycleLiftn = CycleLift{n};
+            %     TargetFjnk = BraidObj.Fjnk{n};
+            %     ln = length(TargetFjnk);
+            %     kcross{n} = [];
+            %     Fkcross{n} = [];
+            %     kp{n} = [];
+            %     Gkp{n} = [];
+            %     % try symbolick
+            %     for i = 1:ln
+            %         iString = CycleLiftn(i);
+            %         for j = i:ln
+            %             jString = CycleLiftn(j);
+            %             if iString == jString
+            %                 continue;
+            %             end
+            %             EQtmpZero = simplify(TargetFjnk{i} - TargetFjnk{j});
+            %             EQtmp = EQtmpZero == 0;
+            %             % numerical
+            %             EQtmpF = matlabFunction(EQtmpZero);
+            %             EQtmpL = EQtmpF(kL);
+            %             EQtmpsignL = sign(EQtmpL);
+            %             EQtmpsigndiffL = diff(EQtmpsignL);
+            %             CrossLocation = find(EQtmpsigndiffL);
+            %             if ~isempty(CrossLocation)
+            %                 for d = CrossLocation
+            %                     syms k real;
+            %                     EQtmp2 = (k>sym(kL(d-1)));
+            %                     EQtmp3 = (k<sym(kL(d+1)));
+            %                     kcrosstmp = solve([EQtmp,EQtmp2,EQtmp3],k);
+            %                     if isempty(kcrosstmp)
+            %                         kcrosstmp = vpasolve([EQtmp],k,[kL(d-1),kL(d+1)]);
+            %                     end
+            %                     Fkcrosstmp = subs(TargetFjnk{i},k,kcrosstmp);
+            %                     [TmpSign,k_index] =  BraidObj.CheckCrossSign(kcrosstmp);
+            %                     StringSeq = NaiveEIGENCAR([iString,jString],k_index);
+            %                     StringSeqSign = sign(StringSeq(2)-StringSeq(1));
+            %                     kp_i = (kcrosstmp+2*pi*(i-1))/ln;
+            %                     kp_j = (kcrosstmp+2*pi*(j-1))/ln;
+            %                     if TmpSign*StringSeqSign < 0
+            %                         Gkp_i = 1;
+            %                         Gkp_j = -1;
+            %                     else
+            %                         Gkp_i = -1;
+            %                         Gkp_j = 1;
+            %                     end
+            %                     kcross{n} = [kcross{n},kcrosstmp];
+            %                     Fkcross{n} = [Fkcross{n},Fkcrosstmp];
+            %                     kp{n} = [kp{n},[kp_i kp_j]];
+            %                     Gkp{n} = [Gkp{n},[Gkp_i Gkp_j]];
+            %                 end
+            %             end
+            %         end
+            %     end
+            %     [~,order] =  sort(double(kcross{n}));
+            %     Fkcross{n} = Fkcross{n}(order);
+            %     kcross{n} = kcross{n}(order);
+            %     [~,order2] =  sort(double(kp{n}));
+            %     kp{n} = kp{n}(order2);
+            %     Gkp{n} = Gkp{n}(order2);
+            % end
             BraidObj.kcross = kcross;
             BraidObj.Fkcross = Fkcross;
             BraidObj.kp = kp;
@@ -347,7 +438,6 @@ classdef Braid < matlab.mixin.CustomDisplay
                     %bmTosolve = sym('b_m',[1 Width]);
                     expSymL =   [exp(1i*k.*mL)];
                     expLFunction = matlabFunction(expSymL,'Vars',k);
-                    
                 else
                     mL = (- Crossln/2 + 1) : ( Crossln/2 - 1 ) ;
                     Width = length(mL) + 1;
@@ -361,9 +451,45 @@ classdef Braid < matlab.mixin.CustomDisplay
                 end
                 % Try Cramer
                 TheMat = simplify(TheMat);
-                TheSolve = (TheMat)\D_Cn.';
-                %
-                Gnk{n} = simplify(sum((TheSolve.').*expSymL));
+                if double(det(TheMat)) == 0
+                    yk = BraidObj.Gkp{n};
+                    ln = length(Lk{n});
+                    tkL = BraidObj.kp{n};
+                    jL =  1:N;
+                    expL = exp(1i.*tkL);
+                    ChooseL = 1:N;
+                    if Odd
+                        K = (N-1)/2;
+                        CoeffL = yk(jL) .* exp((-1i * K * k) + (1i * K * tkL));
+                        count = 0;
+                        for tk_prime = tkL
+                            count = count + 1;
+                            ChooseLTmp  =ChooseL;
+                            ChooseLTmp(ChooseL == count) = [];
+                            expLmodify = expL(ChooseLTmp);
+                            Cumprod(count) = fold(@times,(exp(1i*k) - expLmodify)./(exp(1i*tk_prime) - expLmodify));
+                        end
+                        Gnk{n} = simplify(sum(CoeffL.*Cumprod));
+                    else
+                        K = (N)/2;
+                        CoeffL = yk(jL) .* exp((-1i * K * k) + (1i * K * tkL));
+                        count = 0;
+
+                        for tk_prime = tkL
+                            count = count + 1;
+                            ChooseLTmp  =ChooseL;
+                            ChooseLTmp(ChooseL == count) = [];
+                            expLmodify = expL(ChooseLTmp);
+                            expLmodify = [1,expLmodify];
+                            Cumprod(count) = fold(@times,(exp(1i*k) - expLmodify)./(exp(1i*tk_prime) - expLmodify));
+                        end
+                        Gnk{n} = simplify(sum(CoeffL.*Cumprod));
+                    end
+                else
+                    TheSolve = (TheMat)\D_Cn.';
+                    Gnk{n} = simplify(sum((TheSolve.').*expSymL));
+                end
+
                 kjn = (k+2*sym(pi)*(0:(ln-1)))/ln;
                 for ikj = 1:numel(kjn)
                     Gjnk{n}{ikj} = subs(Gnk{n},k,kjn(ikj));
@@ -446,24 +572,33 @@ classdef Braid < matlab.mixin.CustomDisplay
                 else
                     NaiveSeperateBands{i}(:,1) = DefaultL;
                 end
-                PlotSeqL(:,i) =  NaiveSeperateBands{i}(:,1);
-                PlotSeqLVertical(:,i)  = NaiveSeperateBands{i}(:,1);
-                if BraidList(i) > 0
-                    PlotSeqL([PermutationList(i),PermutationList(i)+1],i) = ...
-                        PlotSeqL([PermutationList(i)+1,PermutationList(i)],i);
-                else
-                   PlotSeqLVertical([PermutationList(i),PermutationList(i)+1],i) = ...
-                        PlotSeqLVertical([PermutationList(i)+1,PermutationList(i)],i);
-                end
+                PlusN = -1;
+                MinusN = -1;
                 for n = 1:Nbands
                     if NaiveSeperateBands{i}(n,1) == PermutationList(i)
                         NaiveSeperateBands{i}(n,2) = NaiveSeperateBands{i}(n,1) + 1;
+                        PlusN = n;
                     elseif NaiveSeperateBands{i}(n,1) == PermutationList(i) +1
                         NaiveSeperateBands{i}(n,2) = NaiveSeperateBands{i}(n,1) - 1;
+                        MinusN = n;
                     else
                         NaiveSeperateBands{i}(n,2) = NaiveSeperateBands{i}(n,1);
                     end
                 end
+                if PlusN > 0 && MinusN > 0
+                    if BraidList(i) > 0 && PlusN > MinusN  
+                        
+                    elseif  BraidList(i) < 0 && PlusN < MinusN 
+                    else
+                        PlotSeqL([MinusN,PlusN],i) = ...
+                            PlotSeqL([PlusN,MinusN],i);
+                        PlotSeqLVertical([MinusN,PlusN],i)= ...
+                            PlotSeqLVertical([PlusN,MinusN],i);
+                    end
+                end
+                %BeginBand = NaiveSeperateBands{i}(:,1);
+                %PlotSeqL(:,i) =  NaiveSeperateBands{i}(:,1);
+                %PlotSeqLVertical(:,i)  = NaiveSeperateBands{i}(:,1);
                 NaiveEIGENCAR(:,i+1) = NaiveSeperateBands{i}(:,2);
             end
         end
@@ -1114,9 +1249,9 @@ classdef Braid < matlab.mixin.CustomDisplay
                 count = 0;
                 while ~Converge
                     count = count + 1;
+                    CycleDecomposition{Ndivide}(count) = TriceElement;
                     PermutationStore(PermutationStore == TriceElement) = [];
                     TriceElement = PermutationFunction(TriceElement);
-                    CycleDecomposition{Ndivide}(count) = TriceElement;
                     Converge = TriceElement == RefTriceElement;
                 end            
             end
@@ -1125,7 +1260,7 @@ classdef Braid < matlab.mixin.CustomDisplay
                 CycleDecompositionStr = [CycleDecompositionStr,'('];
                 CycleDecompositionStr = [CycleDecompositionStr,num2str(CycleDecomposition{i})];
                 CycleDecompositionStr = [CycleDecompositionStr,')'];
-                CycleLift{i} = CycleDecomposition{i}([end,1:end-1]);
+                CycleLift{i} = CycleDecomposition{i};
             end
             
         end
