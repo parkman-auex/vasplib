@@ -29,7 +29,10 @@ switch mode
         DOSCAR_raw = importdata(filename);
         DOSCAR_raw = DOSCAR_raw.data;
 end
-
+if isa(DOSCAR_raw,'struct')
+    %DOSCAR_raw = importdata(filename);
+    DOSCAR_raw = DOSCAR_raw.data;
+end
 %% 创建输出变量
 X = reshape(DOSCAR_raw(:,1),YXlength).';
 Y = reshape(DOSCAR_raw(:,2),YXlength).';

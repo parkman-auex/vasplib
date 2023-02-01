@@ -7,6 +7,7 @@ classdef vasplib < matlab.mixin.CustomDisplay
         Dim = 3;
         Basis_num ;
         Rm = [];
+        Hermitian= true;
     end
     %% Hsym and Hfun
     properties

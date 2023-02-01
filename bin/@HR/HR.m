@@ -3847,7 +3847,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             V= 1/abs(round(det(Ns)));% intger forcely
             OUT_WAN_NUM = H_hr.WAN_NUM*V;
             if  rem(OUT_WAN_NUM,1)
-                error('The supercell matrix for primitive cell is not right.');
+                error('The supercell matrix for primitive cell is not right.\n');
             else
                 
             end
@@ -3879,7 +3879,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             %set hopping terms
             Accuracy_roundn = round(log(Accuracy)/log(10));
             if (strcmp(H_hr.Type,'mat')) ||options.force_list
-                fprintf("Attention enforce list mode in the folding process !");
+                fprintf("Attention enforce list mode in the folding process !\n");
                 H_hr = H_hr.rewrite();
                 OUT_H_hr = OUT_H_hr.rewrite();
                 %options.force_list = true;
@@ -3889,7 +3889,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                     VectorList = double(H_hr.vectorL);
                     %OutVectorList = VectorList;
                     pb = vasplib_tool_outer.CmdLineProgressBar(...
-                        'Generate process: UNFOLDING:');
+                        'Generate process: UNFOLDING:\n');
                     sc_hiL = VectorList(:,H_hr.Dim+1);
                     sc_hjL = VectorList(:,H_hr.Dim+2);
                     hjL_orb_id_in_primitiveL = sc_orb_idL(sc_hjL);
