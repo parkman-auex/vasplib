@@ -1,4 +1,4 @@
-function [re_diag, im_diag] = OPTICS_read(opts)
+function [freq, re_diag, im_diag] = OPTICS_read(opts)
 %%
 % Needed: INCAR OUTCAR, vasprun.xml
 %
@@ -33,23 +33,23 @@ arguments
     opts.Xlim double = [0 6]
 end
 %% draw all the blocks of frequency dependent data from vasprun.xml
-system("cp vasprun.xml vasprun.xml.bk");
+% system("cp vasprun.xml vasprun.xml.bk");
 [~, end_of_blocks] = system("grep '/imag' vasprun.xml");
 endlines = splitlines(end_of_blocks);
 nblock = length(endlines) - 1;
 for ii = 1:nblock
-    system("sed -i '0,/<imag>/{ s/<imag>/<I"+ii+">/;}' vasprun.xml.bk");
-    system("sed -i '0,/<real>/{ s/<real>/<R"+ii+">/;}' vasprun.xml.bk");
+    system("sed -i '0,/<imag>/{ s/<imag>/<I"+ii+">/;}' vasprun.xml");
+    system("sed -i '0,/<real>/{ s/<real>/<R"+ii+">/;}' vasprun.xml");
     
     system("awk 'BEGIN{i=1} /I"+ii+"/,"+...
                     "/\/imag/ "+...
                     "{a[i]=$2 ; b[i]=$3 ; c[i]=$4; d[i]=$5 ; e[i]=$6 ; f[i]=$7; g[i]=$8; i=i+1} "+...
-        "END{for (j=12;j<i-3;j++) print a[j],b[j],c[j],d[j],e[j],f[j],g[j]}' vasprun.xml.bk > IMAG"+ii+".dat");
+        "END{for (j=12;j<i-3;j++) print a[j],b[j],c[j],d[j],e[j],f[j],g[j]}' vasprun.xml > IMAG"+ii+".dat");
 
     system("awk 'BEGIN{i=1} /R"+ii+"/,"+...
                     "/\/real/ "+...
                     "{a[i]=$2 ; b[i]=$3 ; c[i]=$4; d[i]=$5 ; e[i]=$6 ; f[i]=$7; g[i]=$8; i=i+1} "+...
-        "END{for (j=12;j<i-3;j++) print a[j],b[j],c[j],d[j],e[j],f[j],g[j]}' vasprun.xml.bk > REAL"+ii+".dat");
+        "END{for (j=12;j<i-3;j++) print a[j],b[j],c[j],d[j],e[j],f[j],g[j]}' vasprun.xml > REAL"+ii+".dat");
 end
 %% interband
 switch opts.mode
