@@ -2878,10 +2878,10 @@ classdef vasplib < matlab.mixin.CustomDisplay
     methods
         function [WindingNumber,WL] = WindingNumber(Ham_obj,GammaOper,kloop,options)
             % \mathcal{N}=\frac{1}{4 \pi i} \oint_{C} \operatorname{Tr} \sigma_{z} \mathcal{H}_{\mathrm{eff}}^{-1}(\boldsymbol{q}) \nabla_{\boldsymbol{q}} \mathcal{H}_{\mathrm{eff}}(\boldsymbol{q}) \cdot d \boldsymbol{q}
-            % https://journals.aps.org/prb/abstract/10.1103/PhysRevB.99.121106 (5)
+            % https://journals.aps.org/prb/abstract/10.1103/PhysRevB.99.121106 (8)
             arguments
                 Ham_obj;
-                GammaOper =[];
+                GammaOper =[]; % the chiral symmetry oper of Ham_obj
                 kloop double = [];
                 options.plot logical = false;
                 options.dir = [1,2,3];
@@ -2959,9 +2959,9 @@ classdef vasplib < matlab.mixin.CustomDisplay
                         HRmatpB = sum(pagemtimes(HnumLpy,reshape(FactorListki,[1 1 NRPTS_])),3);
                         HRmatpC = sum(pagemtimes(HnumLpz,reshape(FactorListki,[1 1 NRPTS_])),3);
                         % efactor orb
-                        kjiL_A =  tji_mat_frac(:,:,1).*kloop(ki,1);
-                        kjiL_B =  tji_mat_frac(:,:,2).*kloop(ki,2);
-                        kjiL_C =  tji_mat_frac(:,:,3).*kloop(ki,3);
+                        kjiL_A =  tji_mat_frac(:,:,1).*kloop(kn,1);
+                        kjiL_B =  tji_mat_frac(:,:,2).*kloop(kn,2);
+                        kjiL_C =  tji_mat_frac(:,:,3).*kloop(kn,3);
                         Hmat_tji = exp(1i*2*pi*(kjiL_A+kjiL_B+kjiL_C));
                         %
                         Hmat_tjipA = Hmat_tji.* HnumLpA_tji;

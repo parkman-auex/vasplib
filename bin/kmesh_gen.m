@@ -1,10 +1,7 @@
 %kmesh_gen generate an uniform kmesh list
-% [klist_s, klist_r, dk_s, dk_r, kstruct] = kmesh_gen(opts)
+% [klist_s, klist_r] = kmesh_gen(opts)
 % klist_s : Fractional klist
 % klist_r : Cartesian klist (Ang^-1 unit)
-% dk_s : fractional volume of vector dk1 dk2 dk3
-% dk_r : volume in Ang^-D unit, D=dimensions which dk inequal to one
-% kstruct : a struct contains all necessary inputs and outputs
 %
 % see http://www.wanniertools.com/input.html#kcube-bulk for illustration
 % mode = corner(default) or center
@@ -14,7 +11,7 @@
 %   "half" means only half points on the kcube edges are included, to avoid
 %   double counting problems.
 
-function varargout = kmesh_gen(Ham_obj,KCUBE_BULK,kopts)
+function [klist_s, klist_r] = kmesh_gen(Ham_obj,KCUBE_BULK,kopts)
 arguments
     Ham_obj {mustBeA(Ham_obj,{'HR','HK','Htrig'})}
     KCUBE_BULK double =[]; % [original_point; vk1; vk2; vk3]
@@ -57,7 +54,7 @@ for c = 1:nk(3)
     end
 end
 klist_s = klist_s + original_point;
-dk_s = abs(cross(vk(1,:)/nk(1), vk(2,:)/nk(2)) * (vk(3,:)/nk(3))');
+% dk_s = abs(cross(vk(1,:)/nk(1), vk(2,:)/nk(2)) * (vk(3,:)/nk(3))');
 %%
 if kopts.mode == "corner"
 elseif kopts.mode == "center"
@@ -65,27 +62,27 @@ elseif kopts.mode == "center"
 end
 %%
 klist_r = klist_s * Ham_obj.Gk;
-vk_r = vk * Ham_obj.Gk;
-for i = 1:3
-    if nk(i) == 1
-        Id = [0 0 0];
-        Id(i) = 1;
-        vk_r(i,:) = Id;
-    end
-end
-dk_r = abs(cross(vk_r(1,:)/nk(1), vk_r(2,:)/nk(2)) * (vk_r(3,:)/nk(3))');
+% vk_r = vk * Ham_obj.Gk;
+% for i = 1:3
+%     if nk(i) == 1
+%         Id = [0 0 0];
+%         Id(i) = 1;
+%         vk_r(i,:) = Id;
+%     end
+% end
+% dk_r = abs(cross(vk_r(1,:)/nk(1), vk_r(2,:)/nk(2)) * (vk_r(3,:)/nk(3))');
 %%
-varargout{1} = klist_s;
-varargout{2} = klist_r;
-varargout{3} = dk_s;
-varargout{4} = dk_r;
+% varargout{1} = klist_s;
+% varargout{2} = klist_r;
+% varargout{3} = dk_s;
+% varargout{4} = dk_r;
 %% 
-kstruct.klist_s = klist_s;
-kstruct.klist_r = klist_r;
-kstruct.dk_s = dk_s;
-kstruct.dk_r = dk_r;
-kstruct.nk = nk;
-varargout{5} = kstruct;
+% kstruct.klist_s = klist_s;
+% kstruct.klist_r = klist_r;
+% kstruct.dk_s = dk_s;
+% kstruct.dk_r = dk_r;
+% kstruct.nk = nk;
+% varargout{5} = kstruct;
 end
 
 function vlist = linspace3(v1, v2, n)
