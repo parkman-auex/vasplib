@@ -2067,9 +2067,6 @@ classdef vasplib < matlab.mixin.CustomDisplay
     end
     %% Gemometric Phase
     methods
-        function IndividualChern_number = IndividualChern(vasplibobj,options,options_Chern)
-            IndividualChern_number = 'Not implement yet';
-        end
         function Chern_number = Chern(vasplibobj,options,options_Chern)
             arguments
                 vasplibobj ;

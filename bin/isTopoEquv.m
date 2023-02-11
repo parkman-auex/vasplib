@@ -2,13 +2,13 @@ function logi = isTopoEquv(H1,H2,dim,noccu)
 arguments
     H1;
     H2;
-    dim int16 = 2;
+    dim int16;
     noccu int16 = 0;
 end
 %% precision control
 threshold = 1e-4;
 nk = 4;
-options = optimset('TolFun',threshold/10,'TolX',threshold);
+options = optimset('TolFun',threshold/10,'TolX',threshold/10);
 %% half occupation
 nbands = H1.Nbands;
 if noccu == 0

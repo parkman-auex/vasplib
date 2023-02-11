@@ -9,23 +9,14 @@
 %   control the mesh density of each parameter by inputing a full list,
 %   or use the same density by inputing a single number
 
-function mesh_list = para_mesh_gen(AtoB, np, opts)
+function mesh_list = para_mesh_gen(AtoB, np_list, opts)
 arguments
     AtoB (:,2) double = [0, 1; 0, 1; 0, 1]
-    np double = 10
+    np_list double = [10, 10, 10]
     opts.mode {mustBeMember(opts.mode,{'uniform','random'})} = 'uniform';
 end
-%% check
-nparas = size(AtoB,1);
-switch length(np)
-    case 1
-        np_list = ones(1,nparas).*np;
-    case nparas
-        np_list = np;
-    otherwise
-        error("The dimensions of inputs are not compatible!")
-end
 %% input vectors
+nparas = length(np_list);
 vecs = cell(1,nparas);
 switch opts.mode
     case 'uniform'        
