@@ -23,7 +23,7 @@ switch length(t_num)
         error("The inputs are not compatible! Please check the t_num and the t_range")
 end
 %% mesh of parameters
-t_list = para_mesh_gen(t_range , t_num);
+t_list = para_mesh_gen(t_range, t_num, 'shift', 'none');
 nsamples = length(t_list);
 %% init
 tic

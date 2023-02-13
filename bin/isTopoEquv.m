@@ -6,9 +6,10 @@ arguments
     noccu int16 = 0;
 end
 %% precision control
+%% very important !!! nk<=4 may miss the gapless points at rare cases
 threshold = 1e-4;
-nk = 4;
-options = optimset('TolFun',threshold/10,'TolX',threshold/10);
+nk = 5;
+options = optimset('TolFun',threshold/10,'TolX',threshold/10,'Display','off');
 %% half occupation
 nbands = H1.Nbands;
 if noccu == 0
@@ -46,7 +47,6 @@ switch class(H1)
             end
         end
 end
-% disp(gapout)
 end
 
 function gap = get_gap(H1,H2, kp, nbands,noccu)
