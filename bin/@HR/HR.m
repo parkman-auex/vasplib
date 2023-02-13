@@ -3541,6 +3541,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                 options.Accuracy double = 1e-6;
                 options.force_list = false;
                 options.OBC = zeros(1,H_hr.Dim); % For addtional OBC support
+                options.silence = false;
             end
             %--------  init  --------
             V= abs(round(det(Ns)));% intger forcely
@@ -3562,8 +3563,10 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             if H_hr.overlap
                 NRPTS_S = size(H_hr.vectorL_overlap,1);
             end
+            if ~options.silence
             fprintf('Search done; begin to set hoppings\n');
             fprintf('We may improve the perfomance later\n');
+            end
             num_sc = size(sc_vec,1);
             %set hopping terms
             Accuracy_roundn = round(log(Accuracy)/log(10));
@@ -3574,7 +3577,9 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             orb_sc_labelL = find(Leak_L,1);
             %Leak_orb_sc_vecL = orb_sc_vevL(Leak_L,:);
             if ~isempty(orb_sc_labelL) && strcmp(H_hr.Type,'mat') ||options.force_list
-                fprintf("supercell has leak sites, use list mode enforcely!");
+                if ~options.silence
+                    fprintf("supercell has leak sites, use list mode enforcely!");
+                end
                 H_hr = H_hr.rewrite();
                 OUT_H_hr = OUT_H_hr.rewrite();
                 %options.force_list = true;
@@ -3587,9 +3592,11 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                     % considered!
                     for icur_sc_vec = 1:num_sc % go over all super-cell vectors
                         cur_sc_vec = double(sc_vec(icur_sc_vec,:));
+                        if ~options.silence
                         pb = vasplib_tool_outer.CmdLineProgressBar(...
                             ['Generate process: SUPERCELL(',...
                             num2str(icur_sc_vec),',',num2str(num_sc),') NRPT:']);
+                        end
                         for ih = 1:NRPTS_ % go over all hopping terms of the original model
                             % lattice vector of the hopping
                             ind_R = double(H_hr.vectorL(ih,:));
@@ -3690,11 +3697,15 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                                 %
                                 OUT_H_hr = OUT_H_hr.set_hop_mat(tmp_mat,sc_part,'symadd');
                             end
-                            pb.print(ih,NRPTS_,' Hopping ...');
+                            if ~options.silence
+                                pb.print(ih,NRPTS_,' Hopping ...');
+                            end
                             %                     fprintf("Generate process: SUPERCELL(%d,%d) NRPT(%d,%d) RUNINGTIME: %f s.\n",...
                             %                         icur_sc_vec,num_sc,ih,H_hr.NRPTS,etime(clock,t1));
                         end
-                        pb.delete();
+                        if ~options.silence
+                            pb.delete();
+                        end
                         % We will remove all overlap function soon!!;
                         if H_hr.overlap
                             pb = vasplib_tool_outer.CmdLineProgressBar(...
@@ -3775,8 +3786,10 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                     end
                     VectorList = double(H_hr.vectorL);
                     OutVectorList = repmat(VectorList,[num_sc,1]);
-                    pb = vasplib_tool_outer.CmdLineProgressBar(...
-                        'Generate process: SUPERCELL:');
+                    if ~options.silence
+                        pb = vasplib_tool_outer.CmdLineProgressBar(...
+                            'Generate process: SUPERCELL:');
+                    end
                     for icur_sc_vec = 1:num_sc % go over all super-cell vectors
                         cur_sc_vec = double(sc_vec(icur_sc_vec,:));
                         hiL = VectorList(:,H_hr.Dim+1);
@@ -3803,9 +3816,13 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                         indR_in_supercellL  = floor(indRtj_in_supercellL);
                         OutVectorList((icur_sc_vec-1)*nHopping+1:(icur_sc_vec)*nHopping,:) = ...
                             [indR_in_supercellL,sc_hiL,sc_hjL];
-                        pb.print(icur_sc_vec,num_sc,' ...');
+                        if ~options.silence
+                            pb.print(icur_sc_vec,num_sc,' ...');
+                        end
                     end
-                    pb.delete();
+                    if ~options.silence
+                        pb.delete();
+                    end
                     if H_hr.num
                         OUT_H_hr.HnumL = HnumList;
                     end
