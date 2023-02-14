@@ -1,20 +1,17 @@
-function logi = isTopoEquv(H1,H2,dim,noccu)
+function logi = isTopoEquv(H1, H2, dim, noccu, metal_threshold)
+% compare two topological GAPPED systems
 arguments
-    H1;
-    H2;
-    dim int16;
-    noccu int16 = 0;
+    H1
+    H2
+    dim int16
+    noccu int16
+    metal_threshold double = 1e-4
 end
 %% precision control
 %% very important !!! nk<=4 may miss the gapless points at rare cases
-threshold = 1e-4;
-nk = 5;
-options = optimset('TolFun',threshold/10,'TolX',threshold/10,'Display','off');
-%% half occupation
 nbands = H1.Nbands;
-if noccu == 0
-    noccu = nbands/2;
-end
+nk = 5;
+options = optimset('TolFun',metal_threshold/10,'TolX',metal_threshold/10,'Display','off');
 %% generate initial k-mesh
 switch dim
     case 1
@@ -26,14 +23,14 @@ switch dim
 end
 nkpts = size(klist_s,1);
 %% handle of band gap search
-get_gap_kpoint = @(kpoint) get_gap(H1,H2, kpoint, nbands,noccu);
+get_gap_kpoint = @(kpoint) get_gap_flatten(H1,H2, kpoint, nbands, noccu);
 %%
 logi = true;
 switch class(H1)
     case "HR"
         for i = 1:nkpts
             [~,gapout]= fminsearch(get_gap_kpoint,klist_s(i,:),options);
-            if gapout < threshold
+            if gapout < metal_threshold
                 logi = false;
                 break
             end
@@ -41,7 +38,7 @@ switch class(H1)
     case {"Htrig","HK"}
         for i = 1:nkpts
             [~,gapout]= fminsearch(get_gap_kpoint,klist_r(i,:),options);
-            if gapout < threshold
+            if gapout < metal_threshold
                 logi = false;
                 break
             end
@@ -49,7 +46,7 @@ switch class(H1)
 end
 end
 
-function gap = get_gap(H1,H2, kp, nbands,noccu)
+function gap = get_gap_flatten(H1,H2, kp, nbands,noccu)
 [~, WAV1] = H1.EIGENCAR_gen('klist',kp,'printmode',false);
 [~, WAV2] = H2.EIGENCAR_gen('klist',kp,'printmode',false);
 psi1 = WAV1(:,1:noccu);

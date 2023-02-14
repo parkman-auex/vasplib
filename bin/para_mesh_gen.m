@@ -52,6 +52,6 @@ switch nparas
         [p1, p2, p3, p4] = ndgrid(vecs{1}, vecs{2}, vecs{3}, vecs{4});
         mesh_list = [p1(:), p2(:), p3(:), p4(:)];
     otherwise
-        error("dim="+nparas+" not support, sorry")
+        error("para_dim="+nparas+" not support, sorry")
 end
 end
