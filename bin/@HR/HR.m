@@ -2066,6 +2066,9 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                 error('not support at present.')
             elseif isa(A,'HR') && ~isa(B,'HR')
                 switch class(B)
+                    case 'string'
+                        C = lt(A,char(B));
+                        return;
                     case 'char'
                         switch B(1)
                             case {'P','p'}
@@ -2075,6 +2078,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                             case {'k','K'}
                                 C = A.kpathgen3D(B);
                             otherwise
+                                
                         end
                     case 'double'
                         switch size(B,1)
