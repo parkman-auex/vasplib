@@ -617,8 +617,12 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                         end
                     end
                 elseif strcmp(H_hr.Type ,'list')
-                    H_hr.HcoeL(NRPTS_new,1) = sym(0);
-                    H_hr.HnumL(NRPTS_new,1) = 0;
+                    if  H_hr.coe
+                        H_hr.HcoeL(NRPTS_new,1) = sym(0);
+                    end
+                    if H_hr.num
+                        H_hr.HnumL(NRPTS_new,1) = 0;
+                    end
                     if H_hr.overlap
                         H_hr.ScoeL(NRPTS_new,1) = sym(0);
                         H_hr.SnumL(NRPTS_new,1) = 0;
