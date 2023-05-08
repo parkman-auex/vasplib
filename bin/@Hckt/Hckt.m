@@ -381,27 +381,30 @@ classdef Hckt < matlab.mixin.CustomDisplay
     end
     methods(Static)
         function simulation_result = save_signal_names(num_var,data_start_ind,content_str,file_extension)
-            expression = '[a-z]+(';
-            TotalString = fold(@strcat,content_str);
-            content_char = char(TotalString);
-            CharIndex = regexp(content_char,expression);
-            InitIndex = [1,CharIndex];
-            EndIndex = [CharIndex-1,length(content_char)-4];
-            var_name_raw = repmat("",[num_var 1]);
-            for i = 1:num_var
-                var_name_raw(i) = string(content_char(InitIndex(i):EndIndex(i)));
-            end
-            var_name_raw(2:end) = var_name_raw(2:end) + ")";
-            % var_name_raw_ind=num_var+2:data_start_ind-2;
-            % temp=find(max(max((char(content_str(var_name_raw_ind))=='(')*2,1),[],2)>1);
-            % var_name_1st_part=content_str(num_var+1+temp);
-            % var_name_special=setdiff(var_name_raw_ind,var_name_raw_ind(temp));
-            % var_name_last_part(1:length(temp),1)="";
-            % for iii=1:length(var_name_special)
-            %     tt=find(~(var_name_special(iii)>var_name_raw_ind(temp)),1)-1;
-            %     var_name_last_part(tt)=content_str(var_name_raw_ind(tt+1));
-            % end
-            % var_name_raw=[content_str(num_var+1) var_name_1st_part'+var_name_last_part'+")"]';
+%             try
+                expression = '[a-z]+[\d*]?+(';
+                TotalString = fold(@strcat,content_str);
+                content_char = char(TotalString);
+                CharIndex = regexp(content_char,expression);
+                InitIndex = [1,CharIndex];
+                EndIndex = [CharIndex-1,length(content_char)-4];
+                var_name_raw = repmat("",[num_var 1]);
+                for i = 1:num_var
+                    var_name_raw(i) = string(content_char(InitIndex(i):EndIndex(i)));
+                end
+                var_name_raw(2:end) = var_name_raw(2:end) + ")";
+%             catch
+%                 var_name_raw_ind=num_var+2:data_start_ind-2;
+%                 temp=find(max(max((char(content_str(var_name_raw_ind))=='(')*2,1),[],2)>1);
+%                 var_name_1st_part=content_str(num_var+1+temp);
+%                 var_name_special=setdiff(var_name_raw_ind,var_name_raw_ind(temp));
+%                 var_name_last_part(1:length(temp),1)="";
+%                 for iii=1:length(var_name_special)
+%                     tt=find(~(var_name_special(iii)>var_name_raw_ind(temp)),1)-1;
+%                     var_name_last_part(tt)=content_str(var_name_raw_ind(tt+1));
+%                 end
+%                 var_name_raw=[content_str(num_var+1) var_name_1st_part'+var_name_last_part'+")"]';
+%             end
 
             % add _real and _imag with the relevant variable names from .ac#
             % files
