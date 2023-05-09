@@ -1906,11 +1906,12 @@ classdef Hckt < matlab.mixin.CustomDisplay
                     fprintf(fid,".ends IntegratorOpAmp\n");
             end
         end
-        function WriteModules(Modules,fid,magnitude)
+        function WriteModules(Modules,fid,magnitude,Lprefix)
             arguments
                 Modules char;
                 fid;
                 magnitude = 'p';
+                Lprefix = '1';
             end
             switch magnitude
                 case 'p'
@@ -1935,7 +1936,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 case 'Basis' % checked
                     fprintf(fid,"* BasisC3_origin \n");
                     fprintf(fid,"*\n");
-                    fprintf(fid,".SubCkt BasisC3_origin n1 n2 n3 TOGND VarL0=1%s InitV=0V R_L=1u \n",Lmagnitude);
+                    fprintf(fid,".SubCkt BasisC3_origin n1 n2 n3 TOGND VarL0=%f%s InitV=0V R_L=1u \n",Lprefix,Lmagnitude);
                     fprintf(fid,"L1 n1 n2 VarL0 R=R_L \n");
                     fprintf(fid,"L2 n2 n3 VarL0 R=R_L \n");
                     fprintf(fid,"L3 n3 n2 VarL0 R=R_L \n");
