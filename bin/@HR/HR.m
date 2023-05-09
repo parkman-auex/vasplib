@@ -5803,7 +5803,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                     HcktObj = Hckt('title',TITLE,'Nports',NBAND,'vectorL',HomeVector,'magnitude',options.magnitude);
                     fprintf('Limitations: Only Numerical HR, real hopping support.\n');
                     %% set_homecell
-                    HomeCell = Subckt.FromHomecellList(H_hr,'magnitude',options.magnitude);
+                    HomeCell = Subckt.FromHomecellList(H_hr,'magnitude',options.magnitude,'prefix',options_para.prefix);
                     HcktObj = HcktObj.set_home(HomeCell,1:round(NBAND/2),round(NBAND/2)+1:H_hr.WAN_NUM);
                     %% set_hop
                     Cplus  = Subckt('Xplus 1 2  C') ;
