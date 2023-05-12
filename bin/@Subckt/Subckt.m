@@ -217,6 +217,7 @@ classdef Subckt < matlab.mixin.CustomDisplay
                 options.parameters = [];
                 options.name = 'Pri';
                 options.Dim = 3;
+                options.prefix = 100;
             end
             if isempty(options.parameters)
                 options.parameters = ['VarL0 = 1u C0 = 100',options.magnitude,' InitV = 0V'];
@@ -243,7 +244,7 @@ classdef Subckt < matlab.mixin.CustomDisplay
             ScktObjDevice = 'X';
             ScktObjName = options.name;
             ScktObjNode = [string(1:WAN_NUM),'TOGND'];
-            ScktObjNetlist = Subckt.GenNetlistFromHList(HnumL,vectorL,'sym_mode',sym_mode,'magnitude',options.magnitude,'Dim',options.Dim);
+            ScktObjNetlist = Subckt.GenNetlistFromHList(HnumL,vectorL,'sym_mode',sym_mode,'magnitude',options.magnitude,'Dim',options.Dim,'prefix',options.prefix);
             ScktObjDescription = options.parameters;
             ScktObj = Subckt(ScktObjDevice,ScktObjName,ScktObjNode,ScktObjDescription,ScktObjNetlist);% 
         end
@@ -255,6 +256,7 @@ classdef Subckt < matlab.mixin.CustomDisplay
                 options.sym_mode = false;
                 options.Dim = 3;
                 options.vectorL = [0,0,0];
+                options.prefix = 100;
             end
             DIM = options.Dim;
             if size(options.vectorL ,2) ~= DIM
@@ -275,7 +277,7 @@ classdef Subckt < matlab.mixin.CustomDisplay
                     PortL = string(i);
                     TOGND = "TOGND";
                     Ref = "E_A";
-                    Description = "VarC0 = "+ num2str(HnumL(n)*100) + options.magnitude;
+                    Description = "VarC0 = "+ num2str(HnumL(n)*options.prefix) + options.magnitude;
                 elseif i<j
                     PortL = string([i,j]);
                     TOGND = "TOGND";
@@ -284,7 +286,7 @@ classdef Subckt < matlab.mixin.CustomDisplay
                     else
                         Ref = "MinusC";
                     end
-                    Description = "C_hopping = "+ num2str(abs(HnumL(n))*100) + options.magnitude;
+                    Description = "C_hopping = "+ num2str(abs(HnumL(n))*options.prefix) + options.magnitude;
                 else
                     %Hermition!
                     selectL(n) = false;

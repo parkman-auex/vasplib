@@ -617,8 +617,12 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                         end
                     end
                 elseif strcmp(H_hr.Type ,'list')
-                    H_hr.HcoeL(NRPTS_new,1) = sym(0);
-                    H_hr.HnumL(NRPTS_new,1) = 0;
+                    if  H_hr.coe
+                        H_hr.HcoeL(NRPTS_new,1) = sym(0);
+                    end
+                    if H_hr.num
+                        H_hr.HnumL(NRPTS_new,1) = 0;
+                    end
                     if H_hr.overlap
                         H_hr.ScoeL(NRPTS_new,1) = sym(0);
                         H_hr.SnumL(NRPTS_new,1) = 0;
@@ -5799,7 +5803,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                     HcktObj = Hckt('title',TITLE,'Nports',NBAND,'vectorL',HomeVector,'magnitude',options.magnitude);
                     fprintf('Limitations: Only Numerical HR, real hopping support.\n');
                     %% set_homecell
-                    HomeCell = Subckt.FromHomecellList(H_hr,'magnitude',options.magnitude);
+                    HomeCell = Subckt.FromHomecellList(H_hr,'magnitude',options.magnitude,'prefix',options_para.prefix);
                     HcktObj = HcktObj.set_home(HomeCell,1:round(NBAND/2),round(NBAND/2)+1:H_hr.WAN_NUM);
                     %% set_hop
                     Cplus  = Subckt('Xplus 1 2  C') ;
@@ -5925,7 +5929,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             end
 
         end
-        function H_hr_forHckt = HRforHckt(H_hr,options)
+        function [H_hr_forHckt,maxOnsite] = HRforHckt(H_hr,options)
             arguments
                 H_hr HR;
                 options.fast = false
@@ -5953,6 +5957,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                 for i = 1:H_hr_forHckt.WAN_NUM
                     maxOnsite = max(BaseOnsiteL(i)-sum(H_hr_forHckt.HcoeL(H_hr_forHckt.vectorL(:,H_hr.Dim+1)==i)),maxOnsite);
                 end
+                %fprintf('The universal shift is force set to be: %c',maxOnsite);
                 for i = 1:H_hr_forHckt.WAN_NUM
                     BaseOnsiteL(i) = maxOnsite + sum(H_hr_forHckt.HcoeL(H_hr_forHckt.vectorL(:,H_hr.Dim+1)==i));
                     H_hr_forHckt = H_hr_forHckt.set_hop(maxOnsite,...
@@ -5968,6 +5973,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                 for i = 1:H_hr_forHckt.WAN_NUM
                     maxOnsite = max(BaseOnsiteL(i)-sum(H_hr_forHckt.HnumL(H_hr_forHckt.vectorL(:,H_hr.Dim+1)==i)),maxOnsite);
                 end
+                % fprintf('The universal shift is forcely set to be: %f',maxOnsite);
                 for i = 1:H_hr_forHckt.WAN_NUM
                     BaseOnsiteL(i) = maxOnsite + sum(H_hr_forHckt.HnumL(H_hr_forHckt.vectorL(:,H_hr.Dim+1)==i));
                     H_hr_forHckt = H_hr_forHckt.set_hop(maxOnsite,...

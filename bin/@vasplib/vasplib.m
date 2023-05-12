@@ -4284,7 +4284,7 @@ classdef vasplib < matlab.mixin.CustomDisplay
             end
             if isequal(   size(H_sym) , [4,4])
                 [~,H_sym_pauli_L] = vasplib.GammaDecomposition(H_sym);
-                %Pauli_L = gamma_matric.pauli_L();
+                Pauli_L = gamma_matric.pauli_L();
                 
                 H_sym_pauli = sym(0);
                 H_latex_pauli = 'H = ';

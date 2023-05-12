@@ -67,7 +67,11 @@ classdef HK < vasplib & matlab.mixin.CustomDisplay
                             if size(Hsym,1) ~= size(Hsym,2)
                                 error('square sym mat required!')
                             end
-                            H_hk.Degree = HK.checkDegree(Hsym);
+                            try
+                                H_hk.Degree = HK.checkDegree(Hsym);
+                            catch
+                                %H_hk.Degree = 1;
+                            end
                             H_hk =H_hk.Degree2Kinds();
                             BASIS_NUM = length(Hsym);
                             H_hk.Basis_num = BASIS_NUM;
