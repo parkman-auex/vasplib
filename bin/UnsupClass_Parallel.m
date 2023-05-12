@@ -12,9 +12,26 @@ arguments
     prec_opts.metal_threshold double = 1e-4
     prec_opts.exist_metal_phase logical = false
 end
+%% generate initial k-mesh
+nk = 5; % nk<=4 may miss the gapless points at rare cases
+switch dim
+    case 1
+        [klist_s,klist_r] = kmesh_gen(Ham_obj,[],'nk',[nk, 1, 1]);        
+    case 2
+        [klist_s,klist_r] = kmesh_gen(Ham_obj,[],'nk',[nk, nk, 1]);
+    case 3
+        [klist_s,klist_r] = kmesh_gen(Ham_obj,[],'nk',[nk, nk, nk]);
+end
+switch class(Ham_obj)
+    case "HR"
+        klist = klist_s;
+    case {"Htrig","HK"}
+        klist = klist_r;
+end
 %% check inputs
 symvarL = Ham_obj.symvar_list;
 t_type = length(symvarL);
+
 if t_type ~= size(t_range,1)
     error("The inputs are not compatible! Please check the Ham_obj.symvar_list and the t_range")
 end
@@ -26,13 +43,19 @@ switch length(t_num)
     otherwise
         error("The inputs are not compatible! Please check the t_num and the t_range")
 end
+
+if class(Ham_obj) ~= "HR"
+    warning("The EIGENCAR_gen() of HK and Htrig are very very inefficient! "+...
+        "Please consider to use kp2TB() or Htrig2HR() "+...
+        "in order to change the class of input Ham_obj.")
+end
 %% half occupation
 nbands = Ham_obj.Nbands;
 if prec_opts.noccu == 0
     prec_opts.noccu = nbands/2;
 end
 %% mesh of parameters
-t_list = para_mesh_gen(t_range, t_num, 'shift', 'uni-rand');
+t_list = para_mesh_gen(t_range, t_num, 'shift', 'tot-rand');
 nsamples = length(t_list);
 nparts = nsamples/opts.ncore;
 if round(nparts) ~= nparts
@@ -73,7 +96,7 @@ for ci = 2:opts.ncore
             if ismember(ai, ai_skip)
                 continue
             end
-            if isTopoEquv(topoB{bi}, topo{ai}, dim, prec_opts.noccu, prec_opts.metal_threshold)
+            if isTopoEquv(topoB{bi}, topo{ai}, klist, prec_opts.noccu)
                 is_included = true;
                 break
             end
@@ -105,6 +128,22 @@ arguments
     exist_metal_phase logical = false
     % perturbation = []
 end
+%% generate initial k-mesh
+nk = 5; % nk<=4 may miss the gapless points at rare cases
+switch dim
+    case 1
+        [klist_s,klist_r] = kmesh_gen(Ham_obj,[],'nk',[nk, 1, 1]);        
+    case 2
+        [klist_s,klist_r] = kmesh_gen(Ham_obj,[],'nk',[nk, nk, 1]);
+    case 3
+        [klist_s,klist_r] = kmesh_gen(Ham_obj,[],'nk',[nk, nk, nk]);
+end
+switch class(Ham_obj)
+    case "HR"
+        klist = klist_s;
+    case {"Htrig","HK"}
+        klist = klist_r;
+end
 %% check inputs
 symvarL = Ham_obj.symvar_list;
 nsamples = length(t_list);
@@ -129,7 +168,7 @@ for sample_i = 2:nsamples
     nclass = length(topo);
     is_included = false;  
     for class_i = 1:nclass
-        if isTopoEquv(topo{class_i}, H2, dim, noccu, metal_threshold)
+        if isTopoEquv(topo{class_i}, H2, klist , noccu)
             is_included = true;            
             break
         end
@@ -139,7 +178,6 @@ for sample_i = 2:nsamples
 %     if ~is_included && ~isempty(perturbation)
 %         H2p = H2 + perturbation;
 %         for class_i = 1:nclass
-%             H1p = topo{class_i} + perturbation;       
 %             if isTopoEquv(H1p,H2p,dim,noccu)
 %                 is_included = true;            
 %                 break

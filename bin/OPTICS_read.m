@@ -25,13 +25,15 @@ function [freq, re_diag, im_diag] = OPTICS_read(opts)
 % and this function will read it from INCAR.
 %%
 arguments
-    opts.mode {mustBeMember(opts.mode,{'ipa','rpa'})} = 'ipa'
+    opts.dfhandle double = 0
+    opts.mode {mustBeMember(opts.mode,{'ipa','rpa'})} = 'ipa'    
     opts.RTIME double = 0
     opts.count {mustBeMember(opts.count,{'all','inter','intra'})} = 'all'
     opts.ax handle = handle([])
     opts.title = ''
     opts.Xlim double = [0 6]
 end
+%%
 %% draw all the blocks of frequency dependent data from vasprun.xml
 % system("cp vasprun.xml vasprun.xml.bk");
 [~, end_of_blocks] = system("grep '/imag' vasprun.xml");
@@ -52,25 +54,45 @@ for ii = 1:nblock
         "END{for (j=12;j<i-3;j++) print a[j],b[j],c[j],d[j],e[j],f[j],g[j]}' vasprun.xml > REAL"+ii+".dat");
 end
 %% interband
-switch opts.mode
-    case 'ipa'
-        disp("mode = IPA (indpendent particle approximation)")
-        
-        re_inter = readmatrix("REAL2.dat");
-        im_inter = readmatrix("IMAG2.dat");
-    case 'rpa'
-        disp("mode = RPA (random phase approximation)")
-        disp("Mention: LRPA=.FALSE. do not change the form of OUTCAR,");
-        disp("         so you can still use OPTICS_read('mode','rpa') to read it.");
-        
-        re_inter = readmatrix("REAL3.dat");
-        im_inter = readmatrix("IMAG3.dat");
+% switch opts.mode
+%     case 'ipa'
+%         disp("mode = IPA (indpendent particle approximation)")
+%         
+%         re_inter = readmatrix("REAL2.dat");
+%         im_inter = readmatrix("IMAG2.dat");
+%     case 'rpa'
+%         disp("mode = RPA (random phase approximation)")
+%         disp("Mention: LRPA=.FALSE. do not change the form of OUTCAR,");
+%         disp("         so you can still use OPTICS_read('mode','rpa') to read it.");
+%         
+%         re_inter = readmatrix("REAL3.dat");
+%         im_inter = readmatrix("IMAG3.dat");
+% end
+% % 3:end to avoid *** values
+% freq=re_inter(3:end,1); % hbar * freq
+% 
+% re_inter_diag=re_inter(3:end,2:4);
+% im_inter_diag=im_inter(3:end,2:4);
+vaspxml = readstruct('vasprun.xml');
+df = vaspxml.calculation.dielectricfunction;
+if opts.dfhandle == 0
+    switch length(df)
+        case 2
+            dfhandle = 1; % "density"
+            % dfhandle = 2; % "current"
+        case 4
+            dfhandle = 1; % ipa
+            % dfhandle = 3; % rpa
+    end
+else
+    dfhandle = opts.dfhandle;
 end
-% 3:end to avoid *** values
-freq=re_inter(3:end,1); % hbar * freq
+re_inter_tot = multi_split(df(dfhandle).real.array.set.r'); 
+im_inter_tot = multi_split(df(dfhandle).imag.array.set.r'); 
 
-re_inter_diag=re_inter(3:end,2:4);
-im_inter_diag=im_inter(3:end,2:4);
+freq          = re_inter_tot(3:end,1); % hbar * freq
+re_inter_diag = re_inter_tot(3:end,2:4);
+im_inter_diag = im_inter_tot(3:end,2:4);
 %% intraband
 if opts.RTIME == 0
     [~,tmp_char] = system("grep RTIME INCAR");
@@ -155,4 +177,9 @@ set(ax, 'FontSize',21);
 set(ax, 'LineWidth',1.5);
 
 saveas(gcf,"optics_"+opts.mode+"_"+opts.count+".pdf");
+end
+
+function rdouble =  multi_split(str_array)
+rstr = split(str_array," ");
+rdouble = double(rstr);
 end

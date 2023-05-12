@@ -1,25 +1,23 @@
-function Chi_abc_fermi = SOAHC_int(Ham_obj,kstruct,sub_index,opts)
+function Chi_abc_fermi = SOAHC_int(Ham_obj,klist,sub_index,opts)
 % intrinsic 2nd order Anomalous Hall effect
 % ref: 10.1103/PhysRevLett.127.277202
 % in SI unit, Ampere*Volt^-2*meter for 2D case
+% klist == klist_s for HR, klist_r for HK and Htrig
 arguments
     Ham_obj {mustBeA(Ham_obj,{'HR','HK','Htrig'})};
-    kstruct struct;
+    klist double; % klist_s for HR, klist_r for HK and Htrig
     sub_index string = "xyy";
     opts.T double = 20; % temperature (Kelvin)
     opts.Ef double = 0;
     opts.Ef_num double = 100;
     opts.Ef_range double = [-1,1];
     opts.plot logical = true;
-    opts.plotBZ logical = true;
+    opts.plotBZ logical = false;
     opts.plotBZ_bands double = 0;
+    opts.nk double = [];
 end
 %% kmesh info
-klist_s = kstruct.klist_s;
-klist_r = kstruct.klist_r;
-nk = kstruct.nk;
-
-nkpts = size(klist_s,1);
+nkpts = size(klist,1);
 %% index convert
 sub_index = char(sub_index);
 a_index = string(sub_index(1));
@@ -52,10 +50,10 @@ switch class(Ham_obj)
         % partial R
         HnumLpx = 1i*pagemtimes(reshape(vectorList_r(:,1),[1 1 NRPTS_]),HnumList);
         HnumLpy = 1i*pagemtimes(reshape(vectorList_r(:,2),[1 1 NRPTS_]),HnumList);
-        [EIGENCAR, WAVECAR] = Ham_obj.EIGENCAR_gen('klist',klist_s,'printmode',false);
+        [EIGENCAR, WAVECAR] = Ham_obj.EIGENCAR_gen('klist',klist,'printmode',false);
     case {"Htrig","HK"}
         [dH_dkx_fun,dH_dky_fun,~] = Ham_diff(Ham_obj);
-        [EIGENCAR, WAVECAR] = Ham_obj.EIGENCAR_gen('klist',klist_r,'printmode',false);
+        [EIGENCAR, WAVECAR] = Ham_obj.EIGENCAR_gen('klist',klist,'printmode',false);
 end
 %% kubo loop
 G_ac = zeros(nkpts,nbands);
@@ -80,7 +78,7 @@ for kn = 1:nkpts
     switch hclass        
         case "HR"
             % efactor R
-            FactorListki = exp(1i*2*pi*vectorList*klist_s(kn,:).');
+            FactorListki = exp(1i*2*pi*vectorList*klist(kn,:).');
 %             % HRmat
 %             HRmat = sum(pagemtimes(HnumList,reshape(FactorListki,[1 1 NRPTS_])),3);
 %             HRmat = (HRmat+HRmat')/2;
@@ -91,7 +89,7 @@ for kn = 1:nkpts
             dH_dkx = sum(pagemtimes(HnumLpx,reshape(FactorListki,[1 1 NRPTS_])),3);
             dH_dky = sum(pagemtimes(HnumLpy,reshape(FactorListki,[1 1 NRPTS_])),3);   
         case {"HK","Htrig"}
-            kx = klist_r(kn,1); ky = klist_r(kn,2); kz = klist_r(kn,3);   
+            kx = klist(kn,1); ky = klist(kn,2); kz = klist(kn,3);   
             dH_dkx = dH_dkx_fun(kx,ky,kz);
             dH_dky = dH_dky_fun(kx,ky,kz);
     end
@@ -166,12 +164,26 @@ if opts.plot
     ylabel("Ef(eV)")
     title("2nd AHC")
 end
+
+
 if opts.plotBZ
+    if isempty(opts.nk)
+        nk_guess = sqrt(nkpts);
+        if nk_guess == round(nk_guess)
+            nk = [nk_guess nk_guess 1];
+        else
+            error('opts.nk is needed to plot distributions in BZ');
+        end
+    else
+        nk = opts.nk;
+    end
+    
     if opts.plotBZ_bands == 0
         ib = 1:nbands/2;
     else
         ib = opts.plotBZ_bands;
-    end  
+    end
+    
     G_ac_reshape = reshape(sum(G_ac(:,ib),2),nk);
     G_bc_reshape = reshape(sum(G_bc(:,ib),2),nk);    
     Chi_abc_reshape = reshape(sum(Chi_abc(:,ib),2),nk);
@@ -188,7 +200,15 @@ if opts.plotBZ
     surf(f13.axes(1,3),Chi_abc_reshape_2);
     title(f13.axes(1,1),"G_{"+a_index+c_index+"}")
     title(f13.axes(1,2),"G_{"+b_index+c_index+"}")
-    title(f13.axes(1,3),"\chi_{"+a_index+b_index+c_index+"}")
+    title(f13.axes(1,3),"\Lambda_{"+a_index+b_index+c_index+"}")
+    
+    xlabel(f13.axes(1,1),"k_y")
+    xlabel(f13.axes(1,2),"k_y")
+    xlabel(f13.axes(1,3),"k_y")
+    
+    ylabel(f13.axes(1,1),"k_x")
+    ylabel(f13.axes(1,2),"k_x")
+    ylabel(f13.axes(1,3),"k_x")
     
     for i = 1:3
         xlim(f13.axes(1,i),[1 nk(2)])
