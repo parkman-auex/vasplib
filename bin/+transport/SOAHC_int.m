@@ -1,4 +1,4 @@
-function Chi_abc_fermi = SOAHC_int(Ham_obj,klist,sub_index,opts)
+function [Chi_abc_fermi, G_ac_reshape, G_bc_reshape, Chi_abc_reshape]= SOAHC_int(Ham_obj,klist,sub_index,opts)
 % intrinsic 2nd order Anomalous Hall effect
 % ref: 10.1103/PhysRevLett.127.277202
 % in SI unit, Ampere*Volt^-2*meter for 2D case

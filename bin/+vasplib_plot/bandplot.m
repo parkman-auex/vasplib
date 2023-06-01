@@ -41,7 +41,7 @@ end
         color = options.Color ;
     else
         Nbands=size(EIGENCAR,1);
-        if ischar(options.Color)| isnumeric(options.Color)
+        if ischar(options.Color) || isnumeric(options.Color)
             color = options.Color;
         else
             color = [rand,rand,rand];
@@ -119,7 +119,11 @@ end
     %    else
     if iscell(EIGENCAR)
         Npara = length(EIGENCAR);
-        Colormap = color(Npara);
+        if isa(color,'function_handle')
+            Colormap = color(Npara);
+        else
+            Colormap = color;
+        end
         for j = 1:Npara
             switch j
                 case {1,Npara,floor((Npara+1)/2),ceil((Npara+1)/4),floor((Npara+1)*3/4)}
