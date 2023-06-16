@@ -25,6 +25,7 @@ for m = 1:rows
         % Get the axes at the current row/column
         t = (m-1) * cols + n;
         f_struct.axes(m,n) = nexttile(tcl,t);
+        axis(f_struct.axes(m,n),'square');
     end
 end
 %%

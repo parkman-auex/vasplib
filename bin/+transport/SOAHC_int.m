@@ -160,8 +160,8 @@ if opts.plot
     plot(f11.axes(1,1),Chi_abc_fermi,Ef_list,'linewidth',3);
     plot(f11.axes(1,1),zeros(nef,1),Ef_list,'--','linewidth',1)
     hold off
-    xlabel("\chi_{"+a_index+b_index+c_index+"}")
-    ylabel("Ef(eV)")
+    xlabel("\sigma_{"+a_index+b_index+c_index+"}")
+    ylabel("E(eV)")
     title("2nd AHC")
 end
 

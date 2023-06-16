@@ -7908,6 +7908,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                 options.method  = 'nn_sparse';
                 options.rough = false;
                 options.vectorL = [];
+                options.SymHopping_Human = [];
                 %options.overlap = false;
             end
             % test_mode = true;
@@ -7971,6 +7972,11 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                 SymHopping_L = HR.TBSK_Var_gen(L_1_L,L_2_L,m_1_L,m_2_L,nn_level_L,l_L,m_L,n_L);
             else
                 [SymHopping_L,SymOverlap_L] = HR.TBSK_Var_gen(L_1_L,L_2_L,m_1_L,m_2_L,nn_level_L,l_L,m_L,n_L,'overlap',true);
+            end
+            %% replace
+            if ~isempty(options.SymHopping_Human)
+                unSHL = unique(SymHopping_L);
+                SymHopping_L = subs(SymHopping_L, unSHL, options.SymHopping_Human');
             end
             fprintf('< ok >\n')
             %%
