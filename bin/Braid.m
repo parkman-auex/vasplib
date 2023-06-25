@@ -53,9 +53,11 @@ classdef Braid < matlab.mixin.CustomDisplay
         end
     end
     methods
-        function BraidObj = Braid(BraidWord)
+        function BraidObj = Braid(BraidWord,Nstrings)
             DoubleBraidWord_col = Braid.BraidWord2Num(BraidWord);
-            Nstrings = Braid.NumBraidWord2Nstrings(DoubleBraidWord_col);
+            if nargin < 2
+                Nstrings = Braid.NumBraidWord2Nstrings(DoubleBraidWord_col);
+            end
             Crossings = length(DoubleBraidWord_col);
             [Generator,GeneratorStr] = Braid.Nstrings2Generator(Nstrings);
             Permutation =  Braid.PermutationBraidNum(DoubleBraidWord_col);

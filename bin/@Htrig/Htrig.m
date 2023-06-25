@@ -2759,12 +2759,10 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
                                 Hnum_list{i} = subs(H_htrig.HnumL{i},sym(options.paraname),options.para(j,:));
                             end
                         else
-                            
                             for i =1:numel( H_htrig.HsymL_trig)
-                                
                                 % sorry i dont know how to improve
                                 %H_fun_t{i} =@(k_x,k_y,k_z) H_htrig.Hfun{i}(k_x,k_y,k_z,([options.para(j,:)]));
-                                temp_str = ["H_fun_t{i} =@(k_x,k_y,k_z) H_htrig.Hfun{i}(k_x,k_y,k_z",string(options.para(j,:))];
+                                temp_str = ["H_fun_t{i} =@(k_x,k_y,k_z) H_htrig.HcoeL(:,:,i)(k_x,k_y,k_z",string(options.para(j,:))];
                                 temp_str = strjoin(temp_str,',');
                                 temp_str = temp_str+");";
                                 eval(temp_str);
@@ -2853,16 +2851,11 @@ classdef Htrig < vasplib & matlab.mixin.CustomDisplay
                             fprintf('%s :',mat2str(string(sym(options.paraname(i)))));
                             fprintf('%f\n',options.para(j,i));
                         end
+                        TheHcoeL = H_htrig.HcoeL;
+                        TheHcoeL =  subs(TheHcoeL,sym(options.paraname),options.para(j,:));
                         for i =1:numel( H_htrig.HsymL_trig)
-                            
-                            % sorry i dont know how to improve
-                            %H_fun_t{i} =@(k_x,k_y,k_z) H_htrig.Hfun{i}(k_x,k_y,k_z,([options.para(j,:)]));
-                            temp_str = ["H_fun_t{i} =@(k_x,k_y,k_z) H_htrig.Hfun{i}(k_x,k_y,k_z",string(options.para(j,:))];
-                            temp_str = strjoin(temp_str,',');
-                            temp_str = temp_str+");";
-                            eval(temp_str);
+                            H_fun_t{i} = matlabFunction(TheHcoeL(:,:,i),'Vars',H_htrig.VarsSeqLcart(1:H_htrig.Dim));
                         end
-                        
                         if strcmp(H_htrig.Type,'sparse')
                             Htemp=sparse(H_htrig.Basis_num ,H_htrig.Basis_num);
                             for i=1:H_htrig.Kinds
