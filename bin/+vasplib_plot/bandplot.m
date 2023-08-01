@@ -133,6 +133,7 @@ end
             end
             Nbands=size(EIGENCAR{j},1);
             for Ei=1:Nbands
+                
                 plot(ax,klist,EIGENCAR{j}(Ei,:),options.LineSpec,'LineWidth',LineWidth,'Color',Colormap(j,:),'DisplayName',num2str(j)+"_"+num2str(Ei));
                 hold(ax,'on');
                 %hold on;

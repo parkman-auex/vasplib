@@ -1233,7 +1233,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                                         %                                             j);
                                         tmpsym = (H_hr.HcoeL(i)+H_hr.HcoeL(j)')/2;
                                         H_hr_tmp = H_hr_tmp.set_hop(tmpsym,vector_tmp(DIM+1),vector_tmp(DIM+2),vector_tmp(1:H_hr.Dim),'sym');
-                                        H_hr_tmp = H_hr_tmp.set_hop(tmpsym',vector_tmp_oppo(DIM+1),vector_tmp_oppo(DIM+2),vector_tmp_oppo(1:H_hr.Dim)','sym');
+                                        H_hr_tmp = H_hr_tmp.set_hop(tmpsym',vector_tmp_oppo(DIM+1),vector_tmp_oppo(DIM+2),vector_tmp_oppo(1:H_hr.Dim),'sym');
                                     end
                                 end
                             end
@@ -6303,6 +6303,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             arguments
                 H_hr HR;
                 options.level_cut {mustBeInteger} = 1;
+                options.level_list = [];
                 options.onsite logical = false;
                 options.per_dir double = [1,1,1];
                 options.chiral logical = false;
@@ -6362,9 +6363,14 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             % attention
             H_hr.coe = true;
             H_hr.num = false;
+            %% select_nn_store
+            if isempty(options.level_list)
+                select_nn_store = H_hr.nn_store(H_hr.nn_store(:,10)<=options.level_cut,:);
+            else
+                select_nn_store = H_hr.nn_store(ismember(H_hr.nn_store(:,10),options.level_list),:);
+            end
             if options.fast
                 H_hr.vectorhopping = true;
-                select_nn_store = H_hr.nn_store(H_hr.nn_store(:,10)<=options.level_cut,:);
                 % try to speed up
                 if options.chiral
                     element1L =  H_hr.elementL(select_nn_store(:,1));
@@ -6438,7 +6444,6 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                     end
                     pb.delete();
                 else
-                    select_nn_store = H_hr.nn_store(H_hr.nn_store(:,10)<=options.level_cut,:);
                     pb = vasplib_tool_outer.CmdLineProgressBar('Setting ');
                     % try to speed up
                     if options.chiral
@@ -6566,7 +6571,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                     H_hr = H_hr.hermitize;
                     H_hr = H_hr.simplify(options.Accuracy);
                 end
-                return;
+                return;% !!!
             end
             % use numerical of symbolic
             
@@ -6639,6 +6644,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                             [H_hr_R(j),H_hr] = applyRU(H_hr,SymOper_tmp(j));
                         end
                         pb.delete();
+                        fprintf('Debug');
                         H_hr = sum(H_hr_R)/nSymOper_tmp;
                         H_hr = H_hr.simplify(options.Accuracy);
                     else
@@ -7618,6 +7624,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                 options.ax = [];
                 options.Select = [];
                 options.cmap = @parula;
+                options.Title = '';
             end
             import vasplib_plot.*;
             Rm_ = H_hr.Rm*options.scale;
@@ -7696,6 +7703,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                     end
                 otherwise
             end
+            title(options.ax,options.Title);
         end
         function Hout = printout(H_hr,print_list,mode)
             if nargin < 2

@@ -1,4 +1,4 @@
-function y = redblue(varargin)
+function y = redbluecmap(varargin)
 % generate a RED-BLUE colormap with zero as white.
 % Syntax: y = redblue(n,clim,'black')
 %   Typical usage: colormap(redblue(64))
