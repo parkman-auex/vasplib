@@ -15,6 +15,7 @@ arguments
     options.printmode = true;
     options.LWAVE = true;
     options.Umat = [];
+    options.Oper = [];
     options.subband = [];
     options.returnH = [];
     options.Hermite = true;
@@ -95,6 +96,12 @@ if options.WEIGHTCAR
             end
     end
 end
+if isempty(options.Oper)
+    OperMode = 0;
+else
+    % options.WEIGHTCAR = true;
+    OperMode = 1;
+end
 % -------------- nargin ------------------
 if H_hr.overlap
     NRPTS_tmp_S = size(H_hr.vectorL_overlap,1);
@@ -148,7 +155,7 @@ else
     WAVECAR = [];
 end
 EIGENCAR = zeros(NBANDS,kn);
-if options.WEIGHTCAR
+if options.WEIGHTCAR || OperMode
     WEIGHTCAR = EIGENCAR;
 end
 % give back
@@ -245,8 +252,11 @@ if strcmp(options.convention,'II')
         if options.LWAVE
             WAVECAR(:,:,ki) = A(:,subband);
         end
-        if options.WEIGHTCAR
+        if options.WEIGHTCAR 
             [~,WEIGHTCAR(:,ki)] = vasplib.COLORCAR_gen(A,HSVCAR,signlist);
+        end
+        if OperMode
+            [WEIGHTCAR(:,ki)] = vasplib.Observecar_gen(A,options.Oper);
         end
         if options.printmode
             pb.print(ki,kn,' ...');
@@ -355,6 +365,9 @@ elseif strcmp(options.convention,'I')
         if options.WEIGHTCAR
             [~,WEIGHTCAR(:,ki)] = vasplib.COLORCAR_gen(A,HSVCAR,signlist);
         end
+        if OperMode
+            [WEIGHTCAR(:,ki)] = vasplib.Observecar_gen(A,options.Oper);
+        end
         if options.printmode
             pb.print(ki,kn,' ...');
         end
@@ -363,7 +376,7 @@ else
 end
 varargout{1} = EIGENCAR ;
 varargout{2} = WAVECAR;
-if options.WEIGHTCAR
+if options.WEIGHTCAR  || OperMode
     varargout{3} = WEIGHTCAR;
 end
 if options.show
