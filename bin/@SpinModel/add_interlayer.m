@@ -1,10 +1,12 @@
-function H_spin = add_interlayer(H_spin, exchange_num, exchange_label, directions)
+function H_spin = add_interlayer(H_spin, exchange_num, exchange_label, Rlength_cut, directions)
 % long-range exchange terms, for example, between different layers
 arguments
     H_spin SpinModel
     exchange_num int8 = 1
-    exchange_label {mustBeA(exchange_label,{'sym','string'})} = "Js"
-    directions int8 = 3 % 1 2 3 for x y z
+    exchange_label {mustBeA(exchange_label,{'sym','string'})} = "Js"    
+    Rlength_cut double = 20; % set a smaller length can speed up
+    directions {mustBeMember(directions,{'x', 'y', 'z'})} = 'z';
+    %int8 = 3 % 1 2 3 for x y z
 end
 %% check 1
 if length(exchange_label) ~= exchange_num
@@ -18,10 +20,19 @@ allvars = [exchange_label, H_spin.exchange_label];
 if H_spin.exchange_num + exchange_num ~= length(unique(allvars))
     error("The labels of exchange terms must be individual");
 end
+%% check 3
+switch directions
+    case 'x'
+        directions = 1;
+    case 'y'
+        directions = 2;
+    case 'z'
+        directions = 3;
+end
 %% search long-range bonds
 search_range = [1, 1, 1];  % a small guess
 Accuracy = 1e-2;
-Rlength_cut = 20; % a very large value
+ % a very large value
 hr = hr.nn(search_range, Accuracy, Rlength_cut);
 %% cut-off the bonds in x-y plane
 ns = hr.nn_store;

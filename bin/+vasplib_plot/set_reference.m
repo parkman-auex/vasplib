@@ -88,7 +88,8 @@ end
     %line(X_cut,[0 0],'LineWidth',0.1,'Color',[0. 0. 0.],'DisplayName','fermi-level')
     for i=1:(length(kpoints_name)-2)                                           
         X=[kpoints_l(i+1) kpoints_l(i+1)];
-        line(ax,X,Y_cut,'LineWidth',0.1,'Color',[0 0. 0.],'DisplayName','K-path');
+        plot(ax,X,Y_cut,'LineWidth',0.1,'Color',[0 0. 0.],'DisplayName','K-path',...
+            'HandleVisibility','off');
     end
 end
 hold(ax,'on');

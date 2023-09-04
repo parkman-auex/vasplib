@@ -30,21 +30,17 @@
 %
 % * Document Date: 2020/12/03
 % * Creation Date: 2020/12/03
-% * Last updated : 2020/12/03
-%
-%% Copyright
-%
-% * parkman
-% * <parkman@buaa.edu.cn>
+% * Last updated : 2023/09/04
 %
 %% Source code :
 %
-function varargout = pband_plot_set(klist,EIGENCAR,WEIGHTCAR_cell,Name_list,options,optionsplot)
+function varargout = pband_plot_set(klist,EIGENCAR,WEIGHTCAR_cell,Name_list,Selected_projs,options,optionsplot)
 arguments
     klist
     EIGENCAR
     WEIGHTCAR_cell
     Name_list
+    Selected_projs double
     options.cmap
     optionsplot.density = 1;
     optionsplot.WEIGHTCAR_factor = 1;
@@ -83,7 +79,7 @@ else
 end
 optionsplotcell = namedargs2cell(optionsplot);
 %--------  plot  --------
-for i = 1:nWEIGHTCAR
+for i = Selected_projs
     color = cmap(i,:);
     %disp(color);
     WEIGHTCAR_vector = WEIGHTCAR_cell{i}(:);

@@ -109,11 +109,11 @@ function [EIGENCAR,EIGENCAR2,Efermi,klist_l]=EIGENVAL_read(mode,EIGENVAL,Efermi)
         EIGENCAR = EIGENCAR.' - Efermi*ones(NBands,Ktotal);
     elseif strcmp(mode,'vaspkit')
         % import linux_matlab.*;
-        [~,num_list] = linux_matlab.grep(EIGENVAL,'    0.0000','silence');
-        NBands = length(num_list)  ;
-        data = importdata(EIGENVAL)    ;
-        [tot_row,~] = size(data );
-        Ktotal = tot_row/NBands  ;
+        nknbd = linux_matlab.grep('BAND.dat','NKPTS','silence');
+        nknbd_list = split(nknbd);
+        NBands = str2double(nknbd_list(end));
+        Ktotal = str2double(nknbd_list(end-1));
+        data = readmatrix(EIGENVAL, 'NumHeaderLines',3,'CommentStyle','#');
         EIGENCAR = reshape(data(:,2),Ktotal,NBands);
         EIGENCAR = EIGENCAR.' - Efermi*ones(NBands,Ktotal);
     elseif strcmp(mode,'vaspkit2')

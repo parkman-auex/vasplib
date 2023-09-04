@@ -81,7 +81,7 @@ classdef SpinModel
     end
     %% interface to Vampire
     methods
-        Gen_UCF(H_spin, filename)
+        Gen_UCF(H_spin, filename, opts)
     end
 end
 

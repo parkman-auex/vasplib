@@ -31,14 +31,6 @@
 % # fig:
 % # ax:
 %
-%% example:
-% for vasp
-%   bandplot();
-% for a eigencar
-%   bandplot(EIGENCAR)
-% use Ecut
-%   bandplot(EIGENCAR,Ecut)
-%
 %% Note:
 %
 %  Take advantage of the scope of application of the function.
@@ -47,12 +39,7 @@
 %
 % * Document Date: 2020/12/04
 % * Creation Date: 2020/12/04
-% * Last updated : 2020/12/04
-%
-%% Copyright
-%
-% * parkman
-% * <parkman@buaa.edu.cn>
+% * Last updated : 2023/09/04
 %
 %% Source code :
 %
@@ -80,10 +67,11 @@ arguments
     options.LineWidth = 1;
     options.MarkerEdgeColor = [];
     options.MarkerFaceColor = [];
+    options.silent = false;   % If you do not want to be asked to choose the projections, turn on it.
     optionsplot.density = 1;
     optionsplot.WEIGHTCAR_factor = 1;
     optionsplot.ax = handle([]);
-    optionsplot.filled = true;
+    optionsplot.filled = true;   
 end
 %--------  init  --------
 import vasplib_plot.*
@@ -127,9 +115,14 @@ if isempty(WEIGHTCAR_struct)
     % test 2021a new feature
     % propertyCell = namedargs2cell(options);
     %
-    for i = 1:nWEIGHTCAR_struct_cell
-        titlestring_new = titlestring+"-"+Name_list(i,:);
-        disp(titlestring_new );
+    for i = 1:nWEIGHTCAR_struct_cell        
+        element_name = split(Name_list(i,:),'_');
+        titlestring_new = titlestring+"-"+element_name(1);
+        if ~options.silent
+            disp("Please choose which projections of "+element_name(1)+" will be plotted:");
+            disp("(array format like 1:4, [1,4,5]... is supported)");
+        end
+
         options.title = titlestring_new;
         propertyCell = namedargs2cell(options);
         WEIGHTCAR_struct = WEIGHTCAR_struct_cell{i};
@@ -139,20 +132,21 @@ if isempty(WEIGHTCAR_struct)
         %             cmap = cmap_function(nWEIGHTCAR);
         ax_temp=vasplib.pbandplot(WEIGHTCAR_struct,EIGENCAR,klist_l,kpoints_l,kpoints_name,propertyCell{:});
         %--------  fbug  --------
-        fig(i) = ax_temp.Parent;ax(i) = ax_temp;
-        if i ==1
-            WEIGHTCAR_TOT = WEIGHTCAR_struct;
-        else
-            WEIGHTCAR_TOT = [WEIGHTCAR_TOT ,WEIGHTCAR_struct];
-        end
+        fig(i) = ax_temp.Parent;
+        ax(i) = ax_temp;
+        % if i ==1
+        %     WEIGHTCAR_TOT = WEIGHTCAR_struct;
+        % else
+        %     WEIGHTCAR_TOT = [WEIGHTCAR_TOT ,WEIGHTCAR_struct];
+        % end
     end
     %         nWEIGHTCAR = length(WEIGHTCAR_TOT);
     %         cmap = cmap_function(nWEIGHTCAR);
     %--------  fbug  --------
-    options.title = 'TOT';
-    propertyCell = namedargs2cell(options);
-    ax_temp = vasplib_plot.pbandplot(WEIGHTCAR_TOT,EIGENCAR,klist_l,kpoints_l,kpoints_name,propertyCell{:});
-    fig(i+1) = ax_temp.Parent;ax(i+1) = ax_temp;
+    % options.title = 'TOT';
+    % propertyCell = namedargs2cell(options);
+    % ax_temp = vasplib_plot.pbandplot(WEIGHTCAR_TOT,EIGENCAR,klist_l,kpoints_l,kpoints_name,propertyCell{:});
+    % fig(i+1) = ax_temp.Parent;ax(i+1) = ax_temp;
     %-------- return --------
     if nargout  == 2
         varargout{1} = fig;
@@ -163,15 +157,10 @@ if isempty(WEIGHTCAR_struct)
     end
     return;
 end
-if isempty(optionsplot.ax)
-    Fig =  Figs(1,1);
-    ax = Fig.axes(1);
-else
-    ax = optionsplot.ax;
-end
 %--------  norm  --------
-
 if isa(WEIGHTCAR_struct,'double')
+    warning('This method has not been revised!')
+
     pbandmode = 'patch'         ;
     WEIGHTCAR = WEIGHTCAR_struct;
     maxBCplus = options.ColorCut*max((WEIGHTCAR),[],'all');
@@ -191,6 +180,8 @@ if isa(WEIGHTCAR_struct,'double')
 
     %cmap = cmap_function();
 elseif isa(WEIGHTCAR_struct,'cell')
+    warning('This method has not been revised!')
+
     cmap = options.cmap;
     if length(WEIGHTCAR_struct) > 1
         pbandmode = 'bubble_rough' ;
@@ -226,13 +217,33 @@ elseif isa(WEIGHTCAR_struct,'struct')
         cmap = options.cmap;
     end
 end
-
 %--------  init  --------
 Nbands=size(EIGENCAR,1);
 xmin=klist_l(1);
 xmax=klist_l(length(klist_l));
 Xcut = [xmin,xmax];
-%--------plotwhole--------_
+%--------projections----                    
+nWEIGHTCAR = length(WEIGHTCAR_cell);
+if nWEIGHTCAR ~= 9
+    warning("It seems like that the PBAND info does not come from vaspkit!")
+end
+if ~options.silent
+    prompt = "0) all(or just press Enter)\n1) s    2) py    3) pz    4) px\n"...
+        +"5) dxy  6) dyz   7) dz2   8) dxz   9) dx2-y2:\n";
+    Selected_projs = input(prompt);
+    if isempty(Selected_projs)
+        Selected_projs = 1:nWEIGHTCAR;
+    end
+else
+    Selected_projs = 1:nWEIGHTCAR;
+end
+%--------  init ax ------
+if isempty(optionsplot.ax)
+    Fig =  Figs(1,1);
+    ax = Fig.axes(1);
+else
+    ax = optionsplot.ax;
+end
 %--------plotweight--------
 switch pbandmode
     case 'patch'
@@ -252,13 +263,20 @@ switch pbandmode
         end
         ax = pband_plot_set(klist,EIGENCAR,WEIGHTCAR_cell,Name_list,cmap,options.density,ax);
     case 'bubble_refine'
+        %--------baseline------
         for Ei=1:Nbands
-            plot(ax,klist,EIGENCAR(Ei,:),'LineWidth',1.0,'Color',[0.1 0.1 0.1],'DisplayName',num2str(Ei));
+            plot(ax,klist,EIGENCAR(Ei,:),...
+                'LineWidth',1.0,'Color',[0.1 0.1 0.1],'DisplayName',num2str(Ei),...
+                'HandleVisibility','off');
             %hold on;
         end
         optionsplot.ax =ax;
         optionsplotcell = namedargs2cell(optionsplot);
-        ax = vasplib_plot.pband_plot_set(klist,EIGENCAR,WEIGHTCAR_cell,Name_list,'cmap',cmap,optionsplotcell{:});% waiting
+        ax = vasplib_plot.pband_plot_set(klist,EIGENCAR,WEIGHTCAR_cell,Name_list,Selected_projs,...
+            'cmap',cmap,optionsplotcell{:});% waiting
+        %---------legend-------
+        legend_all = ["s", "p_y", "p_z", "p_x", "d_{xy}", "d_{yz}", "d_{z^2}", "d_{xz}", "d_{x^2-y^2}"];
+        legend(ax,legend_all(Selected_projs))
 end
 %--------reference -------
 ax = vasplib_plot.set_reference(kpoints_l,kpoints_name,Xcut,options.Ecut,...

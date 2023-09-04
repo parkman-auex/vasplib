@@ -1,14 +1,24 @@
-function Gen_UCF(H_spin, filename)
+function Gen_UCF(H_spin, filename, opts)
 arguments
     H_spin SpinModel
-    filename = 'vampire.UCF';            
+    filename = 'vampire.UCF';
+    opts.num_materials int8 = 2;
 end
-%% check
+%% check Rm
 H_spin.check_exchange_value();
 if ~isdiag(H_spin.Rm)
     error('Vampire 6.0 only support orthogonal lattice vectors! Please check your Rm');
 end
 orbL = H_spin.orbL;
+%% change int8 to double, very important for using mod and floor!
+mag_atom_num = double(H_spin.mag_atom_num);
+num_materials = double(opts.num_materials);
+%% check the number of materials
+if mod(mag_atom_num, num_materials) ~= 0
+    error("The input number of 'opts.num_materials' can not divide the atoms evenly."+...
+        "If it is what you want, please set opts.num_materials = 1 and modify the UCF file manually.")
+end
+nmBlock = mag_atom_num/num_materials;
 %% head
 fileID = fopen(filename ,'w');
 %
@@ -22,16 +32,17 @@ fprintf(fileID,"# Unit cell vectors:\n");
 fprintf(fileID,"  1.0 0.0 0.0\n");
 fprintf(fileID,"  0.0 1.0 0.0\n");
 fprintf(fileID,"  0.0 0.0 1.0\n");
-%
+%%
 fprintf(fileID,"# Atoms num_atoms num_materials; id cx cy cz (mat cat hcat)\n");
-fprintf(fileID,"%d  %d\n", H_spin.mag_atom_num, H_spin.mag_atom_num);
+fprintf(fileID,"%d  %d\n", mag_atom_num, num_materials);
+
 % orbLs
 for i = 1:size(orbL,1)
     fprintf(fileID,"  %d", i - 1);
-    fprintf(fileID,"  %f",mod(orbL(i,1),1));
-    fprintf(fileID,"  %f",mod(orbL(i,2),1));
-    fprintf(fileID,"  %f",mod(orbL(i,3),1));
-    fprintf(fileID,"  %d", i - 1);
+    fprintf(fileID,"  %f", mod(orbL(i,1),1));
+    fprintf(fileID,"  %f", mod(orbL(i,2),1));
+    fprintf(fileID,"  %f", mod(orbL(i,3),1));
+    fprintf(fileID,"  %d", floor((i-1)/nmBlock));
     fprintf(fileID,"\n");
 end
 %% body
