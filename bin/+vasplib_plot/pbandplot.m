@@ -159,8 +159,8 @@ if isempty(WEIGHTCAR_struct)
 end
 %--------  norm  --------
 if isa(WEIGHTCAR_struct,'double')
-    warning('This method has not been revised!')
-
+    %warning('This method has not been revised!')
+    nWEIGHTCAR = length(WEIGHTCAR_struct);
     pbandmode = 'patch'         ;
     WEIGHTCAR = WEIGHTCAR_struct;
     maxBCplus = options.ColorCut*max((WEIGHTCAR),[],'all');
@@ -216,6 +216,7 @@ elseif isa(WEIGHTCAR_struct,'struct')
     else
         cmap = options.cmap;
     end
+    nWEIGHTCAR = length(WEIGHTCAR_cell);
 end
 %--------  init  --------
 Nbands=size(EIGENCAR,1);
@@ -223,11 +224,11 @@ xmin=klist_l(1);
 xmax=klist_l(length(klist_l));
 Xcut = [xmin,xmax];
 %--------projections----                    
-nWEIGHTCAR = length(WEIGHTCAR_cell);
+
 if nWEIGHTCAR ~= 9
-    warning("It seems like that the PBAND info does not come from vaspkit!")
+   % warning("It seems like that the PBAND info does not come from vaspkit!")
 end
-if ~options.silent
+if ~options.silent && (strcmp(pbandmode,"bubble_only") || strcmp(pbandmode,"bubble_rough") ||strcmp(pbandmode,"bubble_refine"))
     prompt = "0) all(or just press Enter)\n1) s    2) py    3) pz    4) px\n"...
         +"5) dxy  6) dyz   7) dz2   8) dxz   9) dx2-y2:\n";
     Selected_projs = input(prompt);

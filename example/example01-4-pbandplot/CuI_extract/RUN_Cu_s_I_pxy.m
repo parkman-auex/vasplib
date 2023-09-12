@@ -22,4 +22,7 @@ WEIGHTCAR_struct_plot_2(2).WEIGHTCAR = WEIGHTCAR_struct_I1(2).WEIGHTCAR+ ...
 WEIGHTCAR_struct_plot_2(2).WEIGHTCAR =  WEIGHTCAR_struct_plot_2(2).WEIGHTCAR/2; 
 % adjust density
 %% 
-[fig,ax]=pbandplot(WEIGHTCAR_struct_plot_2,EIGENCAR,'Ecut',Ecut,'title',titlestring);                                   
+[fig,ax]=vasplib_plot.pbandplot(WEIGHTCAR_struct_plot_2,EIGENCAR,'Ecut',Ecut,'title',titlestring);     
+
+AxChildren = ax.Children
+legend(AxChildren([4,5]))

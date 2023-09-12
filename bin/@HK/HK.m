@@ -1234,6 +1234,7 @@ classdef HK < vasplib & matlab.mixin.CustomDisplay
                 if strcmp(mode , 'Gamma')
                     
                 else
+                    warning('This function is not well-written, only support Term mode now');
                     kpoints = kpoints_f * H_hk.Gk;
                     H_hk = HK(H_hk.Basis_num,H_hk.Degree,H_hk.Term_to_save.subsk(kpoints));
                 end
@@ -1364,7 +1365,7 @@ classdef HK < vasplib & matlab.mixin.CustomDisplay
                 %%%%%%%%%%%%%%%%%%%%
                 for i = 1:H_hk.Kinds
                     %                         if sum(sum(H_hk.HcoeL(:,:,i))) ~= sym(0)
-                    if  ~all(H_hk.HcoeL(:,:,i) == sym(0) )
+                    if  sum(all(H_hk.HcoeL(:,:,i) == sym(0) ))
                         [vector_list,Coeffs_list] = HK.HstrL_classify(H_hk.HstrL(i),R_struct,lattice_mode);
                         %disp(vector_list);
                         for j =1:length(Coeffs_list)
