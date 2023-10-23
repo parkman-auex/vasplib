@@ -1936,56 +1936,56 @@ classdef vasplib < matlab.mixin.CustomDisplay
                 EIGENCAR = vasplibobj.EIGENCAR_gen();
                 Ecut = varargin{1};
                 varargin = varargin(2:end);
-                vasplib_plot.bandplot(EIGENCAR,Ecut,vasplibobj.klist_l,vasplibobj.kpoints_l,vasplibobj.kpoints_name,varargin{:});
+                bandplot(EIGENCAR,Ecut,vasplibobj.klist_l,vasplibobj.kpoints_l,vasplibobj.kpoints_name,varargin{:});
             elseif nargin ==1
                 EIGENCAR = vasplibobj.EIGENCAR_gen();
                 Ecut=  [-3,3];
-                vasplib_plot.bandplot(EIGENCAR,Ecut,vasplibobj.klist_l,vasplibobj.kpoints_l,vasplibobj.kpoints_name);
+                bandplot(EIGENCAR,Ecut,vasplibobj.klist_l,vasplibobj.kpoints_l,vasplibobj.kpoints_name);
             elseif ismatrix(varargin{1}) && ~isnumeric(varargin{2}) && ~isvector(varargin{2})
                 EIGENCAR = varargin{1};
                 varargin = varargin(2:end);
                 Ecut=  [-3,3];
-                [varargout{:}]  = vasplib_plot.bandplot(EIGENCAR,Ecut,vasplibobj.klist_l,vasplibobj.kpoints_l,vasplibobj.kpoints_name,varargin{:});
+                [varargout{:}]  = bandplot(EIGENCAR,Ecut,vasplibobj.klist_l,vasplibobj.kpoints_l,vasplibobj.kpoints_name,varargin{:});
             elseif  ismatrix(varargin{1}) && isnumeric(varargin{1}) && length(varargin{1}) ==2 && isvector(varargin{1})
                 EIGENCAR = varargin{1};Ecut = varargin{2};
                 varargin = varargin(3:end);
-                varargout{:} = vasplib_plot.bandplot(EIGENCAR,Ecut,vasplibobj.klist_l,vasplibobj.kpoints_l,vasplibobj.kpoints_name,varargin{:});
+                varargout{:} = bandplot(EIGENCAR,Ecut,vasplibobj.klist_l,vasplibobj.kpoints_l,vasplibobj.kpoints_name,varargin{:});
             else
-                [varargout{:}] = vasplib_plot.bandplot(varargin{:});
+                [varargout{:}] = bandplot(varargin{:});
             end
         end
     end
     methods(Static)
         % https://ww2.mathworks.cn/help/matlab/ref/varargout.html
         function varargout = WilsonLoopPlot(varargin)
-            [varargout{1:nargout}] = vasplib_plot.WilsonLoopPlot(varargin{:});
+            [varargout{1:nargout}] = WilsonLoopPlot(varargin{:});
         end
         function varargout = BZplot(varargin)
-            [varargout{1:nargout}] = vasplib_plot.BZplot(varargin{:});
+            [varargout{1:nargout}] = BZplot(varargin{:});
         end
         function varargout= pbandplot(varargin)
-            [varargout{1:nargout}] = vasplib_plot.pbandplot(varargin{:});
+            [varargout{1:nargout}] = pbandplot(varargin{:});
         end
         function varargout = bandcompare(varargin)
-            [varargout{1:nargout}] = vasplib_plot.bandcompare(varargin{:});
+            [varargout{1:nargout}] = bandcompare(varargin{:});
         end
         function varargout = waveplot(varargin)
-            [varargout{1:nargout}] = vasplib_plot.waveplot(varargin{:});
+            [varargout{1:nargout}] = waveplot(varargin{:});
         end
         function varargout = bandplot_3d(varargin)
-            [varargout{1:nargout}] = vasplib_plot.bandplot3d(varargin{:}); % Name Truncation
+            [varargout{1:nargout}] = bandplot3d(varargin{:}); % Name Truncation
         end
         function varargout = heatplot(varargin)
-            [varargout{1:nargout}] = vasplib_plot.heatplot(varargin{:});
+            [varargout{1:nargout}] = heatplot(varargin{:});
         end
         function varargout = heatplot3D(varargin)
-            [varargout{1:nargout}] = vasplib_plot.heatplot3D(varargin{:});
+            [varargout{1:nargout}] = heatplot3D(varargin{:});
         end
         function varargout = BCplot2D(varargin)
-            [varargout{1:nargout}] = vasplib_plot.BCplot2D(varargin{:});
+            [varargout{1:nargout}] = BCplot2D(varargin{:});
         end
         function varargout = ShowSurfIntegral(varargin)
-            [varargout{1:nargout}] = vasplib_plot.ShowSurfIntegral(varargin{:});
+            [varargout{1:nargout}] = ShowSurfIntegral(varargin{:});
         end
     end
     %% Gemometric Phase
