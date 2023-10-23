@@ -1,6 +1,26 @@
-% VASPLIN/BIN
+%% Run this script to add all the classes and functions in vasplib to your matlab search path
+%% classes
+classes_path = "src/classes";
+% HR
+%   HR                    - - a powerful TB tools
 %
-% PLOT
+% HK
+%   HK                    - a powerful kp tools
+%
+% Htrig                  
+%   Htrig
+%
+% SYMMETRY
+%   Oper                  - An operation of a continus or discontinus group.
+%
+% OTHER CLASS
+%   Trig                  - 
+%   Term                  - 
+%   pauli_matric          - pauli matric 
+%   gamma_matric          - pauli matric 
+%   MaterialAccom         - 
+%% plot functions
+plot_funcs_path = "src/functions_plot";
 %   bandplot              - bandplot
 %   bandcompare           - General
 %   bandplot_3d           - An example for the visualization of 3D-bandstructure for your own by using MATLAB
@@ -13,8 +33,8 @@
 %   dosplot               - DOS_plot
 %   heatplot              - 
 %   POSCAR_play           - note: POSCAR is Direct mode
-%
-% DFT
+%% API functions with the files in VASP formats and etc
+api_funcs_path = "src/functions_api";
 %  READ
 %   DOSCAR_read           - DOSCAR_read
 %   KPOINTS_read          - KPOINTS_read
@@ -62,24 +82,7 @@
 %   nanodisk_vasp_prework - make sure present work and save the var
 %   enforce_2D_POSCAR     - 
 %
-% HR
-%   HR                    - - a powerful TB tools
-%
-% HK
-%   HK                    - a powerful kp tools
-%
-% Htrig                  
-%   Htrig
-%
-% SYMMETRY
-%   Oper                  - An operation of a continus or discontinus group.
-%
-% OTHER CLASS
-%   Trig                  - 
-%   Term                  - 
-%   pauli_matric          - pauli matric 
-%   gamma_matric          - pauli matric 
-%   MaterialAccom         - 
+
 %
 % TOOLS
 %   kmesh3D               - To generate k-mesh for DOSplot or 2D-Bandplot
@@ -107,3 +110,14 @@
 %   write_pj              - map_rule
 %   Ymlsym                - 
 %   Htrig                 - 
+%% data files
+datas_path = "src/datas";
+%%
+main_path = pwd;
+addpath(main_path+"/src");
+addpath(main_path+"/"+classes_path);
+addpath(main_path+"/"+plot_funcs_path);
+addpath(main_path+"/"+api_funcs_path);
+addpath(main_path+"/"+datas_path);
+addpath(main_path+"/src/functions_transport");
+savepath;

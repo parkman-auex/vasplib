@@ -1,3 +1,0 @@
-% VASPLIB
-%
-% Files

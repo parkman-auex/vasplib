@@ -36,8 +36,8 @@ classdef SpinModel
                     {'isotropic','vectorial','tensorial'})} = 'isotropic'
             end            
             %% pre check
-            [Rm, sites, Atom_name, Atom_num] = POSCAR_readin(POSCAR_name); 
-            if length(Atom_name) ~= 1
+            [Rm, sites, ~, Atom_num] = POSCAR_readin(POSCAR_name); 
+            if length(Atom_num) ~= 1
                 error('At present, you should provide a POSCAR file with only magnetic sites');
             end   
             H_spin.mag_atom_num = Atom_num;
@@ -50,7 +50,7 @@ classdef SpinModel
             H_spin.exchange_type = options.exchange_type;              
             %% take innar HR objs to hidden unused informations
             HR_obj_base = HR(Atom_num);
-            HR_obj_base = HR_obj_base.input_Rm();
+            % HR_obj_base = HR_obj_base.input_Rm();
             HR_obj_base = HR_obj_base.input_orb_struct();
             HR_obj_base.quantumL = zeros(Atom_num, 4);
             

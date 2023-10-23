@@ -15,9 +15,9 @@ matlab工具箱：
 vasplib基本函数，vasplib类，HR类，HK类，Htrig类
 
 #### 安装教程
+运行INSTALL.m脚本
 
-~/Documents/MATLAB/vasplib/bin 
-addpath 放入matlab目录
+run the INSTALL.m script
 
 #### 使用说明
 
