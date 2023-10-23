@@ -22,7 +22,7 @@ end
 scale =options.scale;
 %
 if nargin <1
-    [Rm,sites,Atom_name,Atom_num,~]=POSCAR_readin('POSCAR');
+    [Rm,sites,Atom_name,Atom_num,~]=POSCAR_read('POSCAR');
 end
 % 
 elements_table=element_table();

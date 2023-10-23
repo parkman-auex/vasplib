@@ -7,7 +7,7 @@ arguments
     options.OriginPoint = [0 0 0];
     options.Orientation = eye(3);
 end
-import vasplib_plot.*
+
 if isempty(options.ax)
     Fig =  Figs(1,1);
     ax = Fig.axes(1);

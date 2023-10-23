@@ -27,7 +27,7 @@ NRPTS_tmp = H_hr.NRPTS;
 % -------------- plot ------------------
 if options.show
     if  isempty(options.ax)
-        ax = vasplib_plot.BZplot(vasplibobj.Rm,'color','r');
+        ax = BZplot(vasplibobj.Rm,'color','r');
     else
         ax = options.ax;
     end

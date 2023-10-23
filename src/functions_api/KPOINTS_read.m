@@ -66,9 +66,16 @@ function [kpoints,nodes,kpoints_name] = KPOINTS_read(filename,mode)
     if strcmp(mode,'vasp')
         % get whole information
         KPOINTS=fopen(filename,'r');                 %open KPOINTS
-        temp_i=0;
+       temp_i=0;
         while ~feof(KPOINTS)
             temp_i=temp_i+1;
+            if temp_i == 3
+                K_mode = fgets(KPOINTS);
+                if K_mode(1) ~= 'L' && K_mode(1) ~= 'l'
+                    error("The "+filename+" is not in Line-Mode,..." + ...
+                        " please provide the KPOINTS used in your band calculations")
+                end
+            end
             KPOINTS_information{temp_i}=fgets(KPOINTS);
         end
         fclose(KPOINTS);                              %close KPOINTS

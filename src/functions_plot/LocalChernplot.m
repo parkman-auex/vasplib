@@ -15,10 +15,10 @@ end
 
 if isempty(options.Rm)
     try
-        [Rm,~,~,~,~]=POSCAR_readin(options.POSCAR);
+        [Rm,~,~,~,~]=POSCAR_read(options.POSCAR);
     catch
         filename = input('please give a POSCAR file :');
-        [Rm,~,~,~,~]=POSCAR_readin(filename);
+        [Rm,~,~,~,~]=POSCAR_read(filename);
     end
 else
     Rm = options.Rm;

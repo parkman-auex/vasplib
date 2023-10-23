@@ -8,7 +8,7 @@ arguments
     options.ax = handle([]);
     options.scale = 0.5;
     options.ShowArrowHead = 'on';
-    options.Rm = POSCAR_readin;
+    options.Rm = POSCAR_read;
     options.BZ logical= false;
     options.BZmode {mustBeMember(options.BZmode,{'3D','2D'})} = '2D';
     options.BZlabel logical = true; 

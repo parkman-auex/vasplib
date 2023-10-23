@@ -33,7 +33,7 @@ else
     titlestring  = options.title;
 end
 if isempty(options.ax)
-    figs = vasplib_plot.create_figure();
+    figs = create_figure();
     ax = figs.axes(1);
 else
     ax = options.ax;

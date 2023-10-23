@@ -7,7 +7,7 @@ NP = importdata('NP');
 VaspRunner = importdata('vasprun');VaspRunner = VaspRunner{1};
 vasprun = ['!mpirun -np ',num2str(NP),' ',VaspRunner,'>log 2>err'];
 format long;
-[Rm,sites,Atom_name,Atom_num,~,factor]=POSCAR_readin('POSCAR');
+[Rm,sites,Atom_name,Atom_num,~,factor]=POSCAR_read('POSCAR');
 natom = length(sites);
 V = abs(dot(Rm(:,3),cross(Rm(:,1),Rm(:,2))))*factor^3;
 fid = fopen('matlabrun.log','w');
@@ -46,7 +46,7 @@ for j = 1:DecimalDepth
         count = count + 1;
         copyfile('POSCAR.bk','POSCAR');
         evalstring = ['!sed -i "2c ',num2str(v_i),'" POSCAR'];
-        [Rm,~,~,~,~,~] = POSCAR_readin('POSCAR','vasp','digits',10);
+        [Rm,~,~,~,~,~] = POSCAR_read('POSCAR','vasp','digits',10);
         Rstruct = park.Rm2abc(Rm*v_i);
         eval(evalstring);
         % cd RELAX
@@ -56,7 +56,7 @@ for j = 1:DecimalDepth
         eval(vasprun);
         !grep 'free  energy' OUTCAR |tail -n 1|awk '{print $5}' >tmpE.dat
         E_RELAX = importdata('tmpE.dat')/natom;
-        [Rm_optimize,~,~,~,~,~]= POSCAR_readin('CONTCAR','vasp','digits',10);
+        [Rm_optimize,~,~,~,~,~]= POSCAR_read('CONTCAR','vasp','digits',10);
         Rstruct_optimize = park.Rm2abc(Rm_optimize*v_i);
         
         % cd back

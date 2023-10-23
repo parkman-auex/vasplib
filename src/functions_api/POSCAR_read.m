@@ -1,4 +1,4 @@
-%% POSCAR_readin
+%% POSCAR_read
 %
 % get poscar information from vasp and others
 % * Label:
@@ -7,9 +7,9 @@
 %%
 %% Usage:
 %
-% * [Rm,sites,Atom_name,Atom_num]= POSCAR_readin(filename,mode)
-% * [Rm,sites,Atom_name,Atom_num] = POSCAR_readin(filename)
-% * [Rm,sites,Atom_name,Atom_num] = POSCAR_readin()
+% * [Rm,sites,Atom_name,Atom_num]= POSCAR_read(filename,mode)
+% * [Rm,sites,Atom_name,Atom_num] = POSCAR_read(filename)
+% * [Rm,sites,Atom_name,Atom_num] = POSCAR_read()
 %
 %% Input:
 %

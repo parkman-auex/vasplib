@@ -12,7 +12,7 @@ function [Hopping_handle] = Plot_Hopping(vectorL,Hoppinglist,Rm,orbL,options)
         options.LineWidth = 1;
         options.norm = false
     end
-    import vasplib_plot.*
+    
     if options.TwoD
         Rm(3,:) = [0,0,1];
     end

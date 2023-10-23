@@ -354,7 +354,7 @@ classdef BasisFunc < HollowKnight
                 tf {Spin.mustBeSize(tf,[3 1;1 3])}= ([0 0 0]);%
                 optionsConvection.rightorleft {mustBeMember(optionsConvection.rightorleft,{'right','left'})}= 'right';
                 optionsOper.Oper = [];
-                optionsRm.Rm = POSCAR_readin;
+                optionsRm.Rm = POSCAR_read;
                 options.sym = false;
                 options.conjugate = false;
                 options.antisymmetry = false;

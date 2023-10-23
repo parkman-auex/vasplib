@@ -4,7 +4,7 @@ function AutoJ_table = AutoJ(targetdir)
     end
     workdir = pwd;
     cd(targetdir);
-    [Rm,sites,Atom_name,~]=POSCAR_readin();
+    [Rm,sites,Atom_name,~]=POSCAR_read();
     [~,MAGMOM_string] = system("grep MAGMOM "+ 'INCAR');
     MAGMOM_string = strsplit(MAGMOM_string,'=');
     MAGMOM_str = MAGMOM_string{2};

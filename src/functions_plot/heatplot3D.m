@@ -24,7 +24,7 @@ arguments
 end
 %
 %--------  init  --------
-import vasplib_plot.*
+
 %
 V = DOSCAR;
 %

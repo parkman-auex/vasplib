@@ -11,7 +11,7 @@ end
 disp('遵循Chiral碳纳米管标准范式，请采用基矢夹角为锐角的石墨烯POSCAR');
 disp('X为径向，Y为轴向，请通过调节手性数m、n来调节边界');
 disp('Mobius模式下，建议ncell = 1，以限制碳纳米管宽度，减轻内圈结构畸变')
-[Rm,sites,Atom_name,Atom_num,~,~] = POSCAR_readin(opts.POSCAR);
+[Rm,sites,Atom_name,Atom_num,~,~] = POSCAR_read(opts.POSCAR);
 %% primitive cell of graphene
 % Rm = [2.4560000896         0.0000000000         0.0000000000;
 %       1.2280000448         2.1269584693         0.0000000000;

@@ -1,6 +1,6 @@
 function varargout = BZplot(Rm,options)
 arguments
-    Rm = POSCAR_readin;
+    Rm = POSCAR_read;
     options.ax = handle([]);
     options.color ='none';
     options.blackwhite = false;

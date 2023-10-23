@@ -36,7 +36,7 @@ classdef SpinModel
                     {'isotropic','vectorial','tensorial'})} = 'isotropic'
             end            
             %% pre check
-            [Rm, sites, ~, Atom_num] = POSCAR_readin(POSCAR_name); 
+            [Rm, sites, ~, Atom_num] = POSCAR_read(POSCAR_name); 
             if length(Atom_num) ~= 1
                 error('At present, you should provide a POSCAR file with only magnetic sites');
             end   

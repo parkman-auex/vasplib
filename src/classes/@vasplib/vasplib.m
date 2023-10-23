@@ -213,13 +213,13 @@ classdef vasplib < matlab.mixin.CustomDisplay
     methods
         function vasplibobj = input_Rm(vasplibobj,Rm)
             if nargin <2 && exist('POSCAR','file')
-                [Rm,~,~,~,~] = vasplib.POSCAR_readin('POSCAR','vasp');
+                [Rm,~,~,~,~] = vasplib.POSCAR_read('POSCAR','vasp');
             elseif nargin <2 && ~exist('POSCAR','file')
                 Rm = eye(vasplibobj.Dim);
                 %warning('POSCAR or Rm needed');
             else
                 if isa(Rm,'string') || isa(Rm,'char')
-                    [Rm,~,~,~,~] = vasplibobj.POSCAR_readin(Rm,'vasp');
+                    [Rm,~,~,~,~] = vasplibobj.POSCAR_read(Rm,'vasp');
                 end
             end
             Rm = (Rm);
@@ -238,7 +238,7 @@ classdef vasplib < matlab.mixin.CustomDisplay
             if options.Operation
                 import spglib_matlab.*;
             end
-            [vasplibobj.Rm,tmpsites,vasplibobj.Atom_name,vasplibobj.Atom_num,elements]=vasplibobj.POSCAR_readin(filename,mode);
+            [vasplibobj.Rm,tmpsites,vasplibobj.Atom_name,vasplibobj.Atom_num,elements]=vasplibobj.POSCAR_read(filename,mode);
 
             % error check
             if options.warning
@@ -823,7 +823,7 @@ classdef vasplib < matlab.mixin.CustomDisplay
         end
         function [klist_cart,klist_frac,klist_cart_plot,sizemesh,Gk_,Grid] = kmesh2D(Rm,options,optionsEdge)
             arguments
-                Rm =POSCAR_readin;
+                Rm =POSCAR_read;
                 options.knum1   = 51;
                 options.knum2   = 51;
                 options.kstart  = [-0.5,-0.5,0];
@@ -920,7 +920,7 @@ classdef vasplib < matlab.mixin.CustomDisplay
                 opt.anticlockwise = true;
             end
             if isempty(opt.Gk)
-                Rm = vasplib.POSCAR_readin;
+                Rm = vasplib.POSCAR_read;
                 opt.Gk = (2*pi*eye(3)/Rm).';
             end
             if opt.inputCar
@@ -1043,13 +1043,13 @@ classdef vasplib < matlab.mixin.CustomDisplay
             Ns = [1 0 0;0 1 0;0 0 1];
             if ~options.fast
                 %disp(fin_dir_list);
-                [Rm_tmp,sites_tmp,Atom_name_tmp,Atom_num_tmp]=vasplib.POSCAR_readin(POSCAR_file);
+                [Rm_tmp,sites_tmp,Atom_name_tmp,Atom_num_tmp]=vasplib.POSCAR_read(POSCAR_file);
                 % gen POSCAR
                 H_hr.supercell(Ns,'POSCAR_super_fin',Rm_tmp,sites_tmp,Atom_name_tmp,Atom_num_tmp,fin_dir_list);
             else
                 switch class(POSCAR_file)
                     case {'string','char'}
-                        [Rm_tmp,~,~,~]=vasplib.POSCAR_readin(POSCAR_file);
+                        [Rm_tmp,~,~,~]=vasplib.POSCAR_read(POSCAR_file);
                     case 'double'
                         Rm_tmp = POSCAR_file;
                 end
@@ -1088,7 +1088,7 @@ classdef vasplib < matlab.mixin.CustomDisplay
             POSCAR=rawStringColumns;
             clearvars filename delimiter startRow formatSpec fileID dataArray ans rawStringColumns raw;
         end
-        function [Rm,sites,Atom_name,Atom_num,elements]=POSCAR_readin(filename,mode,options)
+        function [Rm,sites,Atom_name,Atom_num,elements]=POSCAR_read(filename,mode,options)
             %
             % get poscar information from vasp and others
             % * Label:
@@ -3349,7 +3349,7 @@ classdef vasplib < matlab.mixin.CustomDisplay
                 WfunType=false;
             end
             if isempty(options.Rm)
-                Rm = POSCAR_readin;
+                Rm = POSCAR_read;
             else
                 Rm = options.Rm;
             end
@@ -3601,7 +3601,7 @@ classdef vasplib < matlab.mixin.CustomDisplay
                 optionsPlot.view = [0,90];
             end
             if isempty(options.Rm)
-                Rm = POSCAR_readin;
+                Rm = POSCAR_read;
             else
                 Rm = options.Rm;
             end

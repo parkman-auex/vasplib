@@ -47,5 +47,5 @@
 %
 %% Source code :
 function varargout=dosplot(varargin)
-    varargout{:} = vasplib_plot.dosplot(varargin{:});
+    varargout{:} = dosplot(varargin{:});
 end

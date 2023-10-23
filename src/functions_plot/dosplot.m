@@ -55,7 +55,7 @@ function [figure_dos,Pdensity,Totdensity] = dosplot(Ecut,choose_list,mode,option
         options.d = true;
     end
     %--------  init  --------
-    import vasplib_plot.*
+    
     import park.*
     import vasplib_tool.*
     %--------  narg  --------

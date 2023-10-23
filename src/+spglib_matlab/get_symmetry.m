@@ -20,7 +20,7 @@ if not(libisloaded('libsymspg'))
     loadlibrary('libsymspg','spglib.h');
 end
 
-[Rm,sites,~,Atom_num] = POSCAR_readin(POSCAR_name);
+[Rm,sites,~,Atom_num] = POSCAR_read(POSCAR_name);
 max_size = 192;
 rotation =  libpointer('int32Ptr',zeros(3,3,max_size));
 translation = libpointer('doublePtr',zeros(3,max_size));

@@ -17,7 +17,7 @@ arguments
 end
 import park.*;
 SOCflag=SOCFLAG;
-[Rm,sites,Atom_name,Atom_num]=POSCAR_readin();
+[Rm,sites,Atom_name,Atom_num]=POSCAR_read();
 try
     check = true;
     EIGENCAR=EIGENVAL_read();

@@ -12,7 +12,7 @@ level_cut = 12;
 % model
 % graphene
 if 1 == 1
-[Rm,sites,Atom_name,Atom_num]=POSCAR_readin('POSCAR','vasp');
+[Rm,sites,Atom_name,Atom_num]=POSCAR_read('POSCAR','vasp');
 
 [Atom_store,nn_store,Rnn]=nn_SK(Rm,sites,search_range, Accuracy);
 

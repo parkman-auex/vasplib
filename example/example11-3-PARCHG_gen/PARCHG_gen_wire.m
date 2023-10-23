@@ -31,7 +31,7 @@ end
 
 if nargin < 6
     if exist('POSCAR','file')
-        [Rm,sites,Atom_name,Atom_num,~]=POSCAR_readin('POSCAR','vasp');
+        [Rm,sites,Atom_name,Atom_num,~]=POSCAR_read('POSCAR','vasp');
     else
         error('POSCAR need！');
     end

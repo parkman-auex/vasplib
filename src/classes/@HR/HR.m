@@ -296,7 +296,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             search_range = options.search_range ;
             Type = options.Type;
             %
-            [~,sites,~,~,~]=vasplib.POSCAR_readin(POSCAR_file,'tbsk');
+            [~,sites,~,~,~]=vasplib.POSCAR_read(POSCAR_file,'tbsk');
             if options.WAN_NUM == -1
                 H_hr = HR(length(sites),'overlap',options.overlap,'Type',Type);
             else
@@ -3183,7 +3183,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             end
             if isempty(H_hr.sites)
                 if exist('POSCAR','file')
-                    [Rm_tmp,sites_tmp,Atom_name_tmp,Atom_num_tmp,~]=HR.POSCAR_readin('POSCAR','vasp');
+                    [Rm_tmp,sites_tmp,Atom_name_tmp,Atom_num_tmp,~]=HR.POSCAR_read('POSCAR','vasp');
                     H_hr = H_hr.supercell(Ns,'POSCAR_super_fin',Rm_tmp,sites_tmp,Atom_name_tmp,Atom_num_tmp,fin_dir_list);
                 else
                     % interaction
@@ -4407,7 +4407,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                 fin_dir_list = [0 0 0];
                 %disp(fin_dir_list);
                 if ~options.fast
-                    [Rm_tmp,sites_tmp,Atom_name_tmp,Atom_num_tmp]=HR.POSCAR_readin();
+                    [Rm_tmp,sites_tmp,Atom_name_tmp,Atom_num_tmp]=HR.POSCAR_read();
                     H_hr.supercell(Ns,'POSCAR_super_fin',Rm_tmp,sites_tmp,Atom_name_tmp,Atom_num_tmp,fin_dir_list);
                 end
             else
@@ -4441,11 +4441,11 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                 fin_dir_list = double(fin_dir>1);
                 if ~options.fast
                     %disp(fin_dir_list);
-                    [Rm_tmp,sites_tmp,Atom_name_tmp,Atom_num_tmp]=HR.POSCAR_readin();
+                    [Rm_tmp,sites_tmp,Atom_name_tmp,Atom_num_tmp]=HR.POSCAR_read();
                     % gen POSCAR
                     H_hr.supercell(Ns,'POSCAR_super_fin',Rm_tmp,sites_tmp,Atom_name_tmp,Atom_num_tmp,fin_dir_list);
                 else
-                    [Rm_tmp,sites_tmp,Atom_name_tmp,Atom_num_tmp]=HR.POSCAR_readin();
+                    [Rm_tmp,sites_tmp,Atom_name_tmp,Atom_num_tmp]=HR.POSCAR_read();
                 end
                 % rebuild fin_orb
                 Rm_tmp = Ns*Rm_tmp;
@@ -4503,7 +4503,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
             end
             if nargin == 4
                 Origin_POSCAR = Rm;
-                [Rm,sites,Atom_name,Atom_num,~]=HR.POSCAR_readin(Origin_POSCAR,'vasp');
+                [Rm,sites,Atom_name,Atom_num,~]=HR.POSCAR_read(Origin_POSCAR,'vasp');
                 findir = [0,0,0];
             end
             if nargin < 3
@@ -5464,7 +5464,7 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                 fprintf(fileID,"\n  ");
             end
             fclose(fileID);
-            [H_hr_bk.Rm,H_hr_bk.sites,H_hr_bk.Atom_name,H_hr_bk.Atom_num,~]=POSCAR_readin(filename);
+            [H_hr_bk.Rm,H_hr_bk.sites,H_hr_bk.Atom_name,H_hr_bk.Atom_num,~]=POSCAR_read(filename);
         end
         function H_hr = tbbox_in_gen(H_hr,options)
             arguments
@@ -7674,7 +7674,6 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
                 options.cmap = @parula;
                 options.Title = '';
             end
-            import vasplib_plot.*;
             Rm_ = H_hr.Rm*options.scale;
             if H_hr.vectorhopping
                 H_hr = H_hr.GenfromOrth();

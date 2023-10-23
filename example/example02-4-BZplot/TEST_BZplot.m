@@ -1,4 +1,4 @@
-Rm = POSCAR_readin('POSCAR');
+Rm = POSCAR_read('POSCAR');
 Gk = eye(3)*2*pi/Rm;
 Gk = Gk.';
 %% bulk
@@ -25,7 +25,7 @@ Gk_tmp = (eye(3)*2*pi/Rm_23).';
 [fig,ax] = vasplib.BZplot(Rm_23,'mode','2D','color','b','ax',ax,'label',false,...
 'OriginPoint',Gk_tmp(3,:));
 
-Rm = POSCAR_readin('POSCAR_166');
+Rm = POSCAR_read('POSCAR_166');
 Gk = eye(3)*2*pi/Rm;
 Gk = Gk.';
 %% bulk

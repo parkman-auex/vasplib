@@ -4,7 +4,7 @@ arguments
     KCUBE_BULK  = [-0.5 -0.5 -0.5;1 0 0;0 1 0;0 0 1];
     DATA_L = [];
     opt.cart = false;
-    opt.Rm = POSCAR_readin;
+    opt.Rm = POSCAR_read;
     opt.tol = 1e-12;
     opt.MeshOutput = false;
     opt.method {mustBeMember(opt.method,{'linear','nearest','natural'})} = 'linear';

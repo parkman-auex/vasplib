@@ -26,7 +26,7 @@ if not(libisloaded('libsymspg'))
     loadlibrary('libsymspg','spglib.h');
 end
 
-[Rm,sites,Atom_name,Atom_num] = POSCAR_readin(POSCAR_name);
+[Rm,sites,Atom_name,Atom_num] = POSCAR_read(POSCAR_name);
 
 lattice = Rm;
 num_atom = sum(Atom_num);

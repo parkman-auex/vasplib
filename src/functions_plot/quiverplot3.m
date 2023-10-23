@@ -1,6 +1,6 @@
 function varargout = quiverplot3(R,A,color,displayname,ax,scale)
 %--------  init  --------
-import vasplib_plot.*
+
 if nargin <6
     scale = 0.5;
 end

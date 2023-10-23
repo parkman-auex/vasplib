@@ -838,7 +838,7 @@ classdef Oper < group
             arguments
                 SymOper Oper
                 Basis
-                options.Rm = POSCAR_readin;
+                options.Rm = POSCAR_read;
                 options.sym = false;
                 options.center = [0,0,0];
             end

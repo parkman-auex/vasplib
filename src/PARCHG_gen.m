@@ -42,7 +42,7 @@ if nargin <2
     WaveFunc = zeros(size(orb_list,1),1);
 end
 if isempty(options.sites) && isempty(options.Atom_name) && isempty(options.Atom_num)
-    [Rm,sites,Atom_name,Atom_num,~]=POSCAR_readin(options.POSCAR );
+    [Rm,sites,Atom_name,Atom_num,~]=POSCAR_read(options.POSCAR );
 else
     Rm = options.Rm;
     sites = options.sites;
@@ -51,7 +51,7 @@ else
 end
 [Nwave,Nlist] = size(WaveFunc);
 if strcmp(mode,'glance')
-    vasplib_plot.waveplot(orb_list,WaveFunc);
+    waveplot(orb_list,WaveFunc);
 elseif strcmp(mode,'PARCHG')
     %% check
     Norb = length(orb_list);

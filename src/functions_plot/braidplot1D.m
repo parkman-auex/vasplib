@@ -36,7 +36,7 @@ end
     varargout = cell(1,nOutputs);
 %--------  narg  -------- 
     if isempty(klist_l) 
-       Rm=POSCAR_readin(options.POSCAR);
+       Rm=POSCAR_read(options.POSCAR);
        [~,klist_l,~,kpoints_l,kpoints_name]=kpathgen3D(Rm,options.KPOINTS);
     end
     Nbands=size(EIGENCAR,1);

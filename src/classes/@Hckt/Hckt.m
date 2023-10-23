@@ -566,7 +566,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
             end
             %
             if exist(options.KPOINTS,'file') && exist(options.POSCAR,'file')
-                Rm=POSCAR_readin(options.POSCAR);
+                Rm=POSCAR_read(options.POSCAR);
                 [~,~,klist_frac,~,~]=kpathgen3D(Rm,options.KPOINTS);
                 %[~,klist_l,~,kpoints_l,kpoints_name]=kpathgen3D(Rm,options.KPOINTS);
             else
@@ -947,7 +947,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
             % WaveFunc
             WaveFunc = normalize(sum(ObservationsMat(:,ChooseL),2),'range',[0,1])*options_select.scale;
             % 
-            ax = vasplib_plot.waveplot(ORBL,WaveFunc,optionscell{:});
+            ax = waveplot(ORBL,WaveFunc,optionscell{:});
         end
         function [ax] = bandplot(EIGNECAR,OmegaCut,SpectrumL,options,optionskpath)
             arguments
@@ -972,14 +972,14 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 optionskpath.kpoints_name = [];
             end
             if isempty(options.ax)
-                Fig = vasplib_plot.create_figure('Position',options.Position);
+                Fig = create_figure('Position',options.Position);
                 ax = Fig.axes;
             else
                 ax = options.ax;
             end
             %
             if exist(options.KPOINTS,'file') && exist(options.POSCAR,'file') && isempty(optionskpath.kpoints_name )
-                Rm=POSCAR_readin(options.POSCAR);
+                Rm=POSCAR_read(options.POSCAR);
                 [~,klist_l,~,kpoints_l,kpoints_name]=kpathgen3D(Rm,options.KPOINTS);
                 UseKpath = true;
                 if options.shift
@@ -1025,7 +1025,7 @@ classdef Hckt < matlab.mixin.CustomDisplay
                 Xcut = [min(X),max(X)];
                 Ycut = [min(Y),max(Y)];
                 %--------reference -------
-                ax= vasplib_plot.set_reference(kpoints_l,kpoints_name,Xcut,Ycut,...
+                ax= set_reference(kpoints_l,kpoints_name,Xcut,Ycut,...
                     'ax',ax,...
                     'xlabel',options.xlabel,...
                     'ylabel',options.ylabel ...

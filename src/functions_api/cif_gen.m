@@ -3,7 +3,7 @@ function [SG,R_struct] = cif_gen(filename,Rm,Atom_name,sites,SG,mode)
         filename = "POSCAR.cif";
     end
     if nargin < 2
-        [Rm,sites,Atom_name,~,~]=POSCAR_readin('POSCAR','vasp');
+        [Rm,sites,Atom_name,~,~]=POSCAR_read('POSCAR','vasp');
     end
     if nargin < 5
         SG = 1;

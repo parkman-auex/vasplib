@@ -77,7 +77,7 @@ end
 import vasplib_tool.*
 %--------  narg  --------
 if isempty(klist_l)
-    Rm=POSCAR_readin(options.POSCAR);
+    Rm=POSCAR_read(options.POSCAR);
     [~,klist_l,~,kpoints_l,kpoints_name]=kpathgen3D(Rm,options.KPOINTS);
 end
 if strcmp(options.title,'')
@@ -144,7 +144,7 @@ if isempty(WEIGHTCAR_struct)
     %--------  fbug  --------
     % options.title = 'TOT';
     % propertyCell = namedargs2cell(options);
-    % ax_temp = vasplib_plot.pbandplot(WEIGHTCAR_TOT,EIGENCAR,klist_l,kpoints_l,kpoints_name,propertyCell{:});
+
     % fig(i+1) = ax_temp.Parent;ax(i+1) = ax_temp;
     %-------- return --------
     if nargout  == 2
@@ -255,7 +255,7 @@ switch pbandmode
     case 'bubble_only'
         optionsplot.ax =ax;
         optionsplotcell = namedargs2cell(optionsplot);
-        ax = vasplib_plot.pband_plot_one_bubble(klist,EIGENCAR,WEIGHTCAR_mat,cmap,Name_list,optionsplotcell{:});
+        ax = pband_plot_one_bubble(klist,EIGENCAR,WEIGHTCAR_mat,cmap,Name_list,optionsplotcell{:});
     case 'bubble_rough'
         for Ei=1:Nbands
             plot(ax,klist,EIGENCAR(Ei,:),'LineWidth',1.0,'Color',[0.1 0.1 0.1],'DisplayName',num2str(Ei));
@@ -272,14 +272,14 @@ switch pbandmode
         end
         optionsplot.ax =ax;
         optionsplotcell = namedargs2cell(optionsplot);
-        ax = vasplib_plot.pband_plot_set(klist,EIGENCAR,WEIGHTCAR_cell,Name_list,Selected_projs,...
+        ax = pband_plot_set(klist,EIGENCAR,WEIGHTCAR_cell,Name_list,Selected_projs,...
             'cmap',cmap,optionsplotcell{:});% waiting
         %---------legend-------
         legend_all = ["s", "p_y", "p_z", "p_x", "d_{xy}", "d_{yz}", "d_{z^2}", "d_{xz}", "d_{x^2-y^2}"];
         legend(ax,legend_all(Selected_projs))
 end
 %--------reference -------
-ax = vasplib_plot.set_reference(kpoints_l,kpoints_name,Xcut,options.Ecut,...
+ax = set_reference(kpoints_l,kpoints_name,Xcut,options.Ecut,...
     'ax',ax,...
     'fontname',options.fontname ...
     );

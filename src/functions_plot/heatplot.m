@@ -25,7 +25,7 @@ arguments
     options.fin_dir = 3;
     options.cartisian = false;
 end
-import vasplib_plot.*;
+
 %
 V = DOSCAR;
 cmap = options.cmap;
@@ -62,7 +62,7 @@ end
 %
 if options.enforceRef
     vasplibobj = vasplib;
-    vasplibobj.Rm = POSCAR_readin(options.POSCAR);
+    vasplibobj.Rm = POSCAR_read(options.POSCAR);
     vasplibobj = kpathgen3D(vasplibobj,options.KPOINTS);
     [~,kpoints_l,kpoints_name] = kpath_information(vasplibobj);
 end
@@ -70,7 +70,7 @@ switch options.mode
     case 'surf'
         if isempty(X)
             vasplibobj = vasplib;
-            vasplibobj.Rm = POSCAR_readin(options.POSCAR);
+            vasplibobj.Rm = POSCAR_read(options.POSCAR);
             vasplibobj = kpathgen3D(vasplibobj,options.KPOINTS);
             [klist_l,kpoints_l,kpoints_name] = kpath_information(vasplibobj);
             X =klist_l;
@@ -96,7 +96,7 @@ switch options.mode
     case 'arc'
         if length(X) == 2
             vasplibobj = vasplib;
-            vasplibobj.Rm = POSCAR_readin(options.POSCAR);
+            vasplibobj.Rm = POSCAR_read(options.POSCAR);
             kfermiarc = Y;
             kmesh = X;
             [klist,klist1,klist2]=kmesh3D(vasplibobj,kmesh,kfermiarc,'fermiarc');
