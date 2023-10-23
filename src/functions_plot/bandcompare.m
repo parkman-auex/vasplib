@@ -30,5 +30,5 @@ options.ax = bandplot(EIGENCAR_DFT,Ecut,klist_l,kpoints_l,kpoints_name,propertyC
 options.LineSpec = '.';
 options.Color = 'r';
 propertyCell2 = namedargs2cell(options);
-ax = vasplib_plot.bandplot(EIGENCAR,Ecut,klist_l,kpoints_l,kpoints_name,propertyCell2{:});
+ax = bandplot(EIGENCAR,Ecut,klist_l,kpoints_l,kpoints_name,propertyCell2{:});
 end

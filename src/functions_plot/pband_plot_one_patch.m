@@ -48,8 +48,7 @@ arguments
     options.ax = handle([]);
     options.LineWidth = 2;
 end
-    %--------  init  --------
-    import vasplib_plot.*
+
 %--------  init  --------
     Nbands=size(EIGENCAR,1);
     cmap = options.cmap;

@@ -14,7 +14,6 @@ arguments
     options.KPOINTS = '';
     options.title = '';
 end
-import vasplib_plot.*
 import vasplib_tool_outer.*;
 X0 = options.OriginPoint(1);
 Y0 = options.OriginPoint(2);

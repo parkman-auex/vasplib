@@ -11,7 +11,6 @@ arguments
     options.OrbColor = 'k';
     options.OrbSize = 1;
 end
-import vasplib_plot.*;
 if isempty(options.Rm)
     try
         [Rm,~,~,~,~]=POSCAR_readin(options.POSCAR);

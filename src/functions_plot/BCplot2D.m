@@ -104,7 +104,7 @@ if options.shading
     shading(ax,'interp');
 end
 if options.BZ
-    ax =vasplib_plot.BZplot(Rm,'color','none','ax',ax,'blackwhite',true,'mode',options.BZmode,'label',options.BZlabel,'OriginPoint',options.GkOrigin) ;
+    ax = BZplot(Rm,'color','none','ax',ax,'blackwhite',true,'mode',options.BZmode,'label',options.BZlabel,'OriginPoint',options.GkOrigin) ;
     view(ax,2);
 end
 

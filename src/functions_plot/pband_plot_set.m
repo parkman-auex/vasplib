@@ -48,7 +48,6 @@ arguments
     optionsplot.filled = true;
 end
 %--------  init  --------
-import vasplib_plot.*
 Nbands = size(EIGENCAR,1);
 klist_mat = repmat(klist,[Nbands,1]);
 klist_vector = klist_mat(:);

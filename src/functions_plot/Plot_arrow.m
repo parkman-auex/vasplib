@@ -12,7 +12,6 @@ arguments
     options.CData = [];
 end
     import vasplib_tool_outer.*;
-    import vasplib_plot.*
     S = [ 'd',options.LineStyle , char(string(options.LineWidth))];
     W = options.W;
     H = options.H;

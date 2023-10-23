@@ -15,7 +15,7 @@ if options.ycut(1) >= 0
     WccCAR(WccCAR(:,:)<0) = 1+WccCAR(WccCAR(:,:)<0);
 end
 if isempty(options.ax)
-    Fig = vasplib_plot.create_figure('Position',[0.2,0.2,0.6,0.6]);
+    Fig = create_figure('Position',[0.2,0.2,0.6,0.6]);
     ax = Fig.axes(1);
 else
     ax = options.ax ;
@@ -24,7 +24,7 @@ if length(klist_l)==1
     WccCAR = [WccCAR,WccCAR];
     klist_l = [0,klist_l];
 end
-ax = vasplib_plot.bandplot(WccCAR+options.shift,options.ycut+options.shift,klist_l,[],[],...
+ax = bandplot(WccCAR+options.shift,options.ycut+options.shift,klist_l,[],[],...
     'LineSpec',options.LineSpec,...
     'Color',options.Color,...
     'xlabel',options.xlabel,...

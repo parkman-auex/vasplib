@@ -5,7 +5,7 @@ switch vacuum_mode
         Ns = [1 0 0;0 1 0;0 0 1];Ns = Ns.*fin_dir;
         fin_dir_list = [0 0 0];
         %disp(fin_dir_list);
-        [Rm,sites,Atom_name,Atom_num]=POSCAR_readin();
+        [Rm,sites,Atom_name,Atom_num]=POSCAR_read();
         [~,~] = supercell(Ns,Rm,sites,Atom_name,Atom_num,fin_dir_list,'POSCAR_super_fin');
         for i = 1:3
             Nslab = fin_dir(i);

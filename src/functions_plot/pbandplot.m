@@ -74,7 +74,6 @@ arguments
     optionsplot.filled = true;   
 end
 %--------  init  --------
-import vasplib_plot.*
 import vasplib_tool.*
 %--------  narg  --------
 if isempty(klist_l)

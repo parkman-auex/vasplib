@@ -51,7 +51,7 @@ end
 %--------  init  --------
 import vasplib_tool.*
 %--------  init  --------
-[~,ax] = vasplib_plot.create_figure('Position',[0.2,0.2,0.2,0.6]);
+[~,ax] = create_figure('Position',[0.2,0.2,0.2,0.6]);
 %--------  narg  --------
 
 %--------  chek  --------
