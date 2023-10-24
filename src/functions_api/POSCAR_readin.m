@@ -67,7 +67,7 @@ arguments
     mode = 'vasp';
     options.digits = 6;
 end
-disp("This function is deprecated and will be removed in the future, please use POSCAR_read instead")
+warning("This function is deprecated and will be removed in the future, please use POSCAR_read instead")
 return
 
 

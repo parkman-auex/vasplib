@@ -69,14 +69,14 @@ function [kpoints,nodes,kpoints_name] = KPOINTS_read(filename,mode)
        temp_i=0;
         while ~feof(KPOINTS)
             temp_i=temp_i+1;
+            KPOINTS_information{temp_i}=fgets(KPOINTS);
             if temp_i == 3
-                K_mode = fgets(KPOINTS);
+                K_mode = KPOINTS_information{temp_i};
                 if K_mode(1) ~= 'L' && K_mode(1) ~= 'l'
                     error("The "+filename+" is not in Line-Mode,..." + ...
                         " please provide the KPOINTS used in your band calculations")
                 end
-            end
-            KPOINTS_information{temp_i}=fgets(KPOINTS);
+            end          
         end
         fclose(KPOINTS);                              %close KPOINTS
         % nodes
