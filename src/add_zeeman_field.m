@@ -1,4 +1,4 @@
-function H_B = add_zeeman_field(Ham_obj,B,opts)
+function Ham_obj_B = add_zeeman_field(Ham_obj,B,opts)
 % H_B = g*mu_B/hbar*s*B = mu_B*sigma*B (default: g=2, s=hbar/2*sigma)
 arguments
     Ham_obj
@@ -7,8 +7,12 @@ arguments
     opts.L double = 0
     opts.J double = 0
     opts.g_factor double = 2
-    opts.spin_mode {mustBeMember(opts.spin_mode,{'new','old'})} = 'old'
+    opts.spin_mode {mustBeMember(opts.spin_mode,{'new','old'})} = 'new'
     opts.natural_unit = false
+end
+%%
+if isempty(Ham_obj.HnumL)
+    error("Please input a numerical HR obj")
 end
 %%
 sigma_x = [0 1;1 0]; sigma_y = [0 -1i;1i 0]; sigma_z = [1 0;0 -1];
@@ -34,4 +38,5 @@ elseif opts.spin_mode == "old"
     disp("This is used in Wannier90 v1.2 and Wannier Tools")
     H_B = kron(s_dot_B, I_N_proj);
 end
+Ham_obj_B = Ham_obj + H_B;
 end

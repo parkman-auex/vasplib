@@ -1365,7 +1365,7 @@ classdef HK < vasplib & matlab.mixin.CustomDisplay
                 %%%%%%%%%%%%%%%%%%%%
                 for i = 1:H_hk.Kinds
                     %                         if sum(sum(H_hk.HcoeL(:,:,i))) ~= sym(0)
-                    if  sum(all(H_hk.HcoeL(:,:,i) == sym(0) ))
+                    if  ~sum(all(H_hk.HcoeL(:,:,i) == sym(0) ))
                         [vector_list,Coeffs_list] = HK.HstrL_classify(H_hk.HstrL(i),R_struct,lattice_mode);
                         %disp(vector_list);
                         for j =1:length(Coeffs_list)

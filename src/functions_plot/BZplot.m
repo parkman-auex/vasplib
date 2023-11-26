@@ -70,7 +70,7 @@ switch options.mode
         if strcmp(options.KPOINTS,'')
             text(ax,X0,Y0,Z0,"\Gamma",'FontSize',24);
         else
-            [kpoints,~,~,kpoints_name] = KPOINTS_read(options.KPOINTS);
+            [kpoints,~,kpoints_name] = KPOINTS_read(options.KPOINTS);
             [kpoints,label_unique] = unique(kpoints,'rows');
             kpoints_name = kpoints_name(label_unique);
             kpoints_name = strrep(kpoints_name,'GAMMA','Γ');

@@ -123,7 +123,7 @@ classdef vasplib < matlab.mixin.CustomDisplay
             symvar_list = symvar(vasplibobj.HcoeL);
         end
         function Nbands = get.Nbands(vasplibobj)
-            if isfield(vasplibobj,"WAN_NUM")
+            if isprop(vasplibobj,"WAN_NUM")
                 Nbands = vasplibobj.WAN_NUM;
             else
                 Nbands = vasplibobj.Basis_num;
