@@ -125,11 +125,10 @@ end
             Colormap = color;
         end
         for j = 1:Npara
-            switch j
-                case {1,Npara,floor((Npara+1)/2),ceil((Npara+1)/4),floor((Npara+1)*3/4)}
-                    LineWidth = 3.0;
-                otherwise
-                    LineWidth = 1;
+            if length(options.LineWidth) == Npara
+                LineWidth = options.LineWidth(j);
+            else
+                LineWidth = options.LineWidth;
             end
             Nbands=size(EIGENCAR{j},1);
             for Ei=1:Nbands

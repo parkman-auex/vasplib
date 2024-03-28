@@ -27,7 +27,7 @@ run the INSTALL.m script
 - [ ] Clifford 类的建立 一般性地对哈密顿量进行Clifford拆分
 - [ ] 强化 HR Htrig HK 对称性分析功能
 - [ ] 向量化作对称性 Htrig HK
-- [ ] 半经典输运的接入，异质节
+- [ ] 异质节
 - [ ] Hckt针对一般TB的转化 与实验数据的对接
 
 #### 发展目标
@@ -48,11 +48,10 @@ run the INSTALL.m script
 #### 已完成
 - [x] Symmetry TB in HR-(2021.07.12-07.20)(Htrig working;HK done)；完成
 - [x] 多带Berry phase in HK；Then -> HR Htrig (fyang) 完成
-- [x]  主类 vasplib 绘图与输入输出的提炼总结 （2021.07~08）(已基本构建) 完成
-- [x]  HK Htrig 用Gamma矩阵（tau sigma）矩阵展开
-- [x]  Oper 自动生成对称矩阵; 
-- [x]  fyang:学习牛派的半经典方法(BCP,BCD等)，融入vasplib体系 （2021.08）程序尽量General一点;
-- [x]  Hckt的建立
+- [x] 主类 vasplib 绘图与输入输出的提炼总结 （2021.07~08）(已基本构建) 完成
+- [x] HK Htrig 用Gamma矩阵（tau sigma）矩阵展开
+- [x] Oper 自动生成对称矩阵; 
+- [x] Hckt的建立
 - [x] 分析 hspice的数据 建立拓扑电路绘图的基本函数
 - [x] plot类的构建 完美继承matlab的基础绘图的handle类的情况下 完成所有绘图函数的构建（参考<https://github.com/plotly/plotly_matlab><https://github.com/masumhabib/PlotPub> 外部箭头类内部化）
 - [x] 拓扑电路绘图切片能带

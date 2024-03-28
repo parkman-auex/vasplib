@@ -119,5 +119,4 @@ addpath(main_path+"/"+classes_path);
 addpath(main_path+"/"+plot_funcs_path);
 addpath(main_path+"/"+api_funcs_path);
 addpath(main_path+"/"+datas_path);
-addpath(main_path+"/src/functions_transport");
 savepath;
