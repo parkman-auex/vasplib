@@ -2136,7 +2136,7 @@ classdef vasplib < matlab.mixin.CustomDisplay
                     dSumL = sum(BCCAR,3)/(2*pi);
                     dSumL = dSumL(:);
                 end
-                [~,~] = vasplib.ShowSurfIntegral(vasplibobj.Gk,klist_r_plot,dk_1,dk_2,dSumL,optionsPlotcell{:});
+                vasplib.ShowSurfIntegral(vasplibobj.Gk,klist_r_plot,dk_1,dk_2,dSumL,optionsPlotcell{:});
             end
         end
         function [BFCAR,BF_WAVECAR,klist_l,WAVELOOPCAR] = WilsonLoop(vasplibobj,optionsK,options)
