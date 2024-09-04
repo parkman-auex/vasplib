@@ -1,10 +1,10 @@
 function [nodes_s, nodes_r] = findnodes(Ham_obj,opts,kopts)
 arguments
-    Ham_obj {mustBeA(Ham_obj,{'HR','HK','Htrig'})}
-    opts.Num_Occupied double = 0
+    Ham_obj vasplib
+    opts.Num_Occupied int8 = 0
     opts.Gap_Threshold double = 0.0001
     
-    kopts.nk double = [10 10 1]; % [nk1 nk2 nk3]
+    kopts.nk int8 = [10 10 1]; % [nk1 nk2 nk3]
     kopts.vk = [1 0 0; 0 1 0; 0 0 1]; % [vk1; vk2; vk3]
     kopts.original_point = [-0.5 -0.5 -0.5];
     kopts.mode {mustBeMember(kopts.mode,{'corner','center'})} = 'corner'
