@@ -654,7 +654,12 @@ classdef HR <vasplib & matlab.mixin.CustomDisplay
         % set hop
         function H_hr = set_hop(H_hr,amp,hi,hj,vector_list,mode)
             % -------- nargin -------------
-            if nargin <6
+           arguments
+                H_hr;
+                amp;
+                hi;
+                hj;
+                vector_list;
                 mode = 'set';
             end
             % -------- init -------------

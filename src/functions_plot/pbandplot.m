@@ -275,8 +275,8 @@ switch pbandmode
         ax = pband_plot_set(klist,EIGENCAR,WEIGHTCAR_cell,Name_list,Selected_projs,...
             'cmap',cmap,optionsplotcell{:});% waiting
         %---------legend-------
-        legend_all = ["s", "p_y", "p_z", "p_x", "d_{xy}", "d_{yz}", "d_{z^2}", "d_{xz}", "d_{x^2-y^2}"];
-        legend(ax,legend_all(Selected_projs))
+        %legend_all = ["s", "p_y", "p_z", "p_x", "d_{xy}", "d_{yz}", "d_{z^2}", "d_{xz}", "d_{x^2-y^2}"];
+        %legend(ax,legend_all(Selected_projs))
 end
 %--------reference -------
 ax = set_reference(kpoints_l,kpoints_name,Xcut,options.Ecut,...

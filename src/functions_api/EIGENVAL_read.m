@@ -72,7 +72,7 @@ function [EIGENCAR,EIGENCAR2,Efermi,klist_l]=EIGENVAL_read(mode,EIGENVAL,Efermi)
         if strcmp(mode,'vaspkit')
             Efermi = 0;
         elseif exist('Efermi','file')
-            Efermi = double(textscan('Efermi'));
+            Efermi = double(load('Efermi'));
         elseif exist('DOSCAR','file') && strcmp(mode,'vasp')
             Efermi = GetFermi('vasp');
         elseif exist('scf.out','file') && strcmp(mode,'qe')

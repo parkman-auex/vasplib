@@ -46,7 +46,7 @@
 %
 %% Source code : 
 %
-function [kpoints,nodes,kpoints_name] = KPOINTS_read(filename,mode)
+function [kpoints,nodes,kpoints_name,kpoints_name_pre] = KPOINTS_read(filename,mode)
 %--------  init  --------
 %--------  narg  --------
     if nargin < 2
