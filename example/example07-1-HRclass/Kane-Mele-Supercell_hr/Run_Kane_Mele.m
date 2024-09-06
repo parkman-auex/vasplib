@@ -150,5 +150,5 @@ view(0,90)
 %%
 [BCCAR,Grid,BC_WAVECAR,klist_r_plot] = BC_2D(Kane_Mele_n,...
     'knum1',201,'knum2',201,'BAND_index',2,...
-    'plot',true);
+    'plot',false);
 % surf(Grid(:,:,1),Grid(:,:,2),BCCAR)
