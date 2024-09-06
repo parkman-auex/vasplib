@@ -1420,7 +1420,7 @@ classdef vasplib < matlab.mixin.CustomDisplay
                 end
             end
         end
-        function GREENCAR = GREENCAR_gen(w_list,eta,H00_H01_cell_list_1,H00_H01_cell_list_2,mode)
+        function GREENCAR = GREENCAR_gen(w_list,eta,H00_H01_cell_list_1,H00_H01_cell_list_2,mode,mu_max)
             if nargin < 4
                 mode = 'Green_iter';
             end
@@ -1447,7 +1447,7 @@ classdef vasplib < matlab.mixin.CustomDisplay
                             w =w_list(i);
                             H00 = H00_H01_cell_list_1(:,:,j);
                             H01 = H00_H01_cell_list_2(:,:,j);
-                            [GREENCAR3{i,j},GREENCAR1{i,j},GREENCAR2{i,j}] = HR.GW_iter(H00,H01,w,eta);
+                            [GREENCAR3{i,j},GREENCAR1{i,j},GREENCAR2{i,j}] = HR.GW_iter(H00,H01,w,eta,mu_max);
                         end
                     end
                     pb.delete()
