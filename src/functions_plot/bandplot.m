@@ -25,6 +25,7 @@ arguments
     options.set_reference = true;
     options.Units = 'pixels';
     options.Position = [];
+    options.legends = [];
 end
 
 %--------  init  --------
@@ -131,13 +132,19 @@ end
                 LineWidth = options.LineWidth;
             end
             Nbands=size(EIGENCAR{j},1);
-            for Ei=1:Nbands
-                
-                plot(ax,klist,EIGENCAR{j}(Ei,:),options.LineSpec,'LineWidth',LineWidth,'Color',Colormap(j,:),'DisplayName',num2str(j)+"_"+num2str(Ei));
+            for Ei=1:Nbands            
+                line = plot(ax,klist,EIGENCAR{j}(Ei,:),options.LineSpec,...
+                    'LineWidth',LineWidth,...
+                    'Color',Colormap(j,:),...
+                    'DisplayName',num2str(j)+"_"+num2str(Ei));
+                if Ei ~= 1
+                    line.HandleVisibility = 'off';
+                end
                 hold(ax,'on');
                 %hold on;
             end
         end
+        legend(ax, options.legends)
     else
         if isa(color,'function_handle')
             color = color(1);
