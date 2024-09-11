@@ -74,11 +74,12 @@ function [EIGENCAR,EIGENCAR2,Efermi,klist_l]=EIGENVAL_read(mode,EIGENVAL,Efermi)
     if isnan(Efermi)
         Efermi = 0; % set default
         switch mode
-            case 'vasp'
-                if exist('Efermi','file')
-                    Efermi = double(textscan('Efermi'));
-                elseif exist('DOSCAR','file')
+            case 'vasp'                               
+                if exist('DOSCAR','file')
                     Efermi = GetFermi('vasp');
+                elseif exist('FERMI_ENERGY','file')
+                    Efermi = readmatrix('FERMI_ENERGY','NumHeaderLines',1,'CommentStyle','#');
+                    Efermi = Efermi(1);
                 end
             case 'qe'
                 Efermi = GetFermi('qe');
