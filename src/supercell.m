@@ -15,7 +15,7 @@ function [Rm,sites]=supercell(Ns,Rm,sites,Atom_name,Atom_num,findir,filename)
   Accuracy=8;
 %% nargin
 if nargin < 2
-    POSCAR_read;
+    [Rm,sites,Atom_name,Atom_num,elements,a_crystal_constance]=POSCAR_read;
     findir = [0,0,0];
     filename  = 'POSCAR_super';
 end

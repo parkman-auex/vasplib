@@ -3,6 +3,8 @@ clear;
 %;
 KaneMele  = HR(4);
 KaneMele  = KaneMele<'POSCAR_KM' ;
+KaneMele.Rm = sym(KaneMele.Rm)
+KaneMele.orbL = sym(KaneMele.orbL)
 KaneMele= KaneMele.nn([1,1,0],1e-2,1.15);
 %%
 KaneMele = KaneMele.init('level_cut',2,"onsite",1,'fast',true);
@@ -23,8 +25,8 @@ list(KaneMele_test2);
 %Graphene_test2.show('HOPPING','scale', 2.4560000896,'atomscale',0.1,'TwoD',true);
 Varlist = KaneMele_test2.symvar_list;
 %%
-syms t lambda_SO E_pz M_1 real;
-KaneMele_test2 = subs(KaneMele_test2,Varlist,[lambda_SO,E_pz,t]);
+syms t lambda_SO E_pz M_1 T_2 real;
+KaneMele_test2 = subs(KaneMele_test2,Varlist,[T_2 lambda_SO,E_pz,t]);
 KaneMele_test2 = simplify(KaneMele_test2);
 KaneMele_test2.show('HOPPING','scale', 2.4560000896,'atomscale',0.1,'TwoD',true);
 %%

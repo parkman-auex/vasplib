@@ -10,15 +10,15 @@ Graphene = Graphene<'KPOINTS';
 search_range = [1 1 0];
 maxR = 2.5;
 Accuracy = 2;
-Graphene = Graphene.nn_sk_smart(search_range, Accuracy ,maxR);
+Graphene = Graphene.nn(search_range, Accuracy ,maxR);
 [Rnn,~,~,~] = Graphene.nn_information();
 level_cut = 1;
-Graphene = Graphene.H_TB_gen_SK(level_cut,[1 1 0]);
+Graphene = Graphene.H_TBSK_gen('level_cut',level_cut,'per_dir',[1 1 0]);
 % list mode
 Graphene = rewrite(Graphene);
 Graphene.symvar_list;
-t = sym('t',[6,1],'real');
-Graphene.HcoeL = t;
+% t = sym('t',[6,1],'real');
+% Graphene.HcoeL = t;
 list(Graphene);
 Graphene.show('HOPPING','scale', 2.4560000896,'atomscale',0.1,'TwoD',true);
 %%
