@@ -80,6 +80,8 @@ function [EIGENCAR,EIGENCAR2,Efermi,klist_l]=EIGENVAL_read(mode,EIGENVAL,Efermi)
                 elseif exist('FERMI_ENERGY','file')
                     Efermi = readmatrix('FERMI_ENERGY','NumHeaderLines',1,'CommentStyle','#');
                     Efermi = Efermi(1);
+                elseif exist('Efermi','file')
+                    Efermi = double(load('Efermi'));
                 end
             case 'qe'
                 Efermi = GetFermi('qe');
@@ -103,8 +105,8 @@ function [EIGENCAR,EIGENCAR2,Efermi,klist_l]=EIGENVAL_read(mode,EIGENVAL,Efermi)
             data=textread(EIGENVAL,'','headerlines',8);
             for i=1:1:NBands
                 for j=1:1:Ktotal
-                    Pup(j,: )=[j,data((NBands+1)*(j-1)+i,2)-Efermi];         %
-                    Pdown(j,: )=[j,data((NBands+1)*(j-1)+i,3)-Efermi];         %
+                    Pup(j,: )=[j,data((NBands+1)*(j-1)+i,2)-Efermi];
+                    Pdown(j,: )=[j,data((NBands+1)*(j-1)+i,3)-Efermi];
                 end
                 EIGENCAR(i,:)=Pup(:,2)';
                 EIGENCAR2(i,:)=Pdown(:,2)';
