@@ -62,6 +62,21 @@ classdef gamma_matric < pauli_matric
                             case 5
                                 pauli = paulis(1)*paulis(4);
                         end
+                    case 'ZSC_2004' % PHYSICAL REVIEW B 69, 235206 (2004)
+                        switch label1
+                            case 0
+                                pauli = paulis(1)*paulis(1);
+                            case 1
+                                pauli = paulis(4)*paulis(3);
+                            case 2
+                                pauli = paulis(4)*paulis(2);
+                            case 3
+                                pauli = paulis(3)*paulis(1);
+                            case 4
+                                pauli = paulis(2)*paulis(1);
+                            case 5
+                                pauli = paulis(4)*paulis(4);
+                        end
                     case 'KM'
                         switch label1
                             case 0
